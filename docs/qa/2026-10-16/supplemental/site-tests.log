@@ -1,0 +1,12 @@
+$ vitest run
+
+ RUN  v3.2.7 /home/watabegg/shinshu-syllabus-search
+
+ ✓ tests/site-syllabus.test.ts (3 tests) 8ms
+ ✓ tests/site-search.test.ts (7 tests) 47ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  02:24:33
+   Duration  642ms (transform 113ms, setup 0ms, collect 142ms, tests 55ms, environment 0ms, prepare 252ms)
+

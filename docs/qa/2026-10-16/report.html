@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QA Report</title>
+  <!-- qa-manifest keys: reportId, repo, pr, branch, commit, environment, targetUrl, executedAt, browserTool, ciStatus, cases[].id, cases[].method, cases[].status, cases[].screenshots[], cases[].evidence[] -->
+  <style>
+    :root {
+      --bg:#fafafa;
+      --panel:#ffffff;
+      --text:#111827;
+      --sub:#475467;
+      --muted:#94a3b8;
+      --line:#e5e7eb;
+      --soft:#f8fafc;
+      --ok:#10b981;
+      --ng:#ef4444;
+      --warn:#f59e0b;
+      --hold:#64748b;
+      --link:#2563eb;
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo",system-ui,sans-serif;
+      font-size:13px;
+      line-height:1.55;
+      font-variant-numeric:tabular-nums;
+    }
+    a { color:var(--link); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:1px 5px; }
+    .shell { max-width:1240px; margin:0 auto; padding:24px; }
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      align-items:flex-start;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:22px;
+    }
+    .eyebrow { color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+    h1 { margin:4px 0 6px; font-size:28px; line-height:1.18; letter-spacing:0; }
+    .lead { margin:0; color:var(--sub); max-width:760px; }
+    .top-meta { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:520px; }
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:4px 9px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--sub);
+      white-space:nowrap;
+      font-weight:600;
+    }
+    .status {
+      border-color:currentColor;
+      font-weight:700;
+    }
+    .PASS { color:var(--ok); background:rgba(16,185,129,.08); }
+    .FAIL { color:var(--ng); background:rgba(239,68,68,.08); }
+    .PARTIAL { color:var(--warn); background:rgba(245,158,11,.12); }
+    .BLOCKED { color:var(--hold); background:rgba(100,116,139,.10); }
+    .nav {
+      position:sticky;
+      top:0;
+      z-index:10;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      padding:12px 0;
+      background:rgba(250,250,250,.92);
+      backdrop-filter:blur(10px);
+    }
+    .nav a {
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+      color:var(--sub);
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin:14px 0;
+    }
+    .metric {
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:14px;
+    }
+    .metric span { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
+    .metric b { display:block; font-size:28px; font-weight:650; line-height:1; }
+    .bar {
+      height:10px;
+      overflow:hidden;
+      display:flex;
+      border-radius:999px;
+      background:var(--line);
+      margin-top:10px;
+    }
+    .bar i { display:block; height:100%; }
+    .bar .ok { background:var(--ok); }
+    .bar .ng { background:var(--ng); }
+    .bar .warn { background:var(--warn); }
+    .bar .hold { background:var(--hold); }
+    section {
+      scroll-margin-top:62px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:20px;
+      margin:14px 0;
+    }
+    .section-head {
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:12px;
+    }
+    h2 { margin:0; font-size:15px; font-weight:700; letter-spacing:0; }
+    .hint { margin:3px 0 0; color:var(--muted); }
+    table { width:100%; border-collapse:collapse; }
+    th, td {
+      border-bottom:1px solid var(--line);
+      padding:9px 8px;
+      text-align:left;
+      vertical-align:top;
+      font-size:12.5px;
+    }
+    th { color:var(--muted); background:transparent; font-weight:700; white-space:nowrap; }
+    tr:last-child td { border-bottom:0; }
+    .filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .filter {
+      cursor:pointer;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--sub);
+      border-radius:999px;
+      padding:5px 9px;
+      font:inherit;
+      font-size:12px;
+      font-weight:700;
+    }
+    .filter.active { color:var(--text); border-color:#cbd5e1; background:var(--soft); }
+    .case {
+      border:1px solid var(--line);
+      border-left-width:3px;
+      border-radius:12px;
+      background:#fff;
+      margin:14px 0;
+      overflow:hidden;
+    }
+    .case[data-status="PASS"] { border-left-color:var(--ok); }
+    .case[data-status="FAIL"] { border-left-color:var(--ng); }
+    .case[data-status="PARTIAL"] { border-left-color:var(--warn); }
+    .case[data-status="BLOCKED"] { border-left-color:var(--hold); }
+    .case > header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      padding:15px 16px;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+    }
+    .case-title { display:flex; gap:10px; align-items:flex-start; }
+    .case-id { color:var(--sub); }
+    .case h3 { margin:0 0 3px; font-size:15px; }
+    .meta-line { color:var(--muted); font-size:12px; }
+    .case-body { padding:16px; }
+    .gwt {
+      display:grid;
+      grid-template-columns:80px 1fr;
+      gap:7px 12px;
+      margin:0 0 14px;
+      padding:12px;
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:10px;
+    }
+    .gwt dt { margin:0; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+    .gwt dd { margin:0; color:var(--text); }
+    .evidence {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+    figure {
+      margin:0;
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+    figure img {
+      display:block;
+      width:100%;
+      aspect-ratio:16/10;
+      object-fit:cover;
+      background:var(--soft);
+    }
+    figcaption { padding:9px 10px; color:var(--sub); font-size:12px; border-top:1px solid var(--line); }
+    pre {
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:var(--soft);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:12px;
+      font-size:12px;
+    }
+    details {
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:10px 12px;
+      background:#fff;
+      margin-top:10px;
+    }
+    details summary { cursor:pointer; color:var(--sub); font-weight:700; }
+    @media (max-width: 920px) {
+      .shell { padding:14px; }
+      .topbar, .case > header, .section-head { display:block; }
+      .top-meta { justify-content:flex-start; margin-top:14px; }
+      .grid, .evidence { grid-template-columns:1fr; }
+      h1 { font-size:23px; }
+    }
+    @media print {
+      body { background:#fff; }
+      .shell { max-width:none; padding:0; }
+      .nav, .filters { display:none; }
+      .topbar, section, .case { break-inside:avoid; }
+      .evidence { grid-template-columns:1fr 1fr; }
+      a { color:inherit; text-decoration:underline; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">QA Report</div>
+        <h1>シラバス検索 全件反映・UI変更 ローカルQA</h1>
+        <p class="lead">NO_FAILURE_FOUND / COMPLETE(必須obligation実行率 11/11、未実行0件)</p>
+      </div>
+      <div class="top-meta">
+        <span class="pill status PASS" title="Overall result">PASS</span>
+        <span class="pill">PR <code>-</code></span>
+        <span class="pill">Branch <code>main</code></span>
+        <span class="pill">Commit <code>3b8e31c</code></span>
+        <span class="pill">-</span>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <a href="#summary">Summary</a>
+      <a href="#coverage">Coverage</a>
+      <a href="#seed">Seed</a>
+      <a href="#scenarios">Scenarios</a>
+      <a href="#findings">Findings</a>
+      <a href="#notes">Notes</a>
+      <a href="#appendix">Appendix</a>
+    </nav>
+
+    <section id="summary">
+      <div class="section-head">
+        <div>
+          <h2>Summary</h2>
+          <p class="hint">- ・ 2026-10-15T17:26:09.125Z ・ codex-qa ・ Playwright Chromium / localhost</p>
+        </div>
+        <span class="pill">ローカルbuild・TS10件・Python24件・E2E5件・strict検証成功。リモートCI未実施</span>
+      </div>
+      <div class="grid">
+        <div class="metric"><span>Pass Rate</span><b>100%</b></div>
+        <div class="metric"><span>Pass / Total</span><b>12 / 12</b></div>
+        <div class="metric"><span>Critical</span><b>0</b></div>
+        <div class="metric"><span>Blocked</span><b>0</b></div>
+      </div>
+      <div class="bar" aria-label="result distribution">
+        <i class="ok" style="width:100%"></i>
+        <i class="ng" style="width:0%"></i>
+        <i class="warn" style="width:0%"></i>
+        <i class="hold" style="width:0%"></i>
+      </div>
+      <details>
+        <summary>Run context</summary>
+        <table>
+          <tbody>
+            <tr><th>Repo</th><td>shinshu-syllabus-search</td><th>Commit</th><td><code>3b8e31ca30dba8471d0c143a1d6fe2115b1ae7fb</code></td></tr>
+            <tr><th>Target URL</th><td><a href="-" target="_blank">-</a></td><th>Fallback</th><td>-</td></tr>
+            <tr><th>Reviewer</th><td>codex-qa</td><th>Approver</th><td>-</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+
+    <section id="coverage">
+      <div class="section-head">
+        <div>
+          <h2>Coverage</h2>
+          <p class="hint">差分の影響範囲と実行シナリオの対応。</p>
+        </div>
+      </div>
+      <div class="filters" data-filter-target="coverage-table">
+        <button class="filter active" data-status="all">All</button>
+        <button class="filter" data-status="PASS">Pass</button>
+        <button class="filter" data-status="FAIL">Fail</button>
+        <button class="filter" data-status="PARTIAL">Partial</button>
+        <button class="filter" data-status="BLOCKED">Blocked</button>
+      </div>
+      <table id="coverage-table">
+        <thead><tr><th>Surface</th><th>Files</th><th>User Impact</th><th>Risk</th><th>Scenario</th><th>Method</th><th>Type</th><th>Priority</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody><tr data-status="PASS"><td>S1 検索フォーム・条件保持・件数表示</td><td>-</td><td>-</td><td>-</td><td>QA-01, QA-02, QA-03, QA-05, QA-06, QA-10, QA-11</td><td>Browser</td><td>normal-readback, input-or-time-boundary, concurrency-retry, lifecycle-boundary</td><td>-</td><td>PASS</td><td>4</td></tr>
+<tr data-status="PASS"><td>S2 ページ選択・前後移動</td><td>-</td><td>-</td><td>-</td><td>QA-04</td><td>Browser</td><td>normal-readback, input-or-time-boundary</td><td>-</td><td>PASS</td><td>2</td></tr>
+<tr data-status="PASS"><td>S3 カード遷移・構造化本文・原文表示・幅統一</td><td>-</td><td>-</td><td>-</td><td>QA-07</td><td>Browser</td><td>normal-readback, adjacent-regression</td><td>-</td><td>PASS</td><td>2</td></tr>
+<tr data-status="PASS"><td>S4 全件取込とOCR・コード補完・重複解消の表示</td><td>-</td><td>-</td><td>-</td><td>QA-08</td><td>Browser</td><td>integration-visible</td><td>-</td><td>PASS</td><td>1</td></tr>
+<tr data-status="PASS"><td>S5 スマホとキーボード操作</td><td>-</td><td>-</td><td>-</td><td>QA-09</td><td>Browser</td><td>normal-readback</td><td>-</td><td>PASS</td><td>1</td></tr>
+<tr data-status="PASS"><td>S6 別タブの独立した検索状態</td><td>-</td><td>-</td><td>-</td><td>QA-12</td><td>Browser</td><td>adjacent-regression</td><td>-</td><td>PASS</td><td>1</td></tr>
+<tr data-status="-"><td>S7 PDF再試行・OCR・原本ハッシュ補正・正規化・重複参照・依存とビルド</td><td>-</td><td>-</td><td>-</td><td>covered_by: quality_gate (supplemental/quality-gates.json)</td><td>Quality Gate</td><td>normal-readback</td><td>-</td><td>QG</td><td>1</td></tr></tbody>
+      </table>
+    </section>
+
+    <section id="seed">
+      <div class="section-head">
+        <div>
+          <h2>Seed Check</h2>
+          <p class="hint">QA前に確認・作成したデータ。正規フロー、seed、factory、API、DB確認のいずれかを明記。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Scenario</th><th>Needed State</th><th>Source</th><th>IDs</th><th>Verification</th><th>Result</th><th>Cleanup</th></tr></thead>
+        <tbody><tr><td>QA-01</td><td>6460授業のローカルDBで検索画面を開く</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-02</td><td>検索画面で科目名・教員・教室を入力できる</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-03</td><td>学部・学期・曜日・時限の選択肢がある</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-04</td><td>2026年度の1ページ目が表示されている</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-05</td><td>検索フォームで未知の科目名を入力できる</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-06</td><td>形式未指定のT1AB3300とオンデマンドT1AB4300が存在する</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-07</td><td>コロイドの検索結果が表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-08</td><td>OCR・コード補完・重複処理済みのデータがある</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-09</td><td>390px幅で検索フォームを開く</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-10</td><td>検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-11</td><td>科目名にコロイドを入力する</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-12</td><td>2つのタブで異なる検索条件を開く</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr></tbody>
+      </table>
+    </section>
+
+    <section id="scenarios">
+      <div class="section-head">
+        <div>
+          <h2>Scenarios</h2>
+          <p class="hint">Given / When / Then とブラウザ、コマンド、CI、inspection 証跡。</p>
+        </div>
+      </div>
+      <article class="case" data-status="PASS" id="QA-01">
+  <header>
+    <div class="case-title">
+      <a href="#QA-01" class="case-id"><code>QA-01</code></a>
+      <div>
+        <h3>条件なしで検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>6460授業のローカルDBで検索画面を開く</dd>
+      <dt>When</dt><dd>条件なしで検索する</dd>
+      <dt>Then</dt><dd>総件数6460件・20件のカード・1/323を確認し、削除した文言がない</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-01-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-01-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:10.958Z ・ assets/screenshots/QA-01-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-01-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-01-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:11.152Z ・ assets/screenshots/QA-01-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-01-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-01-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:12.045Z ・ assets/screenshots/QA-01-then.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/quality-gates.json ・ 2026-10-15T17:29:39.545145+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-02">
+  <header>
+    <div class="case-title">
+      <a href="#QA-02" class="case-id"><code>QA-02</code></a>
+      <div>
+        <h3>コロイド、酒 井 俊郎、工Ｗ２－１０１で検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>検索画面で科目名・教員・教室を入力できる</dd>
+      <dt>When</dt><dd>コロイド、酒 井 俊郎、工Ｗ２－１０１で検索する</dd>
+      <dt>Then</dt><dd>全条件に一致するT1AB3300が1件表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-02-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-02-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:13.140Z ・ assets/screenshots/QA-02-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-02-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-02-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:13.241Z ・ assets/screenshots/QA-02-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-02-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-02-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:13.718Z ・ assets/screenshots/QA-02-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-03">
+  <header>
+    <div class="case-title">
+      <a href="#QA-03" class="case-id"><code>QA-03</code></a>
+      <div>
+        <h3>工学部・後期・月曜・3限を選び検索して再読込する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.lifecycle-boundary ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>学部・学期・曜日・時限の選択肢がある</dd>
+      <dt>When</dt><dd>工学部・後期・月曜・3限を選び検索して再読込する</dd>
+      <dt>Then</dt><dd>選択とURLが維持され、条件をクリアすると総件数に戻る</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-03-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-03-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:14.527Z ・ assets/screenshots/QA-03-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-03-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-03-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:17.204Z ・ assets/screenshots/QA-03-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-03-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-03-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:18.270Z ・ assets/screenshots/QA-03-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-04">
+  <header>
+    <div class="case-title">
+      <a href="#QA-04" class="case-id"><code>QA-04</code></a>
+      <div>
+        <h3>次ページ、3ページ、最終323ページ、前ページへ移動し、範囲外324ページを開く</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S2.normal-readback, S2.input-or-time-boundary ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>2026年度の1ページ目が表示されている</dd>
+      <dt>When</dt><dd>次ページ、3ページ、最終323ページ、前ページへ移動し、範囲外324ページを開く</dd>
+      <dt>Then</dt><dd>条件を保持し重複のない結果を表示、先頭と末尾の矢印を適切に無効化し、範囲外は最終ページに補正する</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-04-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-04-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:27:19.437Z ・ assets/screenshots/QA-04-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-04-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-04-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:27:21.902Z ・ assets/screenshots/QA-04-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-04-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-04-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:27:23.855Z ・ assets/screenshots/QA-04-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-05">
+  <header>
+    <div class="case-title">
+      <a href="#QA-05" class="case-id"><code>QA-05</code></a>
+      <div>
+        <h3>存在しない科目名を検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>検索フォームで未知の科目名を入力できる</dd>
+      <dt>When</dt><dd>存在しない科目名を検索する</dd>
+      <dt>Then</dt><dd>0件表示と説明が出て、クリアで6460件に戻る</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-05-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-05-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:27.654Z ・ assets/screenshots/QA-05-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-05-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-05-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:27.721Z ・ assets/screenshots/QA-05-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-05-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-05-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:28.133Z ・ assets/screenshots/QA-05-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-06">
+  <header>
+    <div class="case-title">
+      <a href="#QA-06" class="case-id"><code>QA-06</code></a>
+      <div>
+        <h3>対面とオンデマンドでそれぞれ絞る</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>形式未指定のT1AB3300とオンデマンドT1AB4300が存在する</dd>
+      <dt>When</dt><dd>対面とオンデマンドでそれぞれ絞る</dd>
+      <dt>Then</dt><dd>前者は対面検索で表示され、後者はオンデマンドのまま表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-06-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-06-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:28:16.581Z ・ assets/screenshots/QA-06-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-06-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-06-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:28:17.801Z ・ assets/screenshots/QA-06-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-06-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-06-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:28:18.346Z ・ assets/screenshots/QA-06-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-07">
+  <header>
+    <div class="case-title">
+      <a href="#QA-07" class="case-id"><code>QA-07</code></a>
+      <div>
+        <h3>カードの登録コードを押し、授業計画と原文を展開して戻る</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S3.normal-readback, S3.adjacent-regression ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>コロイドの検索結果が表示される</dd>
+      <dt>When</dt><dd>カードの登録コードを押し、授業計画と原文を展開して戻る</dd>
+      <dt>Then</dt><dd>詳細と検索の幅が同じで、授業回表・原文・PDFリンクがあり検索条件を保持する</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-07-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-07-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:40.601Z ・ assets/screenshots/QA-07-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-07-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-07-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:40.835Z ・ assets/screenshots/QA-07-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-07-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-07-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:41.004Z ・ assets/screenshots/QA-07-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-08">
+  <header>
+    <div class="case-title">
+      <a href="#QA-08" class="case-id"><code>QA-08</code></a>
+      <div>
+        <h3>L2241700、医学部Q3002902、hsのHS900100/HS901100、理学部SG113100を検索し詳細を開く</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S4.integration-visible ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>OCR・コード補完・重複処理済みのデータがある</dd>
+      <dt>When</dt><dd>L2241700、医学部Q3002902、hsのHS900100/HS901100、理学部SG113100を検索し詳細を開く</dd>
+      <dt>Then</dt><dd>OCR授業の構造化本文、医学部授業、別コード2授業、重複なし1授業が確認できる</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-08-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-08-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:41.671Z ・ assets/screenshots/QA-08-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-08-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-08-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:41.886Z ・ assets/screenshots/QA-08-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-08-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-08-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:43.018Z ・ assets/screenshots/QA-08-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-09">
+  <header>
+    <div class="case-title">
+      <a href="#QA-09" class="case-id"><code>QA-09</code></a>
+      <div>
+        <h3>学部Selectを操作し、320px幅でもページ選択と詳細を開く</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S5.normal-readback ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>390px幅で検索フォームを開く</dd>
+      <dt>When</dt><dd>学部Selectを操作し、320px幅でもページ選択と詳細を開く</dd>
+      <dt>Then</dt><dd>ネイティブselectを表示せず、横にはみ出さず検索と詳細を操作できる</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-09-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-09-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:27:52.599Z ・ assets/screenshots/QA-09-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-09-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-09-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:27:52.800Z ・ assets/screenshots/QA-09-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-09-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-09-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:27:55.395Z ・ assets/screenshots/QA-09-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-10">
+  <header>
+    <div class="case-title">
+      <a href="#QA-10" class="case-id"><code>QA-10</code></a>
+      <div>
+        <h3>6語検索・41文字の1語・不正ページ・不正形式・不存在詳細を開く</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.input-or-time-boundary ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>検索フォームが表示される</dd>
+      <dt>When</dt><dd>6語検索・41文字の1語・不正ページ・不正形式・不存在詳細を開く</dd>
+      <dt>Then</dt><dd>400相当の説明または404を表示し、検索ページへ戻れる</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-10-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-10-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:50.137Z ・ assets/screenshots/QA-10-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-10-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-10-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:50.209Z ・ assets/screenshots/QA-10-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-10-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-10-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:50.826Z ・ assets/screenshots/QA-10-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-11">
+  <header>
+    <div class="case-title">
+      <a href="#QA-11" class="case-id"><code>QA-11</code></a>
+      <div>
+        <h3>検索ボタンを連続送信して結果を再読込する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.duplicate-submit ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>科目名にコロイドを入力する</dd>
+      <dt>When</dt><dd>検索ボタンを連続送信して結果を再読込する</dd>
+      <dt>Then</dt><dd>件数と条件が安定しカードが重複しない</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-11-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-11-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:27:56.456Z ・ assets/screenshots/QA-11-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-11-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-11-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:27:57.172Z ・ assets/screenshots/QA-11-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-11-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-11-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:27:57.905Z ・ assets/screenshots/QA-11-then.png</figcaption></figure></div>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-12">
+  <header>
+    <div class="case-title">
+      <a href="#QA-12" class="case-id"><code>QA-12</code></a>
+      <div>
+        <h3>片方のページ番号を変更しもう片方を再読込する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S6.adjacent-regression ・ 2026-10-15T17:26:09.125Z</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>2つのタブで異なる検索条件を開く</dd>
+      <dt>When</dt><dd>片方のページ番号を変更しもう片方を再読込する</dd>
+      <dt>Then</dt><dd>各タブの検索条件が独立して維持される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-12-given.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-12-given.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T17:26:53.784Z ・ assets/screenshots/QA-12-given.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-12-when.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-12-when.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T17:26:55.352Z ・ assets/screenshots/QA-12-when.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-12-then.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-12-then.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T17:26:55.735Z ・ assets/screenshots/QA-12-then.png</figcaption></figure></div>
+  </div>
+</article>
+      <template id="scenario-template">
+        <article class="case" data-status="PASS" id="QA-CASE-ID">
+          <header>
+            <div class="case-title">
+              <a href="#QA-CASE-ID" class="case-id"><code>QA-CASE-ID</code></a>
+              <div>
+                <h3>Scenario title</h3>
+                <div class="meta-line">method Browser ・ normal ・ priority high ・ admin@example ・ Chrome ・ 2026-05-22 14:02</div>
+              </div>
+            </div>
+            <span class="pill status PASS">PASS</span>
+          </header>
+          <div class="case-body">
+            <dl class="gwt">
+              <dt>Given</dt><dd>Initial state and prepared data.</dd>
+              <dt>When</dt><dd>User action or external event.</dd>
+              <dt>Then</dt><dd>Expected visible outcome and actual result.</dd>
+            </dl>
+            <div class="evidence">
+              <figure>
+                <a href="assets/screenshots/QA-CASE-ID_given_name.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-CASE-ID_given_name.png" alt="Given screenshot"></a>
+                <figcaption>Given ・ screen ・ captured at ・ file ・ why this proves setup</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/screenshots/QA-CASE-ID_when_name.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-CASE-ID_when_name.png" alt="When screenshot"></a>
+                <figcaption>When ・ screen ・ captured at ・ file ・ action just performed</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/screenshots/QA-CASE-ID_then_name.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-CASE-ID_then_name.png" alt="Then screenshot"></a>
+                <figcaption>Then ・ screen ・ captured at ・ file ・ expected vs actual</figcaption>
+              </figure>
+            </div>
+            <details>
+              <summary>Non-browser evidence</summary>
+              <pre>For command / CI / inspection cases, put exact command or target and observed output summary here. For NOT RUN / BLOCKED, put reason, risk, and follow-up.</pre>
+            </details>
+          </div>
+        </article>
+      </template>
+    </section>
+
+    <section id="findings">
+      <div class="section-head">
+        <div>
+          <h2>Findings</h2>
+          <p class="hint">リリース判断に影響するIssue、差分起因の疑い、観測結果。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>ID</th><th>Severity</th><th>Scenario</th><th>What Happened</th><th>Expected</th><th>Impact</th><th>Evidence</th><th>Next Action</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="notes">
+      <div class="section-head">
+        <div>
+          <h2>Follow-ups</h2>
+          <p class="hint">未確認、環境制約、追加で見るべき観点。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Item</th><th>Reason</th><th>Risk</th><th>Follow-up</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="appendix">
+      <div class="section-head">
+        <div>
+          <h2>Appendix</h2>
+          <p class="hint">コマンド、CI、seed作成ログ、参照リンク。</p>
+        </div>
+      </div>
+      <h3>Commands</h3>
+      <pre># 検証はすべて trusted runner 経由(OK 行の転記は証明にならない。証明は attestation.json のみ)
+python3 &lt;skill&gt;/assets/run.py lock-plan &lt;session&gt;/plan.json
+python3 &lt;skill&gt;/assets/run.py render &lt;session&gt;
+python3 &lt;skill&gt;/assets/run.py verify &lt;session&gt;</pre>
+      <h3>CI</h3>
+      <pre>ローカルbuild・TS10件・Python24件・E2E5件・strict検証成功。リモートCI未実施</pre>
+      <h3>Seed Logs</h3>
+      <pre>-</pre>
+      <h3>References</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Link</th></tr></thead>
+        <tbody><tr><td>plan</td><td>plan.json</td></tr><tr><td>results</td><td>results.json</td></tr><tr><td>attestation</td><td>attestation.json(runner 生成。無ければ UNATTESTED)</td></tr></tbody>
+      </table>
+    </section>
+
+    <script type="application/json" id="qa-manifest">
+{
+  "reportId": "QA-REPORT",
+  "repo": "shinshu-syllabus-search",
+  "pr": null,
+  "branch": "main",
+  "commit": "3b8e31ca30dba8471d0c143a1d6fe2115b1ae7fb",
+  "environment": null,
+  "targetUrl": null,
+  "executedAt": "2026-10-15T17:26:09.125Z",
+  "browserTool": "Playwright Chromium / localhost",
+  "ciStatus": "ローカルbuild・TS10件・Python24件・E2E5件・strict検証成功。リモートCI未実施",
+  "verdict": {
+    "outcome": "NO_FAILURE_FOUND",
+    "coverage": "COMPLETE",
+    "legacy": "PASS"
+  },
+  "summaryLine": "NO_FAILURE_FOUND / COMPLETE(必須obligation実行率 11/11、未実行0件)",
+  "cases": [
+    {
+      "id": "QA-01",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-01-given.png",
+        "assets/screenshots/QA-01-when.png",
+        "assets/screenshots/QA-01-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-01-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-01-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-01-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/quality-gates.json"
+      ]
+    },
+    {
+      "id": "QA-02",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-02-given.png",
+        "assets/screenshots/QA-02-when.png",
+        "assets/screenshots/QA-02-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-02-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-02-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-02-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-03",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-03-given.png",
+        "assets/screenshots/QA-03-when.png",
+        "assets/screenshots/QA-03-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-03-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-03-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-03-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-04",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-04-given.png",
+        "assets/screenshots/QA-04-when.png",
+        "assets/screenshots/QA-04-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-04-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-04-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-04-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-05",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-05-given.png",
+        "assets/screenshots/QA-05-when.png",
+        "assets/screenshots/QA-05-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-05-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-05-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-05-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-06",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-06-given.png",
+        "assets/screenshots/QA-06-when.png",
+        "assets/screenshots/QA-06-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-06-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-06-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-06-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-07",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-07-given.png",
+        "assets/screenshots/QA-07-when.png",
+        "assets/screenshots/QA-07-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-07-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-07-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-07-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-08",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-08-given.png",
+        "assets/screenshots/QA-08-when.png",
+        "assets/screenshots/QA-08-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-08-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-08-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-08-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-09",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-09-given.png",
+        "assets/screenshots/QA-09-when.png",
+        "assets/screenshots/QA-09-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-09-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-09-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-09-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-10",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-10-given.png",
+        "assets/screenshots/QA-10-when.png",
+        "assets/screenshots/QA-10-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-10-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-10-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-10-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-11",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-11-given.png",
+        "assets/screenshots/QA-11-when.png",
+        "assets/screenshots/QA-11-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-11-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-11-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-11-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    },
+    {
+      "id": "QA-12",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-12-given.png",
+        "assets/screenshots/QA-12-when.png",
+        "assets/screenshots/QA-12-then.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-12-given.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-12-when.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-12-then.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": []
+    }
+  ]
+}
+    </script>
+    <script>
+      document.querySelectorAll('.filters').forEach((group) => {
+        const table = document.getElementById(group.dataset.filterTarget);
+        group.addEventListener('click', (event) => {
+          const button = event.target.closest('button[data-status]');
+          if (!button || !table) return;
+          group.querySelectorAll('.filter').forEach((item) => item.classList.remove('active'));
+          button.classList.add('active');
+          const status = button.dataset.status;
+          table.querySelectorAll('tbody tr').forEach((row) => {
+            row.hidden = status !== 'all' && row.dataset.status !== status;
+          });
+        });
+      });
+    </script>
+  </main>
+</body>
+</html>

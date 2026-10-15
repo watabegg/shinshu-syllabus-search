@@ -1,0 +1,584 @@
+[
+  {
+    "case": "QA-01",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:10.961Z",
+    "viewport": {
+      "width": 1281,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-01",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:11.156Z",
+    "viewport": {
+      "width": 1281,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-01",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:12.047Z",
+    "viewport": {
+      "width": 1281,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-02",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:13.141Z",
+    "viewport": {
+      "width": 1282,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-02",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:13.242Z",
+    "viewport": {
+      "width": 1282,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-02",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=%E9%85%92%20%E4%BA%95%20%E4%BF%8A%E9%83%8E&room=%E5%B7%A5%EF%BC%B7%EF%BC%92%EF%BC%8D%EF%BC%91%EF%BC%90%EF%BC%91&year=2026&department=&term=&day=&period=&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:13.720Z",
+    "viewport": {
+      "width": 1282,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-03",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:14.528Z",
+    "viewport": {
+      "width": 1283,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-03",
+    "slot": "when",
+    "url": "http://localhost:5173/?q=&title=&teacher=&room=&year=2026&department=t&term=%E5%BE%8C%E6%9C%9F&day=1&period=3&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:17.205Z",
+    "viewport": {
+      "width": 1283,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-03",
+    "slot": "then",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:18.272Z",
+    "viewport": {
+      "width": 1283,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-04",
+    "slot": "given",
+    "url": "http://localhost:5173/?year=2026",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:19.157Z",
+    "viewport": {
+      "width": 1284,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-04",
+    "slot": "when",
+    "url": "http://localhost:5173/?year=2026&page=3",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:21.591Z",
+    "viewport": {
+      "width": 1284,
+      "height": 900
+    }
+  },
+  {
+    "id": "QA-04",
+    "error": "Error: expect(locator).toHaveText(expected) failed\n\nLocator:  getByRole('combobox', { name: 'ページを選択' })\nExpected: \"323/323\"\nReceived: \"3/323\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveText\" getByRole('combobox', { name: 'ページを選択' }) with timeout 5000ms\n  - waiting for getByRole('combobox', { name: 'ページを選択' })\n    11 × locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"closed\" data-size=\"default\" aria-label=\"ページを選択\" aria-expanded=\"false\" aria-autocomplete=\"none\" data-slot=\"select-trigger\" class=\"flex items-center justify-between gap-2 border border-input py-2 whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destr…>…</button>\n       - unexpected value \"3/323\"\n",
+    "stack": "Error: expect(locator).toHaveText(expected) failed\n\nLocator:  getByRole('combobox', { name: 'ページを選択' })\nExpected: \"323/323\"\nReceived: \"3/323\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveText\" getByRole('combobox', { name: 'ページを選択' }) with timeout 5000ms\n  - waiting for getByRole('combobox', { name: 'ページを選択' })\n    11 × locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"closed\" data-size=\"default\" aria-label=\"ページを選択\" aria-expanded=\"false\" aria-autocomplete=\"none\" data-slot=\"select-trigger\" class=\"flex items-center justify-between gap-2 border border-input py-2 whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destr…>…</button>\n       - unexpected value \"3/323\"\n\n    at captureRawStack (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright-core@1.64.1/node_modules/playwright-core/lib/coreBundle.js:9282:17)\n    at callMatcherAsStep (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13316:57)\n    at Object.toHaveText (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13308:23)\n    at /tmp/syllabus-browser-push.cjs:29:770\n    at async scenario (/tmp/syllabus-browser-push.cjs:24:175)\n    at async /tmp/syllabus-browser-push.cjs:29:1"
+  },
+  {
+    "case": "QA-05",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:27.655Z",
+    "viewport": {
+      "width": 1285,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-05",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:27.722Z",
+    "viewport": {
+      "width": 1285,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-05",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=&title=%E4%B8%8D%E5%AD%98%E5%9C%A8QA%E5%B0%82%E7%94%A8%E7%A7%91%E7%9B%AExyz&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:28.136Z",
+    "viewport": {
+      "width": 1285,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-06",
+    "slot": "given",
+    "url": "http://localhost:5173/?q=T1AB3300",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:29.395Z",
+    "viewport": {
+      "width": 1286,
+      "height": 900
+    }
+  },
+  {
+    "id": "QA-06",
+    "error": "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: 'オンデマンド', exact: true })\u001b[22m\n",
+    "stack": "locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: 'オンデマンド', exact: true })\u001b[22m\n\n    at choose (/tmp/syllabus-browser-push.cjs:21:149)\n    at async /tmp/syllabus-browser-push.cjs:31:306\n    at async scenario (/tmp/syllabus-browser-push.cjs:24:175)\n    at async /tmp/syllabus-browser-push.cjs:31:1"
+  },
+  {
+    "case": "QA-07",
+    "slot": "given",
+    "url": "http://localhost:5173/?q=T1AB3300",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:40.602Z",
+    "viewport": {
+      "width": 1287,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-07",
+    "slot": "when",
+    "url": "http://localhost:5173/courses/course_007d46044133b3dded33fe3eb5b8bc2e?back=%2F%3Fq%3DT1AB3300",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:40.836Z",
+    "viewport": {
+      "width": 1287,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-07",
+    "slot": "then",
+    "url": "http://localhost:5173/courses/course_007d46044133b3dded33fe3eb5b8bc2e?back=%2F%3Fq%3DT1AB3300",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:41.005Z",
+    "viewport": {
+      "width": 1287,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-08",
+    "slot": "given",
+    "url": "http://localhost:5173/?q=L2241700",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:41.672Z",
+    "viewport": {
+      "width": 1288,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-08",
+    "slot": "when",
+    "url": "http://localhost:5173/courses/course_760006e0ea8010eb2b468a9d10ec88c3?back=%2F%3Fq%3DL2241700",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:41.887Z",
+    "viewport": {
+      "width": 1288,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-08",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=SG113100&department=s",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:43.019Z",
+    "viewport": {
+      "width": 1288,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-09",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:43.810Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "case": "QA-09",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:43.970Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "id": "QA-09",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('combobox', { name: '曜日', exact: true })\nExpected substring: \"月曜日\"\nReceived string:    \"すべて\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('combobox', { name: '曜日', exact: true }) with timeout 5000ms\n  - waiting for getByRole('combobox', { name: '曜日', exact: true })\n    11 × locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" id=\"filter-day\" data-state=\"closed\" data-size=\"default\" aria-expanded=\"false\" aria-autocomplete=\"none\" data-slot=\"select-trigger\" class=\"flex items-center justify-between gap-2 rounded-md border border-input px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive ari…>…</button>\n       - unexpected value \"すべて\"\n",
+    "stack": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('combobox', { name: '曜日', exact: true })\nExpected substring: \"月曜日\"\nReceived string:    \"すべて\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('combobox', { name: '曜日', exact: true }) with timeout 5000ms\n  - waiting for getByRole('combobox', { name: '曜日', exact: true })\n    11 × locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" id=\"filter-day\" data-state=\"closed\" data-size=\"default\" aria-expanded=\"false\" aria-autocomplete=\"none\" data-slot=\"select-trigger\" class=\"flex items-center justify-between gap-2 rounded-md border border-input px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive ari…>…</button>\n       - unexpected value \"すべて\"\n\n    at captureRawStack (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright-core@1.64.1/node_modules/playwright-core/lib/coreBundle.js:9282:17)\n    at callMatcherAsStep (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13316:57)\n    at Object.toContainText (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13308:23)\n    at /tmp/syllabus-browser-push.cjs:34:585\n    at async scenario (/tmp/syllabus-browser-push.cjs:24:175)\n    at async /tmp/syllabus-browser-push.cjs:34:1"
+  },
+  {
+    "case": "QA-10",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:50.138Z",
+    "viewport": {
+      "width": 1290,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-10",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:50.210Z",
+    "viewport": {
+      "width": 1290,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-10",
+    "slot": "then",
+    "url": "http://localhost:5173/courses/not-found",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:50.827Z",
+    "viewport": {
+      "width": 1290,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-11",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:52.306Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-11",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:52.406Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "id": "QA-11",
+    "error": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 22\n+ Received  +  1\n\n- Array [\n-   \"/courses/course_063ff497544fe136d4aa2c86997bbeed?back=%2F\",\n-   \"/courses/course_de431d07f3fce4d7b0d154f06eba5df5?back=%2F\",\n-   \"/courses/course_594028c1c40a742fc1e6924e40a13e0f?back=%2F\",\n-   \"/courses/course_697a3f5aeb6785fa4b4edd3dd5ba57d9?back=%2F\",\n-   \"/courses/course_632bcfaeeecce9158d71d15d6841d7d6?back=%2F\",\n-   \"/courses/course_860b82c3ad1989ccea50c67d2c599ee4?back=%2F\",\n-   \"/courses/course_1e0f7a38e3b3e5701eb2b2cff9b8a02f?back=%2F\",\n-   \"/courses/course_93aab293366d7b8ff66ca8acfd4327d4?back=%2F\",\n-   \"/courses/course_33e53400c02fe612d8b36ce58b260b89?back=%2F\",\n-   \"/courses/course_cb655af00c12be74029a42813c9209c5?back=%2F\",\n-   \"/courses/course_4f8f2f57f2411dc6733396392b1b323c?back=%2F\",\n-   \"/courses/course_8a8002e53ad9767f2e99935691566cf8?back=%2F\",\n-   \"/courses/course_83ef02e1e93d78647748e565e364892d?back=%2F\",\n-   \"/courses/course_ed80dfc3a08bab0dab75449f90bc6959?back=%2F\",\n-   \"/courses/course_0f2adc3292dd71ad39f24f51e4f2cc94?back=%2F\",\n-   \"/courses/course_7a33ea788a451ceba221c297a6c0ca23?back=%2F\",\n-   \"/courses/course_c84e4a524769ebea8d405eb2ccb114eb?back=%2F\",\n-   \"/courses/course_a90e3e9af764a956dd1868da54674aeb?back=%2F\",\n-   \"/courses/course_68d8ef2fd63c1294e3dbdd5fe68df5aa?back=%2F\",\n-   \"/courses/course_853d274b1943935ddbecd4917a08128d?back=%2F\",\n- ]\n+ Array []",
+    "stack": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 22\n+ Received  +  1\n\n- Array [\n-   \"/courses/course_063ff497544fe136d4aa2c86997bbeed?back=%2F\",\n-   \"/courses/course_de431d07f3fce4d7b0d154f06eba5df5?back=%2F\",\n-   \"/courses/course_594028c1c40a742fc1e6924e40a13e0f?back=%2F\",\n-   \"/courses/course_697a3f5aeb6785fa4b4edd3dd5ba57d9?back=%2F\",\n-   \"/courses/course_632bcfaeeecce9158d71d15d6841d7d6?back=%2F\",\n-   \"/courses/course_860b82c3ad1989ccea50c67d2c599ee4?back=%2F\",\n-   \"/courses/course_1e0f7a38e3b3e5701eb2b2cff9b8a02f?back=%2F\",\n-   \"/courses/course_93aab293366d7b8ff66ca8acfd4327d4?back=%2F\",\n-   \"/courses/course_33e53400c02fe612d8b36ce58b260b89?back=%2F\",\n-   \"/courses/course_cb655af00c12be74029a42813c9209c5?back=%2F\",\n-   \"/courses/course_4f8f2f57f2411dc6733396392b1b323c?back=%2F\",\n-   \"/courses/course_8a8002e53ad9767f2e99935691566cf8?back=%2F\",\n-   \"/courses/course_83ef02e1e93d78647748e565e364892d?back=%2F\",\n-   \"/courses/course_ed80dfc3a08bab0dab75449f90bc6959?back=%2F\",\n-   \"/courses/course_0f2adc3292dd71ad39f24f51e4f2cc94?back=%2F\",\n-   \"/courses/course_7a33ea788a451ceba221c297a6c0ca23?back=%2F\",\n-   \"/courses/course_c84e4a524769ebea8d405eb2ccb114eb?back=%2F\",\n-   \"/courses/course_a90e3e9af764a956dd1868da54674aeb?back=%2F\",\n-   \"/courses/course_68d8ef2fd63c1294e3dbdd5fe68df5aa?back=%2F\",\n-   \"/courses/course_853d274b1943935ddbecd4917a08128d?back=%2F\",\n- ]\n+ Array []\n    at captureRawStack (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright-core@1.64.1/node_modules/playwright-core/lib/coreBundle.js:9282:17)\n    at callMatcherAsStep (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13316:57)\n    at Object.toEqual (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13308:23)\n    at /tmp/syllabus-browser-push.cjs:36:493\n    at async scenario (/tmp/syllabus-browser-push.cjs:24:175)\n    at async /tmp/syllabus-browser-push.cjs:36:1"
+  },
+  {
+    "case": "QA-12",
+    "slot": "given",
+    "url": "http://localhost:5173/?q=L2241700",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:53.785Z",
+    "viewport": {
+      "width": 1292,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-12",
+    "slot": "when",
+    "url": "http://localhost:5173/?q=L2241700",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:55.353Z",
+    "viewport": {
+      "width": 1292,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-12",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=L2241700",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:26:55.737Z",
+    "viewport": {
+      "width": 1292,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-04",
+    "slot": "given",
+    "url": "http://localhost:5173/?year=2026",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:19.438Z",
+    "viewport": {
+      "width": 1284,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-04",
+    "slot": "when",
+    "url": "http://localhost:5173/?year=2026&page=3",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:21.903Z",
+    "viewport": {
+      "width": 1284,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-04",
+    "slot": "then",
+    "url": "http://localhost:5173/?year=2026&page=324",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:23.856Z",
+    "viewport": {
+      "width": 1284,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-06",
+    "slot": "given",
+    "url": "http://localhost:5173/?q=T1AB3300",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:24.240Z",
+    "viewport": {
+      "width": 1286,
+      "height": 900
+    }
+  },
+  {
+    "id": "QA-06",
+    "error": "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: 'オンデマンド', exact: true })\u001b[22m\n",
+    "stack": "locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: 'オンデマンド', exact: true })\u001b[22m\n\n    at choose (/tmp/syllabus-browser-push.cjs:22:149)\n    at async /tmp/syllabus-browser-push.cjs:32:306\n    at async scenario (/tmp/syllabus-browser-push.cjs:25:298)\n    at async /tmp/syllabus-browser-push.cjs:32:1"
+  },
+  {
+    "case": "QA-11",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:35.753Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-11",
+    "slot": "when",
+    "url": "http://localhost:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:36.166Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "id": "QA-11",
+    "error": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 8\n+ Received  + 1\n\n- Array [\n-   \"/courses/course_9c7ed5841804ce071e9d6e0cf2a7f0c7?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_007d46044133b3dded33fe3eb5b8bc2e?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_990b8ccbbf51c48ee1ec4588044a52b0?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_739292c3220fd5d378c99fa36b0b06a0?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_808da0f4925a7697825ef88cfe49faac?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_3e130f211cff437fb9ffc5038ba1cfa6?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n- ]\n+ Array []",
+    "stack": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 8\n+ Received  + 1\n\n- Array [\n-   \"/courses/course_9c7ed5841804ce071e9d6e0cf2a7f0c7?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_007d46044133b3dded33fe3eb5b8bc2e?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_990b8ccbbf51c48ee1ec4588044a52b0?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_739292c3220fd5d378c99fa36b0b06a0?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_808da0f4925a7697825ef88cfe49faac?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n-   \"/courses/course_3e130f211cff437fb9ffc5038ba1cfa6?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\",\n- ]\n+ Array []\n    at captureRawStack (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright-core@1.64.1/node_modules/playwright-core/lib/coreBundle.js:9282:17)\n    at callMatcherAsStep (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13316:57)\n    at Object.toEqual (/home/watabegg/shinshu-syllabus-search/node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/lib/matchers/expect.js:13308:23)\n    at /tmp/syllabus-browser-push.cjs:37:575\n    at async scenario (/tmp/syllabus-browser-push.cjs:25:298)\n    at async /tmp/syllabus-browser-push.cjs:37:1"
+  },
+  {
+    "case": "QA-09",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:52.600Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "case": "QA-09",
+    "slot": "when",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:52.802Z",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "case": "QA-09",
+    "slot": "then",
+    "url": "http://localhost:5173/courses/course_063ff497544fe136d4aa2c86997bbeed?back=%2F",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:55.397Z",
+    "viewport": {
+      "width": 320,
+      "height": 844
+    }
+  },
+  {
+    "case": "QA-11",
+    "slot": "given",
+    "url": "http://localhost:5173/",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:56.457Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-11",
+    "slot": "when",
+    "url": "http://localhost:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:57.176Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-11",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:27:57.907Z",
+    "viewport": {
+      "width": 1291,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-06",
+    "slot": "given",
+    "url": "http://localhost:5173/?q=T1AB3300",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:28:16.583Z",
+    "viewport": {
+      "width": 1286,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-06",
+    "slot": "when",
+    "url": "http://localhost:5173/?q=T1AB3300&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=in_person",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:28:17.802Z",
+    "viewport": {
+      "width": 1286,
+      "height": 900
+    }
+  },
+  {
+    "case": "QA-06",
+    "slot": "then",
+    "url": "http://localhost:5173/?q=T1AB4300&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=on_demand",
+    "role": "匿名利用者",
+    "title": "信州大学シラバス検索（非公式）",
+    "timestamp": "2026-10-15T17:28:18.347Z",
+    "viewport": {
+      "width": 1286,
+      "height": 900
+    }
+  }
+]

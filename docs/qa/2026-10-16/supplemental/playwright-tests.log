@@ -1,0 +1,29 @@
+[WebServer] (node:3644966) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:3645170) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ vite --host 127.0.0.1 --port 4173
+[WebServer] (node:3645233) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] Default inspector port 9229 not available, using 9230 instead
+[WebServer] 
+
+Running 5 tests using 5 workers
+
+(node:3645429) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3645442) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3645436) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3645448) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3645430) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/search.spec.ts:115:1 › whole result cards navigate and syllabus content is structured (3.3s)
+  ✓  1 [chromium] › tests/e2e/search.spec.ts:3:1 › public search renders its data state and keeps query conditions in the URL (3.5s)
+  ✓  5 [chromium] › tests/e2e/search.spec.ts:94:1 › shadcn dropdown stays visible and usable on mobile (3.7s)
+  ✓  3 [chromium] › tests/e2e/search.spec.ts:142:1 › pagination selects pages, preserves filters, and disables boundary arrows (8.5s)
+  ✓  4 [chromium] › tests/e2e/search.spec.ts:29:1 › shadcn selects submit their values, support keyboard selection, and reset with navigation (10.3s)
+
+  5 passed (16.1s)

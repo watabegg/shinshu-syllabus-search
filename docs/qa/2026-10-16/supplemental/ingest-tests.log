@@ -1,0 +1,11 @@
+[1/1] https://lms.ealps.shinshu-u.ac.jp/syllabus/test/FS000001.pdf
+  failed: temporary network failure
+[1/1] https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FS000001-copy.pdf
+  duplicate PDF of https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FS000001.pdf
+[1/1] https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FS000001-copy.pdf
+  conflict: natural key (2026, 'fs', 'FS000001', '') conflicts with prior valid record https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FS000001.pdf
+[1/1] https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FS000002.pdf
+----------------------------------------------------------------------
+Ran 24 tests in 0.029s
+
+OK

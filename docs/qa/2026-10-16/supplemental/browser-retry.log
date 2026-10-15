@@ -1,0 +1,19 @@
+QA-04 PASS
+QA-06 FAIL TimeoutError: locator.click: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('option', { name: 'オンデマンド', exact: true })[22m
+
+QA-11 FAIL Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 8
++ Received  + 1
+
+- Array [
+-   "/courses/course_9c7ed5841804ce071e9d6e0cf2a7f0c7?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+-   "/courses/course_007d46044133b3dded33fe3eb5b8bc2e?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+-   "/courses/course_990b8ccbbf51c48ee1ec4588044a52b0?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+-   "/courses/course_739292c3220fd5d378c99fa36b0b06a0?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+-   "/courses/course_808da0f4925a7697825ef88cfe49faac?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+-   "/courses/course_3e130f211cff437fb9ffc5038ba1cfa6?back=%2F%3Fq%3D%26title%3D%25E3%2582%25B3%25E3%2583%25AD%25E3%2582%25A4%25E3%2583%2589%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+- ]
++ Array []

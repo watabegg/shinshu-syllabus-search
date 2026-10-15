@@ -1,0 +1,7 @@
+{
+  "status": "reviewed",
+  "reviewer": "Codex lead",
+  "document": "verification-note.md",
+  "material": "packet.md",
+  "result": "全段落を材料と照合。検証件数・修正・対象環境・未実施範囲に意味の相違なし。"
+}

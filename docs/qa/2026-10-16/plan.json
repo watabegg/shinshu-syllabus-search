@@ -1,0 +1,386 @@
+{
+  "target": {
+    "repo": "shinshu-syllabus-search",
+    "pr": null,
+    "head_sha": "3b8e31ca30dba8471d0c143a1d6fe2115b1ae7fb",
+    "environment": {
+      "type": "local",
+      "url": "http://localhost:5173"
+    }
+  },
+  "surfaces": [
+    {
+      "id": "S1",
+      "name": "検索フォーム・条件保持・件数表示",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S1.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S1.input-or-time-boundary",
+          "kind": "input-or-time-boundary"
+        },
+        {
+          "id": "S1.duplicate-submit",
+          "kind": "concurrency-retry",
+          "subtype": "duplicate-submit",
+          "sentinel": true
+        },
+        {
+          "id": "S1.lifecycle-boundary",
+          "kind": "lifecycle-boundary",
+          "sentinel": true
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-01",
+          "QA-02",
+          "QA-03",
+          "QA-05",
+          "QA-06",
+          "QA-10",
+          "QA-11"
+        ]
+      }
+    },
+    {
+      "id": "S2",
+      "name": "ページ選択・前後移動",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S2.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S2.input-or-time-boundary",
+          "kind": "input-or-time-boundary"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-04"
+        ]
+      }
+    },
+    {
+      "id": "S3",
+      "name": "カード遷移・構造化本文・原文表示・幅統一",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S3.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S3.adjacent-regression",
+          "kind": "adjacent-regression"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-07"
+        ]
+      }
+    },
+    {
+      "id": "S4",
+      "name": "全件取込とOCR・コード補完・重複解消の表示",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S4.integration-visible",
+          "kind": "integration-visible"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-08"
+        ]
+      }
+    },
+    {
+      "id": "S5",
+      "name": "スマホとキーボード操作",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S5.normal-readback",
+          "kind": "normal-readback"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-09"
+        ]
+      }
+    },
+    {
+      "id": "S6",
+      "name": "別タブの独立した検索状態",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S6.adjacent-regression",
+          "kind": "adjacent-regression",
+          "sentinel": true
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-12"
+        ]
+      }
+    },
+    {
+      "id": "S7",
+      "name": "PDF再試行・OCR・原本ハッシュ補正・正規化・重複参照・依存とビルド",
+      "reach": "non-browser",
+      "required_obligations": [
+        {
+          "id": "S7.normal-readback",
+          "kind": "normal-readback"
+        }
+      ],
+      "disposition": {
+        "covered_by": "quality_gate",
+        "evidence": "supplemental/quality-gates.json"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "QA-01",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "6460授業のローカルDBで検索画面を開く",
+        "when": "条件なしで検索する",
+        "then": "総件数6460件・20件のカード・1/323を確認し、削除した文言がない"
+      },
+      "given_seed": {
+        "state_summary": "6460授業のローカルDBで検索画面を開く",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-02",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "検索画面で科目名・教員・教室を入力できる",
+        "when": "コロイド、酒 井 俊郎、工Ｗ２－１０１で検索する",
+        "then": "全条件に一致するT1AB3300が1件表示される"
+      },
+      "given_seed": {
+        "state_summary": "検索画面で科目名・教員・教室を入力できる",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-03",
+      "surface": "S1",
+      "covers": [
+        "S1.lifecycle-boundary"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "学部・学期・曜日・時限の選択肢がある",
+        "when": "工学部・後期・月曜・3限を選び検索して再読込する",
+        "then": "選択とURLが維持され、条件をクリアすると総件数に戻る"
+      },
+      "given_seed": {
+        "state_summary": "学部・学期・曜日・時限の選択肢がある",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-04",
+      "surface": "S2",
+      "covers": [
+        "S2.normal-readback",
+        "S2.input-or-time-boundary"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "2026年度の1ページ目が表示されている",
+        "when": "次ページ、3ページ、最終323ページ、前ページへ移動し、範囲外324ページを開く",
+        "then": "条件を保持し重複のない結果を表示、先頭と末尾の矢印を適切に無効化し、範囲外は最終ページに補正する"
+      },
+      "given_seed": {
+        "state_summary": "2026年度の1ページ目が表示されている",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-05",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "検索フォームで未知の科目名を入力できる",
+        "when": "存在しない科目名を検索する",
+        "then": "0件表示と説明が出て、クリアで6460件に戻る"
+      },
+      "given_seed": {
+        "state_summary": "検索フォームで未知の科目名を入力できる",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-06",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "形式未指定のT1AB3300とオンデマンドT1AB4300が存在する",
+        "when": "対面とオンデマンドでそれぞれ絞る",
+        "then": "前者は対面検索で表示され、後者はオンデマンドのまま表示される"
+      },
+      "given_seed": {
+        "state_summary": "形式未指定のT1AB3300とオンデマンドT1AB4300が存在する",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-07",
+      "surface": "S3",
+      "covers": [
+        "S3.normal-readback",
+        "S3.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "コロイドの検索結果が表示される",
+        "when": "カードの登録コードを押し、授業計画と原文を展開して戻る",
+        "then": "詳細と検索の幅が同じで、授業回表・原文・PDFリンクがあり検索条件を保持する"
+      },
+      "given_seed": {
+        "state_summary": "コロイドの検索結果が表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-08",
+      "surface": "S4",
+      "covers": [
+        "S4.integration-visible"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "OCR・コード補完・重複処理済みのデータがある",
+        "when": "L2241700、医学部Q3002902、hsのHS900100/HS901100、理学部SG113100を検索し詳細を開く",
+        "then": "OCR授業の構造化本文、医学部授業、別コード2授業、重複なし1授業が確認できる"
+      },
+      "given_seed": {
+        "state_summary": "OCR・コード補完・重複処理済みのデータがある",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-09",
+      "surface": "S5",
+      "covers": [
+        "S5.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "390px幅で検索フォームを開く",
+        "when": "学部Selectを操作し、320px幅でもページ選択と詳細を開く",
+        "then": "ネイティブselectを表示せず、横にはみ出さず検索と詳細を操作できる"
+      },
+      "given_seed": {
+        "state_summary": "390px幅で検索フォームを開く",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-10",
+      "surface": "S1",
+      "covers": [
+        "S1.input-or-time-boundary"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "検索フォームが表示される",
+        "when": "6語検索・41文字の1語・不正ページ・不正形式・不存在詳細を開く",
+        "then": "400相当の説明または404を表示し、検索ページへ戻れる"
+      },
+      "given_seed": {
+        "state_summary": "検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-11",
+      "surface": "S1",
+      "covers": [
+        "S1.duplicate-submit"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "科目名にコロイドを入力する",
+        "when": "検索ボタンを連続送信して結果を再読込する",
+        "then": "件数と条件が安定しカードが重複しない"
+      },
+      "given_seed": {
+        "state_summary": "科目名にコロイドを入力する",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-12",
+      "surface": "S6",
+      "covers": [
+        "S6.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "2つのタブで異なる検索条件を開く",
+        "when": "片方のページ番号を変更しもう片方を再読込する",
+        "then": "各タブの検索条件が独立して維持される"
+      },
+      "given_seed": {
+        "state_summary": "2つのタブで異なる検索条件を開く",
+        "source": "existing"
+      },
+      "status": "planned"
+    }
+  ]
+}

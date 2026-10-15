@@ -1,7 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { SyllabusBody } from '@/components/syllabus-body';
+import { Separator } from '@/components/ui/separator';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import type { DetailProps, Slot } from '@/lib/contracts';
 import { modalityLabels } from '@/lib/contracts';
 
@@ -63,9 +68,10 @@ export default function Show(props: DetailProps) {
         </header>
         <main id="main-content" className="page-main detail-main">
           <nav className="breadcrumb" aria-label="パンくずリスト"><Link href={backHref}>← 検索結果に戻る</Link></nav>
-          <Card className="panel detail-panel">
-            <p className="section-kicker">COURSE DETAIL</p>
-            <h1>{course.title || '科目名未登録'}</h1>
+          <Card className="gap-4">
+            <CardHeader>
+            <CardTitle><h1 className="text-2xl leading-relaxed">{course.title || '科目名未登録'}</h1></CardTitle>
+            </CardHeader><CardContent>
             <dl className="detail-meta">
               <div><dt>担当教員</dt><dd>{course.teacher_text || '記載なし'}</dd></div>
               <div><dt>登録コード</dt><dd>{course.registration_code}</dd></div>
@@ -83,33 +89,29 @@ export default function Show(props: DetailProps) {
               {course.modalities.length > 0 ? (
                 <ul className="plain-list">{course.modalities.map((modality) => <li key={modality}>{modalityLabels[modality]}</li>)}</ul>
               ) : <p className="muted">授業形式の記載はありません。</p>}
-              {props.modalityEvidence.length > 0 && <ul className="evidence-list">{props.modalityEvidence.map((evidence, index) => <li key={`${evidence.modality}-${index}`}><strong>{modalityLabels[evidence.modality]}</strong>：{evidence.text} <span>（{evidenceSourceLabel(evidence.source)}）</span></li>)}</ul>}
+              {props.modalityEvidence.length > 0 && <ul className="evidence-list">{props.modalityEvidence.map((evidence, index) => <li key={`${evidence.modality}-${index}`}><strong>{evidence.modality === 'unknown' ? '原文の記載' : modalityLabels[evidence.modality]}</strong>：{evidence.text} <span>（{evidenceSourceLabel(evidence.source)}）</span></li>)}</ul>}
             </div>
             <div className="detail-block">
               <h2>シラバス本文</h2>
-              {props.pages.length > 0 ? (
-                <div className="raw-pages">
-                  {props.pages.map((page) => <section className="raw-page" key={page.page_number} aria-label={`${page.page_number}ページ目`}><h3>抽出テキスト · {page.page_number}ページ</h3><pre>{page.raw_text}</pre></section>)}
-                </div>
-              ) : <p className="muted">本文テキストはありません。原本PDFをご確認ください。</p>}
+              <SyllabusBody sections={props.sections} pages={props.pages} />
             </div>
             {props.parseWarnings.length > 0 && (
-              <aside className="warning-panel" aria-labelledby="warning-heading">
-                <h2 id="warning-heading">抽出時の注意</h2>
+              <Alert className="mt-4 border-amber-200 bg-amber-50" aria-labelledby="warning-heading">
+                <AlertTitle><h2 id="warning-heading">抽出時の注意</h2></AlertTitle><AlertDescription>
                 <ul>{props.parseWarnings.map((warning, index) => <li key={`${warning}-${index}`}>{publicWarning(warning)}</li>)}</ul>
-              </aside>
+              </AlertDescription></Alert>
             )}
-            <div className="source-panel">
+            <Separator className="mt-4" /><div className="source-panel">
               <h2>出典と取得情報</h2>
               <dl className="detail-meta source-meta">
                 <div><dt>取得日</dt><dd>{formatDate(props.fetchedAt)}</dd></div>
                 <div><dt>出典ページ</dt><dd>{props.pages.length > 0 ? `${props.pages[0]?.page_number}–${props.pages.at(-1)?.page_number}ページ` : '記録なし'}</dd></div>
               </dl>
-              {props.sourceUrl ? <a className={`${buttonVariants()} source-link`} href={props.sourceUrl} target="_blank" rel="noreferrer noopener">大学の原本PDFを開く ↗</a> : <p className="muted">原本PDFへのリンクを確認できません。</p>}
+              {props.sourceUrl ? <Button asChild><a href={props.sourceUrl} target="_blank" rel="noreferrer noopener">大学の原本PDFを開く <ExternalLink aria-hidden="true" /></a></Button> : <p className="muted">原本PDFへのリンクを確認できません。</p>}
               <p className="source-caveat">本文は公開PDFから抽出したテキストです。表や文字の読み取りに誤り・欠落がある場合は、原本PDFをご確認ください。</p>
-              {props.sourceSha256 && <details className="technical-details"><summary>資料の照合情報</summary><dl><div><dt>PDF識別用ハッシュ</dt><dd><code>{props.sourceSha256}</code></dd></div></dl></details>}
+              {props.sourceSha256 && <Collapsible className="technical-details"><CollapsibleTrigger asChild><Button variant="ghost" size="sm">資料の照合情報<ChevronDown aria-hidden="true" /></Button></CollapsibleTrigger><CollapsibleContent><dl><div><dt>PDF識別用ハッシュ</dt><dd><code>{props.sourceSha256}</code></dd></div></dl></CollapsibleContent></Collapsible>}
             </div>
-          </Card>
+          </CardContent></Card>
         </main>
         <footer className="site-footer"><span>信州大学シラバス検索 · 非公式</span><span>大学の公式サービスではありません。</span></footer>
       </div>

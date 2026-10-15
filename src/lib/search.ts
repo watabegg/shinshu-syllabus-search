@@ -1,3 +1,4 @@
+import { effectiveModalities, structureSyllabus } from './syllabus';
 import type {
   CourseSummary,
   Coverage,
@@ -111,7 +112,7 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
     term,
     day,
     period,
-    modality,
+    modality: modality === 'unknown' ? 'in_person' : modality,
     page: Number(rawPage),
   };
 }
@@ -229,8 +230,12 @@ function buildSearchWhere(filters: SearchFilters): { sql: string; values: QueryV
     clauses.push(`EXISTS (SELECT 1 FROM course_slots s WHERE ${slotClauses.join(' AND ')})`);
   }
   if (filters.modality) {
-    clauses.push('EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id AND cm.modality = ?)');
-    values.push(filters.modality);
+    if (filters.modality === 'in_person') {
+      clauses.push("(EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id AND cm.modality IN ('in_person', 'unknown')) OR NOT EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id))");
+    } else {
+      clauses.push('EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id AND cm.modality = ?)');
+      values.push(filters.modality);
+    }
   }
 
   return { sql: clauses.length ? `WHERE ${clauses.join(' AND ')}` : '', values };
@@ -265,17 +270,22 @@ async function readSummaryRelations(db: D1Database, ids: string[]): Promise<Map<
       period_label: row.period_label, day: row.day, period: row.period, source_kind: row.source_kind });
   }
   for (const row of modalityRows) result.get(row.course_id)?.modalities.push(row.modality);
+  for (const relation of result.values()) relation.modalities = effectiveModalities(relation.modalities);
   return result;
 }
 
-export async function searchCourses(db: D1Database, filters: SearchFilters): Promise<Pick<SearchProps, 'items' | 'hasNext'>> {
+export async function searchCourses(db: D1Database, filters: SearchFilters): Promise<Pick<SearchProps, 'items' | 'hasNext' | 'total' | 'totalPages'> & { page: number }> {
   const where = buildSearchWhere(filters);
+  const count = await first<{ total: number }>(db, `SELECT COUNT(*) AS total FROM courses c ${where.sql}`, ...where.values);
+  const total = count?.total ?? 0;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const page = Math.min(filters.page, Math.max(1, totalPages));
   const rows = await all<SearchRow>(
     db,
     `SELECT c.id, c.title, c.registration_code, c.year, c.department, c.department_name, c.teacher_text, c.room_text, c.credits FROM courses c ${where.sql} ORDER BY c.title_search COLLATE BINARY, c.id COLLATE BINARY LIMIT ? OFFSET ?`,
     ...where.values,
     PAGE_SIZE + 1,
-    (filters.page - 1) * PAGE_SIZE,
+    (page - 1) * PAGE_SIZE,
   );
   const hasNext = rows.length > PAGE_SIZE;
   const pageRows = rows.slice(0, PAGE_SIZE);
@@ -284,7 +294,7 @@ export async function searchCourses(db: D1Database, filters: SearchFilters): Pro
     ...row,
     ...(relations.get(row.id) ?? { slots: [], modalities: [] }),
   }));
-  return { items, hasNext };
+  return { items, hasNext, total, totalPages, page };
 }
 
 type DetailRow = SearchRow & {
@@ -357,6 +367,7 @@ export async function readCourseDetail(db: D1Database, id: string): Promise<Deta
       ...(relations.get(id) ?? { slots: [], modalities: [] }),
     },
     pages: pageRows,
+    sections: structureSyllabus(pageRows),
     sourceUrl: allowedSourcePdf(row.source_url),
     sourceSha256: row.source_sha256 ?? '',
     fetchedAt: row.fetched_at ?? '',
@@ -375,5 +386,5 @@ export async function readSearchPage(
     searchCourses(db, filters),
     readCoverage(db),
   ]);
-  return { ...search, filters, availableFilters, ...importSummary };
+  return { ...search, filters: { ...filters, page: search.page }, availableFilters, ...importSummary };
 }

@@ -16,3 +16,5 @@ pnpm dev
 ```
 
 Node.js 24 以降を使用します。PDFの取り込みには Python 3 と Poppler (`pdftotext`) が必要です。詳細は運用手順を参照してください。
+
+UIは公式shadcnレジストリのSelect・Button・Input・Card・Badge・Label・Alert・Collapsible・Separatorを使用しています。SelectはRadixのポップアップで表示します。

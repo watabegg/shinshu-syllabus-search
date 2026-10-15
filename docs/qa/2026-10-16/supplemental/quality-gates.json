@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "command": "pnpm build",
+      "status": "PASS",
+      "evidence": "build.log",
+      "note": "TypeScript check + Vite build"
+    },
+    {
+      "command": "pnpm test",
+      "status": "PASS",
+      "evidence": "site-tests.log",
+      "tests": 10
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/ingest -q",
+      "status": "PASS",
+      "evidence": "ingest-tests.log",
+      "tests": 24
+    },
+    {
+      "command": "python3 scripts/ingest/validate.py --manifest data/manifest.json --samples data/samples --strict",
+      "status": "PASS",
+      "evidence": "data-validation.log"
+    },
+    {
+      "command": "npx react-doctor@latest --verbose --scope changed",
+      "status": "PASS",
+      "evidence": "react-doctor.log",
+      "score": 71,
+      "new_issues": 0
+    },
+    {
+      "command": "pnpm exec playwright test",
+      "status": "PASS",
+      "tests": 5,
+      "evidence": "playwright-tests.log"
+    }
+  ],
+  "note": "取込側の結果は製品コードが不変の初回チェックから引継ぎ。認証なしの公開read-only UI。ローカル実データを読み、QA用レコードの作成・変更なし。",
+  "review": "全差分を確認。総ページ数超過を補正する修正と回帰テストを追加。その他の未解決差分指摘なし。"
+}

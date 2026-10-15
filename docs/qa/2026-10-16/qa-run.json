@@ -1,0 +1,69 @@
+{
+  "run_id": "20261015T172427Z-re-qa-df6d",
+  "label": "re-qa",
+  "mode": "attested",
+  "repo": "/home/watabegg/shinshu-syllabus-search",
+  "pr": null,
+  "session_dir": "/tmp/syllabus-qa-push-final",
+  "skill_dir": "/home/watabegg/.codex/skills/post-implementation-verify",
+  "started_at": "2026-10-15T17:24:27+00:00",
+  "trusted_dir": "/tmp/qa-trusted-20261015T172427Z-re-qa-df6d-c2ccokf0",
+  "trusted_sha256": {
+    "validate_plan.py": "e5b61f64432f0210919b58aa3567fc3fe2aed9effec8ccd65c578888f150480d",
+    "validate_report.py": "a7a76a875a871fe2ab2f3b6426bb773559f926b4786d54b348a3bd1a2feb4af1",
+    "render_report.py": "5b4512e953d589ce89e0d3774f240403f8f61dc91595f849ac2c836458931318",
+    "report-template.html": "374c5bd1d7322b49f15dbd3271a7c06e48e2387c66d98388458944cd4772b5fe",
+    "schemas/plan.schema.json": "3e8cb64f9576df89c1db66895482fa725fd463e50cca9753c5df533cc9a7c16a",
+    "schemas/results.schema.json": "80b103b84f64eb229053381302b34c2c4765f2b7a8f8e6766daa43ca96333447",
+    "schemas/attestation.schema.json": "930d1283288df0456ec5801e72dfc2d5f136c18e6e1c2825d1b9324647bc689a"
+  },
+  "allowed_dirs": [
+    "/tmp/syllabus-qa-push-final"
+  ],
+  "git_state_start": {
+    "hash": "9d59134a8028e26adbd160eb5214049ac000c07eb79869656e2bd767f5f23107",
+    "files": {
+      "README.md": "70e5006af719ee9871bff7fe0b32cac4cd9f6766494fcc3d073de6718d2a16eb",
+      "app/pages/Courses/Show.tsx": "3557e828baeae89c47b5af01238cde3e94a10fece80b1d0bfc72382c7c2709b5",
+      "app/pages/Error.tsx": "baaff5afb439e6de17f667f69413629cfeb50832a667b7ffdee11bad0c2f48b4",
+      "app/pages/Index.tsx": "c607adc644e8c78ebb54ff8a3b6e641f39af352f08d6403f067bada77d96251b",
+      "docs/operations.md": "4a873c6f664c1dbaff21273a0f093bf89cc9a1ef85a93ce0e3ff0d50e59fd9d8",
+      "docs/plans/syllabus-todo.md": "48aa2cd9aa8537a7c6660ffd187a678bff17c44cf1b5beb322cfff542df4556f",
+      "package.json": "03a427709846da4cbe33c70bf31e34edf71ac051f5c8ca5dc1c257e1e9894632",
+      "pnpm-lock.yaml": "9c90a81d6059d506b81b4caf2fe8ca952159e51cfa2d8e25810a2411c6a69e6a",
+      "scripts/ingest/common.py": "611ac1cbcf749d37c0db9dc49eda4621fd30801574018988a0f15db70c1fd00b",
+      "scripts/ingest/extract.py": "477eb3db7c6ba2112c97236704bac46468ed56840ba7fba6befc77d0591b998a",
+      "scripts/ingest/main.py": "7ed1fbe483d1e3f40efcba76fe8fe301deaa3de8abbc6fc05737fa52678b3cd8",
+      "scripts/ingest/validate.py": "b99af083d1f35f97912511905cc230e3b64f083f252c6095bdd77a6a9d900a6f",
+      "src/components/ui/badge.tsx": "4e67bd06530b3eeeec642a568e3196820a559a3e93fb7ed11fd6c961556339f8",
+      "src/components/ui/button.tsx": "7dcf047a3f46a13e39163599f38afc2a70f88ab686f93a5d4b9d17b15180d834",
+      "src/components/ui/card.tsx": "5e2f5589981295e779da7bf75c2deb2e83064638a65cf49747852cc36e065a58",
+      "src/components/ui/input.tsx": "e37a97ea3a16fc85b415f8e063321627814a5e8d30d04013e7834b64364a2b0b",
+      "src/components/ui/select.tsx": "51ea0965c026ee8814ad18f7f41154a8f358c68df21e28e865559ce08a2dfb77",
+      "src/lib/contracts.ts": "658162d11a174019eadd5cf5d8f9144f4e7799652e6fcbc6585c7c15ef101916",
+      "src/lib/search.ts": "ea4dcd1716db8f0193a88d4d93da1f609ef3ad477e1784932d5f7d3404c8ba77",
+      "src/style.css": "3da9e7c5f7c0444bdb75c9f968b5dc6eadef77238bf13f7747ed90becd3bd477",
+      "tests/e2e/search.spec.ts": "33a56284d18fb137a4472efd0defdf9b917720d694380e7885d4bad8c2974a30",
+      "tests/ingest/test_ingest.py": "e01c7c73b8464abe82e03802d1302b26a98bdadf0014ff6101b0ab0ff746135a",
+      "tests/site-search.test.ts": "85df07dfdcc69f9ad3dc291fdb1e597e28c1214c7f9ec4b87e843545fc28af5e",
+      "tsconfig.json": "ce52396f67fb8803591d53136599844ae785e667318fb542764cfa58fb93e9d6",
+      "config/pdf-corrections.json": "31e69c8c10b0a0a7a6a4a4a6a7d72194857ad08cc38171c1f6ae2c92f5dff3e0",
+      "config/reviewed-text/L2241700.txt": "6979f8b7ec52522339ff76e9db16d2455da28d9d9de81ed35d02d01641f524d1",
+      "scripts/ingest/ocr.py": "1edc340be53cc0e3ebc3250f313f101e99bba3d6ff8039eea88635ff96b8c085",
+      "src/components/syllabus-body.tsx": "d45bef58fa44a0762eca83ff5f2bde09de3556b30d0604952e69dbc44af36d9c",
+      "src/components/ui/alert.tsx": "afeb8ee000195794ccffbf82ab1860bf083e61d355cbe1385fc6ad73fdecfae8",
+      "src/components/ui/collapsible.tsx": "eb4ee2a9ddb3c566c509753a79e4f4c9425d9f8474d55f61f8c8694928b6a509",
+      "src/components/ui/label.tsx": "db5dfcd98a78c5b7c3c01e0bb7726a3adbf0470f4d552e777ccf4751b51e6a56",
+      "src/components/ui/separator.tsx": "f9ec8dde26a5c3f2af1c48a0c588c164e350567cddc5c4070cf5ba780e984f26",
+      "src/components/ui/table.tsx": "75c2355a58861229029512b6f221ddee4e5a0e3326bfa5d2d3d0bccf35e25cd6",
+      "src/lib/syllabus.ts": "2733b3202b086eb119598b4a56ee65322a54cb7b74137db1d6634e25a57693fa",
+      "tests/site-syllabus.test.ts": "8ea0a7f997069a11390851b0958f01dacf7703512e00ea1b1ccb04f533ada49c"
+    }
+  },
+  "resolved_profile": null,
+  "environment": {
+    "type": "local",
+    "url": "http://localhost:5173",
+    "inferred": false
+  }
+}

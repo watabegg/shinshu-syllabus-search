@@ -1,0 +1,66 @@
+QA-01 PASS
+QA-02 PASS
+QA-03 PASS
+QA-04 FAIL Error: expect(locator).toHaveText(expected) failed
+
+Locator:  getByRole('combobox', { name: 'ページを選択' })
+Expected: "323/323"
+Received: "3/323"
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveText" getByRole('combobox', { name: 'ページを選択' }) with timeout 5000ms
+  - waiting for getByRole('combobox', { name: 'ページを選択' })
+    11 × locator resolved to <button dir="ltr" type="button" role="combobox" data-state="closed" data-size="default" aria-label="ページを選択" aria-expanded="false" aria-autocomplete="none" data-slot="select-trigger" class="flex items-center justify-between gap-2 border border-input py-2 whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destr…>…</button>
+       - unexpected value "3/323"
+
+QA-05 PASS
+QA-06 FAIL TimeoutError: locator.click: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('option', { name: 'オンデマンド', exact: true })[22m
+
+QA-07 PASS
+QA-08 PASS
+QA-09 FAIL Error: expect(locator).toContainText(expected) failed
+
+Locator: getByRole('combobox', { name: '曜日', exact: true })
+Expected substring: "月曜日"
+Received string:    "すべて"
+Timeout: 5000ms
+
+Call log:
+  - Expect "toContainText" getByRole('combobox', { name: '曜日', exact: true }) with timeout 5000ms
+  - waiting for getByRole('combobox', { name: '曜日', exact: true })
+    11 × locator resolved to <button dir="ltr" type="button" role="combobox" id="filter-day" data-state="closed" data-size="default" aria-expanded="false" aria-autocomplete="none" data-slot="select-trigger" class="flex items-center justify-between gap-2 rounded-md border border-input px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive ari…>…</button>
+       - unexpected value "すべて"
+
+QA-10 PASS
+QA-11 FAIL Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 22
++ Received  +  1
+
+- Array [
+-   "/courses/course_063ff497544fe136d4aa2c86997bbeed?back=%2F",
+-   "/courses/course_de431d07f3fce4d7b0d154f06eba5df5?back=%2F",
+-   "/courses/course_594028c1c40a742fc1e6924e40a13e0f?back=%2F",
+-   "/courses/course_697a3f5aeb6785fa4b4edd3dd5ba57d9?back=%2F",
+-   "/courses/course_632bcfaeeecce9158d71d15d6841d7d6?back=%2F",
+-   "/courses/course_860b82c3ad1989ccea50c67d2c599ee4?back=%2F",
+-   "/courses/course_1e0f7a38e3b3e5701eb2b2cff9b8a02f?back=%2F",
+-   "/courses/course_93aab293366d7b8ff66ca8acfd4327d4?back=%2F",
+-   "/courses/course_33e53400c02fe612d8b36ce58b260b89?back=%2F",
+-   "/courses/course_cb655af00c12be74029a42813c9209c5?back=%2F",
+-   "/courses/course_4f8f2f57f2411dc6733396392b1b323c?back=%2F",
+-   "/courses/course_8a8002e53ad9767f2e99935691566cf8?back=%2F",
+-   "/courses/course_83ef02e1e93d78647748e565e364892d?back=%2F",
+-   "/courses/course_ed80dfc3a08bab0dab75449f90bc6959?back=%2F",
+-   "/courses/course_0f2adc3292dd71ad39f24f51e4f2cc94?back=%2F",
+-   "/courses/course_7a33ea788a451ceba221c297a6c0ca23?back=%2F",
+-   "/courses/course_c84e4a524769ebea8d405eb2ccb114eb?back=%2F",
+-   "/courses/course_a90e3e9af764a956dd1868da54674aeb?back=%2F",
+-   "/courses/course_68d8ef2fd63c1294e3dbdd5fe68df5aa?back=%2F",
+-   "/courses/course_853d274b1943935ddbecd4917a08128d?back=%2F",
+- ]
++ Array []
+QA-12 PASS

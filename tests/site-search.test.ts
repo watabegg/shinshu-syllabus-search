@@ -163,16 +163,28 @@ describe('public syllabus search', () => {
 
     const missing = await searchCourses(d1, filters('teacher=missing+teacher&room=B-101'));
     expect(missing.items).toHaveLength(0);
+    expect(missing.total).toBe(0);
+    expect(missing.totalPages).toBe(0);
   });
 
   it('keeps pagination stable with a 20+1 probe and a deterministic title/id order', async () => {
     const firstPage = await searchCourses(d1, filters(''));
     expect(firstPage.items).toHaveLength(20);
     expect(firstPage.hasNext).toBe(true);
+    expect(firstPage.totalPages).toBe(2);
+    expect(firstPage.total).toBeGreaterThan(20);
 
     const secondPage = await searchCourses(d1, filters('page=2'));
     expect(secondPage.items[0]?.id).toBe('tie-19');
     expect(secondPage.hasNext).toBe(false);
+    expect(secondPage.total).toBe(firstPage.total);
+    expect(secondPage.totalPages).toBe(2);
+    const beyondLast = await searchCourses(d1, filters('page=999'));
+    expect(beyondLast.page).toBe(2);
+    expect(beyondLast.items).toEqual(secondPage.items);
+    const empty = await searchCourses(d1, filters('title=no-matching-course&page=999'));
+    expect(empty.page).toBe(1);
+    expect(empty.total).toBe(0);
   });
 
   it('loads escaped page text and only exposes an official HTTPS PDF URL', async () => {
@@ -195,4 +207,16 @@ describe('public syllabus search', () => {
     expect(() => filters('modality=forged')).toThrow('授業形式の選択');
     expect(() => filters('page=1001')).toThrow('ページ番号');
   });
+});
+
+it('defaults unspecified modalities to in-person in both search and details without changing remote-only courses', async () => {
+  addCourse({ id: 'online-only', title: 'Online only', modalities: ['on_demand'] });
+  addCourse({ id: 'mixed-default', title: 'Mixed default', modalities: ['unknown', 'in_person', 'live_online'] });
+  const results = await searchCourses(d1, filters('modality=in_person'));
+  expect(results.items.find((course) => course.id === 'course-info')?.modalities).toEqual(['in_person']);
+  expect((await searchCourses(d1, filters('modality=in_person&title=science'))).items.map((course) => course.id)).toContain('course-science');
+  expect((await searchCourses(d1, filters('modality=in_person&title=online'))).items).toHaveLength(0);
+  expect((await readCourseDetail(d1, 'mixed-default'))?.course.modalities).toEqual(['in_person', 'live_online']);
+  expect((await readCourseDetail(d1, 'online-only'))?.course.modalities).toEqual(['on_demand']);
+  expect(filters('modality=unknown').modality).toBe('in_person');
 });

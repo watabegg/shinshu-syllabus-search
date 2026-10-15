@@ -1,0 +1,10 @@
+{
+  "discovered": [
+    "mcp__node_repl__js (in-app runtime)",
+    "project @playwright/test Chromium (local installed)"
+  ],
+  "selected": "project Playwright Chromium; isolated context; localhost:5173",
+  "profile": "missing; product_profile facts unknown; no authorization cases removed",
+  "seed": "existing 6460 public courses; no data writes or cleanup required",
+  "scope": "all uncommitted product changes against HEAD"
+}

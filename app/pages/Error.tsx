@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
 export type ErrorPageProps = { status: number; message: string };
 
@@ -13,11 +13,10 @@ export default function ErrorPage({ status, message }: ErrorPageProps) {
       <div className="site-shell">
         <header className="site-header"><Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバス検索</span><Badge variant="outline">非公式</Badge></Link></header>
         <main className="page-main error-main">
-          <Card className="panel error-panel" role="alert">
-            <p className="section-kicker">ERROR {status}</p>
-            <h1>{heading}</h1>
-            <p>{message}</p>
-            <Link className={buttonVariants()} href="/">検索ページに戻る</Link>
+          <Card className="w-full" role="alert"><CardHeader>
+            <CardTitle><h1 className="text-2xl">{heading}</h1></CardTitle>
+            <CardDescription>{message}</CardDescription></CardHeader><CardFooter>
+            <Button asChild><Link href="/">検索ページに戻る</Link></Button></CardFooter>
           </Card>
         </main>
         <footer className="site-footer"><span>信州大学シラバス検索 · 非公式</span></footer>
