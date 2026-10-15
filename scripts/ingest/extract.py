@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import unicodedata
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from .common import PARSER_VERSION, compact_json, normalize_text, sha256_bytes, stable_id, utc_now
 from .normalize import classify_modalities, detect_slots, has_japanese, search_fields
@@ -54,7 +56,9 @@ def extract_pdf(pdf_path: Path, timeout: int = 60) -> tuple[list[str], list[str]
     while pages and not pages[-1].strip():
         pages.pop()
     if not pages:
-        raise RuntimeError("pdftotext returned no text")
+        from .ocr import ocr_pdf
+        pages = ocr_pdf(pdf_path)
+        warnings.append("text extracted using Tesseract OCR; visual review required")
     return pages, warnings
 
 
@@ -130,6 +134,29 @@ def _clean_teacher(primary: str, secondary: str) -> str:
     return " ".join(pieces)
 
 
+def _medical_header(header: str, source: dict[str, Any]) -> dict[str, str]:
+    """The medicine table omits its code; accept only matching public index/file codes."""
+    if source.get("department") != "m" or "担当教員、教員連絡先内線" not in header:
+        return {}
+    filename_code = Path(urlsplit(str(source["url"])).path).stem
+    codes = set(source.get("anchor_codes", []))
+    code = filename_code if re.fullmatch(r"M[0-9]{5}", filename_code) and codes == {filename_code} else ""
+    title_zone = header.split("担当教員、教員連絡先内線", 1)[0]
+    title = ""
+    for line in title_zone.splitlines():
+        if "開講年度" in line:
+            continue
+        value = line.split("題目", 1)[0].replace("科目名", "").strip()
+        if value:
+            title = re.sub(r"\s+", " ", value)
+            break
+    teacher_match = re.search(r"担当教員、教員連絡先内線[^\S\n]*([^\n]*)", header)
+    teacher = teacher_match.group(1).strip() if teacher_match else ""
+    teacher = re.split(r"内線[:：]?", teacher)[0].strip()
+    teacher = re.sub(r"\s+[0-9]{3,5}$", "", teacher).strip()
+    return {"registration_code": code, "title": title, "teacher": teacher}
+
+
 def parse_course(pages: list[str], *, source: dict[str, Any], source_sha256: str,
                  aliases: dict[str, dict[str, str]], fetched_at: str | None = None) -> dict[str, Any]:
     header = _preamble(pages)
@@ -140,6 +167,13 @@ def parse_course(pages: list[str], *, source: dict[str, Any], source_sha256: str
     year_match = re.search(r"(?<!\d)(20\d{2})(?!\d)", unicodedata.normalize("NFKC", year_text))
     year = int(year_match.group(1)) if year_match else 0
     title = _extract_title(fields, header)
+    medical = _medical_header(header, source)
+    code_from_index = not code and bool(medical.get("registration_code"))
+    if code_from_index:
+        code = medical["registration_code"]
+        warnings.append("registration code supplied by matching public index and PDF filename")
+    if medical.get("title"):
+        title = medical["title"]
     if not code:
         warnings.append("registration code not found in PDF header")
     if not year:
@@ -147,7 +181,7 @@ def parse_course(pages: list[str], *, source: dict[str, Any], source_sha256: str
     if not title:
         warnings.append("course title not found in PDF header")
 
-    teacher_primary = _choose(fields["teacher_primary"])
+    teacher_primary = medical.get("teacher") or _choose(fields["teacher_primary"])
     teacher_sub = _choose(fields["teacher_sub"])
     teacher_text = _clean_teacher(teacher_primary, teacher_sub)
     if teacher_primary and teacher_sub:
@@ -210,6 +244,7 @@ def parse_course(pages: list[str], *, source: dict[str, Any], source_sha256: str
     course_id = stable_id("course", natural)
     source_id = str(source.get("id") or stable_id("source", str(source["url"])))
     metadata = {
+        "registration_code_source": "public_index_and_filename" if code_from_index else "pdf",
         "teacher_primary": teacher_primary,
         "teacher_sub": teacher_sub,
         "schedule": schedule_text,
@@ -255,8 +290,36 @@ def parse_course(pages: list[str], *, source: dict[str, Any], source_sha256: str
 
 def extract_file(pdf_path: Path, *, source: dict[str, Any], source_sha256: str,
                  aliases: dict[str, dict[str, str]], fetched_at: str | None = None) -> tuple[dict[str, Any], list[str]]:
+    corrections_path = Path(__file__).resolve().parents[2] / "config/pdf-corrections.json"
+    corrections = json.loads(corrections_path.read_text(encoding="utf-8")) if corrections_path.exists() else {}
+    correction = corrections.get(source["url"], {})
+    if correction and correction["sha256"] != source_sha256:
+        raise ValueError("reviewed PDF changed; correction requires a new visual review")
     pages, warnings = extract_pdf(pdf_path)
+    if correction.get("reviewed_text"):
+        pages = (corrections_path.parent / correction["reviewed_text"]).read_text(encoding="utf-8").split("\f")
+        warnings = ["OCR text visually reviewed and corrected against the original PDF"]
     course = parse_course(pages, source=source, source_sha256=source_sha256,
                           aliases=aliases, fetched_at=fetched_at)
+    if correction:
+        course["raw_metadata"]["review_reason"] = correction["reason"]
+        if correction.get("reviewed_text"):
+            course["raw_metadata"]["extraction_method"] = "tesseract_ocr_visually_reviewed"
+        if correction.get("registration_code"):
+            if course["registration_code"] != correction["pdf_header_code"]:
+                raise ValueError("reviewed registration code does not match parsed PDF header")
+            code = correction["registration_code"]
+            course["raw_metadata"].update({"pdf_header_registration_code": course["registration_code"],
+                                          "registration_code_source": correction.get("registration_code_source", "reviewed_pdf_enrollment_instruction")})
+            course["registration_code"] = code
+            course["id"] = stable_id("course", f"{course['year']}:{course['department']}:{code}:{course['variant_key']}")
+            course.update(search_fields(title=course["title"], teacher=course["teacher_text"],
+                                        room=course["room_text"], code=code, pages=pages, aliases=aliases))
+            if correction.get("registration_code_source") == "user_approved_related_course_match":
+                course["raw_metadata"]["registration_code_evidence_url"] = correction["evidence_url"]
+                warnings.append("registration code supplied by user-approved related course match; original PDF code is blank")
+            else:
+                warnings.append("registration code follows explicit enrollment instruction in PDF; header code preserved")
+        course["content_revision"] = sha256_bytes((course["content_revision"] + compact_json(correction) + "\n".join(pages)).encode("utf-8"))
     course["parse_warnings"] = list(dict.fromkeys([*warnings, *course["parse_warnings"]]))
     return course, warnings

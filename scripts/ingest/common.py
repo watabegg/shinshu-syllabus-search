@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 
 SOURCE_HOST = "lms.ealps.shinshu-u.ac.jp"
 SOURCE_ROOT = f"https://{SOURCE_HOST}/syllabus/"
-PARSER_VERSION = "syllabus-ingest-1"
+PARSER_VERSION = "syllabus-ingest-3"
 MAX_PDF_BYTES = 10 * 1024 * 1024
 REQUEST_TIMEOUT = 30
 

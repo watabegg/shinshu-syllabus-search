@@ -24,7 +24,7 @@ from scripts.ingest.common import (  # noqa: E402
     sha256_bytes,
     stable_id,
 )
-from scripts.ingest.extract import extract_pdf  # noqa: E402
+from scripts.ingest.extract import extract_file  # noqa: E402
 from scripts.ingest.main import _match_samples  # noqa: E402
 
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -213,7 +213,7 @@ def validate(manifest_path: Path, samples_dir: Path, strict: bool) -> tuple[list
         sampled.add(source["id"])
         if source.get("status") != "ready":
             errors.append(f"sample {path.name} maps to non-ready source {source['id']}")
-        course = courses_by_source.get(source["id"])
+        course = courses_by_source.get(source["id"]) or courses_by_source.get(source.get("duplicate_of"))
         if course is None:
             errors.append(f"sample {path.name} has no valid course record")
             continue
@@ -226,10 +226,12 @@ def validate(manifest_path: Path, samples_dir: Path, strict: bool) -> tuple[list
             digest = sha256_bytes(payload)
             if digest != course.get("source_sha256"):
                 errors.append(f"sample {path.name} SHA-256 differs from the accepted course record")
-            extracted_pages, _ = extract_pdf(path)
+            extracted, _ = extract_file(path, source=source, source_sha256=digest,
+                                        aliases={"teachers": {}, "rooms": {}}, fetched_at=course["fetched_at"])
+            extracted_pages = [page["raw_text"] for page in extracted["pages"]]
             stored_pages = [page.get("raw_text") for page in course.get("pages", [])]
             if extracted_pages != stored_pages:
-                errors.append(f"sample {path.name} Poppler text differs from stored course pages")
+                errors.append(f"sample {path.name} extracted/reviewed text differs from stored course pages")
             sample_pages += len(extracted_pages)
             sample_chars += sum(len(page) for page in extracted_pages)
         except (OSError, RuntimeError, ValueError) as exc:
@@ -239,6 +241,14 @@ def validate(manifest_path: Path, samples_dir: Path, strict: bool) -> tuple[list
         errors.append(f"strict validation found no PDF samples in {samples_dir}")
     if strict and len(sampled) != len(sample_files):
         errors.append(f"strict validation matched {len(sampled)} of {len(sample_files)} sample PDFs")
+    for source in sources:
+        target = source.get("duplicate_of")
+        if not target:
+            continue
+        canonical = courses_by_source.get(target)
+        if (source.get("status") != "ready" or source["id"] in courses_by_source
+                or not canonical or source.get("sha256") != canonical.get("source_sha256")):
+            errors.append(f"source {source['id']} has an invalid duplicate_of reference")
     sample_errors = manifest.get("sample_errors", [])
     if strict and sample_errors:
         errors.append(f"manifest records {len(sample_errors)} offline sample mapping error(s)")

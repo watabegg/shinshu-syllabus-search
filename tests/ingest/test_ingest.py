@@ -347,5 +347,134 @@ class ExportTests(unittest.TestCase):
             build_import_sql([], manifest)
 
 
+class RetryExtractionTests(unittest.TestCase):
+    def test_medical_code_requires_agreement_between_index_and_filename(self):
+        source = make_source("m", "M03020")
+        text = """開講年度：2026
+                腎・泌尿器
+科目名                         題目（副題） 腎・泌尿器
+                Nephro-urology
+担当教員、教員連絡先内線  山田 太郎                 5299
+学年、講義期間、曜日・時限 前期 月曜・１時限
+単位数、講義室 ３単位 医学科第２臨床講堂
+信大コンピテンシー 該当
+授業の達成目標 内容
+"""
+        course = parse_course([text], source=source, source_sha256="a" * 64, aliases=ALIASES)
+        self.assertEqual(course["registration_code"], "M03020")
+        self.assertEqual(course["title"], "腎・泌尿器")
+        self.assertEqual(course["teacher_text"], "山田 太郎")
+        self.assertEqual(course["raw_metadata"]["registration_code_source"], "public_index_and_filename")
+        self.assertEqual(course["room_text"], "医学科第2臨床講堂")
+        source["anchor_codes"] = ["M99999"]
+        mismatch = parse_course([text], source=source, source_sha256="a" * 64, aliases=ALIASES)
+        self.assertEqual(mismatch["registration_code"], "")
+        existing = parse_course(["登録コード M99999\n" + text], source=source, source_sha256="a" * 64, aliases=ALIASES)
+        self.assertEqual(existing["registration_code"], "M99999")
+
+    def test_retry_only_failed_preserves_ready_and_conflict_sources(self):
+        good = make_source()
+        failed = make_source(code="FS000002")
+        failed.update(status="failed", last_attempt_status="failed")
+        conflict = make_source(code="FS000003")
+        conflict.update(status="conflict", last_attempt_status="conflict")
+        prior = make_course(good)
+        recovered = make_course(failed)
+        recovered["registration_code"] = "FS000002"
+        recovered["id"] = stable_id("course", "2026:fs:FS000002:")
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)
+            write_output(output, [prior], [good, failed, conflict])
+            with mock.patch("scripts.ingest.main.discover_sources") as discovery, \
+                 mock.patch("scripts.ingest.main._get_pdf", return_value=(b"%PDF-test", "b" * 64, {"fetched_at": "2026-10-16T00:00:00Z"})) as fetch, \
+                 mock.patch("scripts.ingest.main.extract_file", return_value=(recovered, [])):
+                result = _run_ingestion(output, delay=0, limit=None, offline_samples=None, refresh=True,
+                                        aliases_path=ROOT / "config/aliases.json", retry_failed=True)
+            discovery.assert_not_called()
+            self.assertEqual(fetch.call_count, 1)
+            self.assertEqual(fetch.call_args.args[0]["id"], failed["id"])
+            self.assertEqual(result["counts"]["ready"], 2)
+            self.assertEqual(result["counts"]["conflict"], 1)
+            self.assertEqual(result["counts"]["failed"], 0)
+            self.assertIn(prior, course_from_jsonl(output / "courses.jsonl"))
+
+
+class ResolutionTests(unittest.TestCase):
+    def test_reviewed_code_preserves_header_and_rejects_changed_pdf(self):
+        from scripts.ingest.extract import extract_file
+        config = json.loads((ROOT / 'config/pdf-corrections.json').read_text())
+        source = make_source('hs', 'HS901100')
+        correction = config[source['url']]
+        text = HEADER.replace('FS000001', 'HS900100')
+        with mock.patch('scripts.ingest.extract.extract_pdf', return_value=([text], [])):
+            course, _ = extract_file(Path('unused.pdf'), source=source,
+                                     source_sha256=correction['sha256'], aliases=ALIASES)
+            self.assertEqual(course['registration_code'], 'HS901100')
+            self.assertEqual(course['raw_metadata']['pdf_header_registration_code'], 'HS900100')
+            self.assertIn('hs901100', course['code_search'])
+            with self.assertRaisesRegex(ValueError, 'reviewed PDF changed'):
+                extract_file(Path('unused.pdf'), source=source, source_sha256='a' * 64, aliases=ALIASES)
+
+    def test_image_pdf_invokes_ocr_only_when_no_embedded_text(self):
+        from scripts.ingest.extract import extract_pdf
+        result = mock.Mock(returncode=0, stdout=b'\x0c', stderr=b'')
+        with mock.patch('scripts.ingest.extract.subprocess.run', return_value=result), \
+             mock.patch('scripts.ingest.ocr.ocr_pdf', return_value=[HEADER]) as ocr:
+            pages, warnings = extract_pdf(Path('image.pdf'))
+            self.assertEqual(pages, [HEADER])
+            self.assertIn('OCR', warnings[0])
+            ocr.assert_called_once()
+            result.stdout = HEADER.encode()
+            extract_pdf(Path('text.pdf'))
+            self.assertEqual(ocr.call_count, 1)
+
+    def test_identical_duplicate_resolves_but_different_bytes_conflict(self):
+        for digest, expected in [('a' * 64, 'ready'), ('b' * 64, 'conflict')]:
+            with self.subTest(digest=digest), tempfile.TemporaryDirectory() as directory:
+                output = Path(directory)
+                canonical = make_source()
+                duplicate = make_source(suffix='-copy')
+                duplicate.update(status='conflict', last_attempt_status='conflict')
+                original = make_course(canonical)
+                candidate = make_course(duplicate)
+                candidate['source_sha256'] = digest
+                write_output(output, [original], [canonical, duplicate])
+                with mock.patch('scripts.ingest.main.discover_sources') as discovery, \
+                     mock.patch('scripts.ingest.main._get_pdf', return_value=(b'%PDF-test', digest, {})), \
+                     mock.patch('scripts.ingest.main.extract_file', return_value=(candidate, [])):
+                    manifest = _run_ingestion(output, delay=0, limit=None, offline_samples=None,
+                                              refresh=False, aliases_path=output / 'aliases.json', retry_unresolved=True)
+                discovery.assert_not_called()
+                state = next(s for s in manifest['sources'] if s['id'] == duplicate['id'])
+                self.assertEqual(state['status'], expected)
+                self.assertEqual(manifest['counts']['courses'], 1)
+                if expected == 'ready':
+                    self.assertEqual(state['duplicate_of'], canonical['id'])
+                    errors, _ = validate_output(output / 'manifest.json', output / 'samples', strict=False)
+                    self.assertEqual(errors, [])
+                    state['sha256'] = 'c' * 64
+                    (output / 'manifest.json').write_text(json.dumps(manifest))
+                    errors, _ = validate_output(output / 'manifest.json', output / 'samples', strict=False)
+                    self.assertTrue(any('duplicate_of' in error for error in errors))
+
+
+    def test_user_approved_blank_code_retains_distinct_department_identity(self):
+        from scripts.ingest.extract import extract_file
+        config = json.loads((ROOT / 'config/pdf-corrections.json').read_text())
+        url, correction = next((url, value) for url, value in config.items()
+                               if value.get('registration_code_source') == 'user_approved_related_course_match')
+        source = make_source('m')
+        source.update(url=url, id=stable_id('source', url))
+        with mock.patch('scripts.ingest.extract.extract_pdf', return_value=([HEADER.replace('FS000001', '')], [])):
+            course, _ = extract_file(Path('unused.pdf'), source=source,
+                                     source_sha256=correction['sha256'], aliases=ALIASES)
+        self.assertEqual(course['registration_code'], 'Q3002902')
+        self.assertEqual(course['raw_metadata']['pdf_header_registration_code'], '')
+        self.assertEqual(course['raw_metadata']['registration_code_source'], 'user_approved_related_course_match')
+        self.assertEqual(course['id'], stable_id('course', '2026:m:Q3002902:'))
+        self.assertNotEqual(course['id'], stable_id('course', '2026:g:Q3002902:'))
+        self.assertFalse(any('explicit enrollment instruction' in w for w in course['parse_warnings']))
+
+
 if __name__ == "__main__":
     unittest.main()

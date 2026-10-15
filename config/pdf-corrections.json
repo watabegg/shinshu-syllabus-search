@@ -1,0 +1,21 @@
+{
+  "https://lms.ealps.shinshu-u.ac.jp/syllabus/hs/HS901100.pdf": {
+    "sha256": "34d8b68b3262f1c6e9e25c061ed2f38a6fba99cd5550eac06f54a8aece8ee05b",
+    "registration_code": "HS901100",
+    "pdf_header_code": "HS900100",
+    "reason": "PDF対象学生欄に、2026年度入学の総合医理工学研究科の学生はHS901100で登録する旨の明記あり。公開一覧とPDFファイル名もHS901100。"
+  },
+  "https://lms.ealps.shinshu-u.ac.jp/syllabus/l/L2241700.pdf": {
+    "sha256": "7702c2dfb8a77b33fc4f3fc868e4dce021ab922044f6a4d0a2e8806de2179114",
+    "reviewed_text": "reviewed-text/L2241700.txt",
+    "reason": "Tesseract 5.5.0 jpn+eng OCR後、原本の1ページ全体と照合して誤認識・脱落を補正。"
+  },
+  "https://lms.ealps.shinshu-u.ac.jp/syllabus/m/2026__教育学概論【理作20M以降】（高年次生向け）_rXRibF9idWRhaW1va3XOAAV6XAA.pdf": {
+    "sha256": "bda75dfc53279773aa9462317f5e43b215ae510296dd00aef48a504df1409a32",
+    "registration_code": "Q3002902",
+    "pdf_header_code": "",
+    "registration_code_source": "user_approved_related_course_match",
+    "reason": "原本の登録コードは空欄。共通教育Q3002902と担当教員（荒井英治郎）、前期水曜1限、共通教育12講義室が一致することから、ユーザー承認により補完。医学部の高年次生向け授業として別レコードを維持。",
+    "evidence_url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/g/Q3002902.pdf"
+  }
+}

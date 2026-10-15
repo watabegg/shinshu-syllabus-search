@@ -58,3 +58,9 @@ Cloudflare D1 の無料枠には1日あたり10万回の書き込み上限、1�
 ローカルD1へ21件を反映し、実APIにて教員名「大迫祐太朗」や教室「工Ｗ２－１０１」の検索照合に成功しています。また、18件のPythonテスト、6件のTSテスト、型チェック、build、dry-runを通過し、差分チェックの指摘2件（一覧消失時の保持・不一致、0件表示）も修正済みです。ブラウザ詳細QAも15件通過し、検証用データの削除を確認済みです（[検証レポート](qa/2026-10-15/report.html)）。
 
 SQLファイル投入時の障害注入により先行UPDATEのロールバックをローカルD1上で確認済みですが、リモート環境でのトランザクション保証は未検証です。そのためリモート更新は新規検証DBで確認後に切り替える方針を暫定推奨（運用未実装）としています。なお、本番DB作成、workers.dev設定、本番デプロイは未実施です。
+
+失敗分のみを再取得・再抽出する場合は `python3 scripts/ingest/main.py run --output data --retry-failed --refresh --delay 1` を実行します。保存済みマニフェストを使い、正常取得分と衝突分は再処理しません。
+
+未解決の抽出失敗・衝突だけを再処理する場合は `python3 scripts/ingest/main.py run --output data --retry-unresolved`。同一の自然キーかつPDFのSHA-256が一致する別URLは、manifestの `duplicate_of` で正規の出典を参照し、授業を二重登録しない。本文に別の登録コードを使う指示がある例外は `config/pdf-corrections.json` に原本ハッシュと判断根拠を残す。ハッシュが変わった場合は自動適用せず再確認する。
+
+文字のないPDFはPopplerで画像化し、Tesseract（`jpn`・`eng`）でOCRする。標準PATHまたは `TESSERACT` で実行ファイルを指定する。この環境では `data/tools/ocr/root/usr` にUbuntuパッケージをローカル展開した。OCR原文は元PDFと同じ場所の `.ocr.txt`、原本照合済みの補正文は `config/reviewed-text/` に保存する。PDF原本は変更しない。

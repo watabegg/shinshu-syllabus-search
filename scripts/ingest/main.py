@@ -44,7 +44,7 @@ def _source_state(source: dict[str, Any], previous: dict[str, Any] | None = None
     result = dict(source)
     result["id"] = str(source.get("id") or stable_id("source", str(source["url"])))
     if previous:
-        for key in ("status", "last_attempt_status", "sha256", "fetched_at", "last_attempt_at", "last_error", "etag", "last_modified"):
+        for key in ("status", "last_attempt_status", "sha256", "fetched_at", "last_attempt_at", "last_error", "etag", "last_modified", "duplicate_of"):
             if previous.get(key) is not None:
                 result[key] = previous[key]
     result.setdefault("status", "pending")
@@ -72,18 +72,19 @@ def _merge_discovery(sources: list[dict[str, Any]], indexes: list[dict[str, Any]
         department = str(old.get("department", ""))
         index = indexes_by_id.get(department)
         prior_course = courses_by_source.get(old.get("id"))
+        prior_available = prior_course is not None or old.get("duplicate_of") in courses_by_source
         if index and index.get("status") == "failed":
-            old["status"] = "ready" if prior_course else "failed"
+            old["status"] = "ready" if prior_available else "failed"
             old["last_attempt_status"] = "failed"
             old["last_error"] = f"department index unavailable: {index.get('error', 'unknown error')}"
-        elif prior_course:
+        elif prior_available:
             # Keep a previously accepted course usable when a successful index
             # refresh no longer lists its PDF. Its current publication status
             # remains ready; the separate attempt status records discovery loss.
             old["status"] = "ready"
             old["last_attempt_status"] = "missing"
             old["last_error"] = "PDF URL was absent from the successfully fetched department index"
-            warnings = prior_course.setdefault("parse_warnings", [])
+            warnings = prior_course.setdefault("parse_warnings", []) if prior_course else []
             warning = "source URL is absent from the latest index"
             if warning not in warnings:
                 warnings.append(warning)
@@ -281,13 +282,16 @@ def _validate_natural_identity(course: dict[str, Any], current: dict[str, dict[s
 
 def _run_ingestion(output: Path, *, delay: float, limit: int | None,
                    offline_samples: Path | None, refresh: bool,
-                   aliases_path: Path) -> dict[str, Any]:
+                   aliases_path: Path, retry_failed: bool = False, retry_unresolved: bool = False) -> dict[str, Any]:
+    retry_failed = retry_failed or retry_unresolved
     started_at = utc_now()
     run_id = f"ingest-{uuid.uuid4().hex}"
     old_manifest = _read_manifest(output / "manifest.json")
     old_courses = course_from_jsonl(output / "courses.jsonl")
     client = PublicHttpClient(delay=delay)
-    if offline_samples is not None and old_manifest and old_manifest.get("indexes") and not refresh:
+    if retry_failed and (not old_manifest or offline_samples is not None):
+        raise ValueError("--retry-failed requires an existing manifest and cannot use --offline-samples")
+    if retry_failed or (offline_samples is not None and old_manifest and old_manifest.get("indexes") and not refresh):
         current_discovered = [dict(source) for source in old_manifest.get("sources", []) if source.get("status") != "missing"]
         indexes = [dict(item) for item in old_manifest.get("indexes", [])]
         discovered_count = int((old_manifest.get("run") or {}).get(
@@ -306,7 +310,7 @@ def _run_ingestion(output: Path, *, delay: float, limit: int | None,
     for source in old_manifest.get("sources", []) if old_manifest else []:
         if source.get("id") not in current_sources:
             prior = dict(source)
-            prior["status"] = "ready" if any(course.get("source_id") == prior.get("id") for course in old_courses) else "missing"
+            prior["status"] = "ready" if any(course.get("source_id") in {prior.get("id"), prior.get("duplicate_of")} for course in old_courses) else "missing"
             prior["last_attempt_status"] = "missing"
             current_sources[prior["id"]] = prior
     sources = list(current_sources.values())
@@ -321,7 +325,10 @@ def _run_ingestion(output: Path, *, delay: float, limit: int | None,
         for _, sample_path in selected:
             _copy_atomic(sample_path, samples_out / sample_path.name)
     else:
-        chosen = current_discovered if limit is None else current_discovered[:max(0, limit)]
+        retry_statuses = {"failed", "conflict"} if retry_unresolved else {"failed"}
+        candidates = ([source for source in current_discovered if source.get("last_attempt_status") in retry_statuses]
+                      if retry_failed else current_discovered)
+        chosen = candidates if limit is None else candidates[:max(0, limit)]
         selected = [(source, None) for source in chosen]
 
     aliases = load_aliases(aliases_path)
@@ -335,6 +342,7 @@ def _run_ingestion(output: Path, *, delay: float, limit: int | None,
         source = sources_by_id.get(discovered_source["id"], discovered_source)
         source["last_attempt_at"] = utc_now()
         source["last_error"] = None
+        source.pop("duplicate_of", None)
         print(f"[{index}/{len(selected)}] {source['url']}", flush=True)
         payload: bytes | None = None
         try:
@@ -345,9 +353,18 @@ def _run_ingestion(output: Path, *, delay: float, limit: int | None,
                                     aliases=aliases, fetched_at=metadata.get("fetched_at"))
             _valid_course(course)
             validate_course_export_limits(course)
-            _validate_natural_identity(course, current_new, courses_by_source)
-            current_new[source["id"]] = course
-            courses_by_source[source["id"]] = course
+            duplicate = next((other for other in courses_by_source.values()
+                              if other["source_id"] != source["id"]
+                              and natural_key(other) == natural_key(course)
+                              and other["source_sha256"] == file_hash), None)
+            if duplicate:
+                source["duplicate_of"] = duplicate["source_id"]
+                courses_by_source.pop(source["id"], None)
+                print(f"  duplicate PDF of {duplicate['source_url']}", flush=True)
+            else:
+                _validate_natural_identity(course, current_new, courses_by_source)
+                current_new[source["id"]] = course
+                courses_by_source[source["id"]] = course
             source.update({"status": "ready", "last_attempt_status": "ready", "sha256": file_hash,
                            "fetched_at": metadata.get("fetched_at"), "etag": metadata.get("etag"),
                            "last_modified": metadata.get("last_modified"), "last_error": None,
@@ -368,10 +385,18 @@ def _run_ingestion(output: Path, *, delay: float, limit: int | None,
             else:
                 print(f"  conflict: {message}", file=sys.stderr, flush=True)
 
+    # Recheck aliases after canonical PDFs may have been refreshed in this run.
+    for source in sources:
+        if source.get("duplicate_of"):
+            canonical = courses_by_source.get(source["duplicate_of"])
+            if not canonical or canonical["source_sha256"] != source.get("sha256"):
+                source.pop("duplicate_of")
+                source.update(status="conflict", last_attempt_status="conflict",
+                              last_error="duplicate PDF no longer matches canonical source; retry required")
     courses = list(courses_by_source.values())
     courses.sort(key=lambda course: (course["year"], course["department"], course["registration_code"], course.get("variant_key", ""), course["source_url"]))
     manifest = _write_run(output, sources, indexes, courses, run_id=run_id,
-                          mode="offline-samples" if offline_samples is not None else "run",
+                          mode="retry-unresolved" if retry_unresolved else "retry-failed" if retry_failed else ("offline-samples" if offline_samples is not None else "run"),
                           started_at=started_at, discovered_count=discovered_count, sample_errors=sample_errors)
     return manifest
 
@@ -392,6 +417,8 @@ def _parser() -> argparse.ArgumentParser:
             command.add_argument("--delay", type=float, default=1.0, help="minimum seconds between HTTP requests (default: 1)")
         if name == "run":
             command.add_argument("--offline-samples", type=Path, help="use local *.pdf samples instead of downloading matching PDFs")
+            command.add_argument("--retry-unresolved", action="store_true", help="retry failed and conflicting sources from the saved manifest")
+            command.add_argument("--retry-failed", action="store_true", help="retry only failed sources in the saved manifest; preserve ready and conflict rows")
             command.add_argument("--refresh", action="store_true", help="refresh index pages and bypass the PDF cache")
             command.add_argument("--aliases", type=Path, default=DEFAULT_ALIASES, help="teacher/room alias JSON")
         if name == "export":
@@ -411,7 +438,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "run":
             manifest = _run_ingestion(args.output, delay=args.delay, limit=args.limit,
                                       offline_samples=args.offline_samples, refresh=args.refresh,
-                                      aliases_path=args.aliases)
+                                      aliases_path=args.aliases, retry_failed=args.retry_failed, retry_unresolved=args.retry_unresolved)
             print(json.dumps(manifest["counts"], ensure_ascii=False, sort_keys=True))
             print(f"Wrote {args.output / 'courses.jsonl'} and {args.output / 'manifest.json'}")
             return 0 if manifest["counts"]["failed"] == 0 and manifest["counts"]["conflict"] == 0 and not manifest.get("sample_errors") else 1
