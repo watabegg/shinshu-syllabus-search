@@ -1,0 +1,13 @@
+{
+  "classification": "harness setup probe; not a QA case",
+  "attempted_case": "QA-SEARCH-001",
+  "outcome": "discarded before screenshot or browser assertion of product behavior",
+  "cause": "temporary helper queried `get text body`; this returned no text because the CLI selector was invalid for the helper. Replaced with wait --text plus get text main.",
+  "original_result": {
+    "id": "QA-SEARCH-001",
+    "status": "FAIL",
+    "evidence": [],
+    "fail_attribution": "diff",
+    "attribution_evidence": "expected visible text missing: ['シラバスを検索', '検索条件', '検索結果']; URL=http://127.0.0.1:5173/"
+  }
+}

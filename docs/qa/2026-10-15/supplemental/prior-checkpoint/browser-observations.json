@@ -1,0 +1,246 @@
+[
+  {
+    "case_id": "QA-SEARCH-001",
+    "action": "anonymous page and cookies",
+    "observed": {
+      "page_title": "信州大学シラバス検索（非公式）",
+      "cookies": "",
+      "cards": 20,
+      "coverage_visible": true
+    },
+    "url": "http://127.0.0.1:5173/",
+    "observed_at": "2026-10-15T13:43:40.248+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-001",
+    "action": "public search readiness",
+    "observed": {
+      "cards": 20,
+      "coverage": "21 / 6,461",
+      "authentication": "not requested"
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:44:05.596+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-002",
+    "action": "single-field search",
+    "observed": {
+      "field": "q",
+      "value": "コロイド",
+      "expected_visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:44:56.185+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-003",
+    "action": "single-field search",
+    "observed": {
+      "field": "title",
+      "value": "コロイド",
+      "expected_visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:45:46.781+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-004",
+    "action": "single-field search",
+    "observed": {
+      "field": "teacher",
+      "value": "大　迫 祐太朗",
+      "expected_visible": "ASL00500",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=%E5%A4%A7%E3%80%80%E8%BF%AB%20%E7%A5%90%E5%A4%AA%E6%9C%97&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:46:37.465+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-005",
+    "action": "single-field search",
+    "observed": {
+      "field": "room",
+      "value": "工Ｗ２－１０１",
+      "expected_visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=%E5%B7%A5%EF%BC%B7%EF%BC%92%EF%BC%8D%EF%BC%91%EF%BC%90%EF%BC%91&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:47:28.094+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "independent academic facet",
+    "observed": {
+      "field": "year",
+      "value": "2025",
+      "visible": "QA 時間割スロット検証",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2025&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:48:18.875+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "independent academic facet",
+    "observed": {
+      "field": "department",
+      "value": "t",
+      "visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=t&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:48:44.343+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "independent academic facet",
+    "observed": {
+      "field": "term",
+      "value": "後期",
+      "visible": "科学技術政策特論",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=%E5%BE%8C%E6%9C%9F&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:49:09.918+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-007",
+    "action": "independent schedule facet",
+    "observed": {
+      "field": "day",
+      "value": "1",
+      "expected_visible": [
+        "月曜日",
+        "T1AB3300"
+      ],
+      "card_count": 18
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=1&period=&modality=",
+    "observed_at": "2026-10-15T13:50:00.847+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-007",
+    "action": "independent schedule facet",
+    "observed": {
+      "field": "period",
+      "value": "5",
+      "expected_visible": [
+        "HM218100",
+        "HB800100"
+      ],
+      "card_count": 2
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=5&modality=",
+    "observed_at": "2026-10-15T13:50:26.530+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-008",
+    "action": "same-slot schedule condition",
+    "observed": {
+      "cross_pair": "Monday 1 + Friday 2 are stored; Monday+2 returns 0",
+      "valid_pair": "Monday+1 returns QA row",
+      "course_id": "qa-browser-slot-20261015"
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=QA%20%E6%99%82%E9%96%93%E5%89%B2&teacher=&room=&year=2025&department=&term=%E5%BE%8C%E6%9C%9F&day=1&period=1&modality=",
+    "observed_at": "2026-10-15T13:51:42.296+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-009",
+    "action": "modality filter",
+    "observed": {
+      "filter": "in_person",
+      "expected_codes": [
+        "FSE15500",
+        "HB800100"
+      ],
+      "mixed_labels_visible": true
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=in_person",
+    "observed_at": "2026-10-15T13:52:32.879+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-010",
+    "action": "combined AND filters",
+    "observed": {
+      "fields": [
+        "title",
+        "teacher",
+        "room",
+        "year",
+        "department",
+        "term",
+        "day",
+        "period",
+        "modality"
+      ],
+      "code": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=%E9%85%92%E4%BA%95%20%E4%BF%8A%E9%83%8E&room=%E5%B7%A5%EF%BC%B7%EF%BC%92%EF%BC%8D%EF%BC%91%EF%BC%90%EF%BC%91&year=2026&department=t&term=%E5%89%8D%E6%9C%9F&day=1&period=1&modality=unknown",
+    "observed_at": "2026-10-15T13:53:24.410+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-011",
+    "action": "assertion",
+    "observed": "expected visible text missing: ['条件に合う講義が見つかりませんでした']; URL=http://127.0.0.1:5173/?q=AND%20OR%20NOT&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "url": "http://127.0.0.1:5173/?q=AND%20OR%20NOT&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:54:15.325+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-011",
+    "action": "literal FTS operator query actual result",
+    "observed": {
+      "query": "AND OR NOT",
+      "card_count": 3,
+      "registration_codes": [
+        "HM218100",
+        "HB800100",
+        "HS900100"
+      ],
+      "fts_or_sql_error_visible": false
+    },
+    "url": "http://127.0.0.1:5173/?q=AND%20OR%20NOT&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:56:20.081+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-011",
+    "action": "independent local content match check",
+    "observed": {
+      "method": "SQLite boolean-only scan of title_search, teacher_search, body_search; no source text printed",
+      "courses": {
+        "HB800100": {
+          "and_in_body": true,
+          "or_in_body": true,
+          "not_in_body": true
+        },
+        "HM218100": {
+          "and_in_body": true,
+          "or_in_body": true,
+          "not_in_body": true
+        },
+        "HS900100": {
+          "and_in_body": true,
+          "or_in_body": true,
+          "not_in_body": true
+        }
+      }
+    },
+    "url": "local D1 SQLite read-only query",
+    "observed_at": "2026-10-15T13:56:45.332+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-011",
+    "action": "unique literal query supplemental check",
+    "observed": {
+      "query": "AND OR NOT ZXQ7910",
+      "card_count": 0,
+      "normal_empty_state": true,
+      "fts_or_sql_error_visible": false
+    },
+    "url": "http://127.0.0.1:5173/?q=AND%20OR%20NOT%20ZXQ7910&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T13:56:45.331+00:00"
+  }
+]

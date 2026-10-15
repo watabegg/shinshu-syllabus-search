@@ -1,0 +1,76 @@
+{
+  "preserved_at": "2026-10-15T14:09:26+00:00",
+  "note": "Initial detail workflow reached the course detail and rendered the official source link, but the temporary browser helper called `get attr` with arguments reversed. Browser CLI syntax is `get attr <selector> <name>`. DOM inspection confirmed the a.source-link element and university PDF host were present; this was a harness command-order issue, not an app failure.",
+  "browser_command_log": "supplemental/browser-command-log.jsonl",
+  "initial_screenshot": "assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png",
+  "retry_history": [
+    {
+      "attempt": 1,
+      "outcome": "helper command failed",
+      "assertion": "get attr arguments reversed; corrected using documented selector-then-attribute order",
+      "timestamp": "2026-10-15T14:11:12+00:00"
+    },
+    {
+      "attempt": 2,
+      "outcome": "PDF tab opened but capture was blank while viewer loaded",
+      "assertion": "screenshot below 10 KB",
+      "observation": "waited 3 seconds and confirmed the PDF rendered visibly",
+      "timestamp": "2026-10-15T14:11:12+00:00"
+    },
+    {
+      "attempt": 3,
+      "outcome": "helper tab switch failed",
+      "assertion": "CLI requires t1/t2 stable ids; corrected parser to read bracketed stable ids",
+      "timestamp": "2026-10-15T14:11:12+00:00"
+    },
+    {
+      "attempt": 4,
+      "outcome": "PASS",
+      "observation": "official PDF viewer rendered; app tab restored and title filter remained on the list",
+      "timestamp": "2026-10-15T14:11:18+00:00"
+    }
+  ],
+  "intermediate_failed_result": {
+    "id": "QA-DETAIL-001",
+    "status": "FAIL",
+    "evidence": [
+      {
+        "slot": "given",
+        "path": "assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png",
+        "type": "screenshot",
+        "taken_at": "2026-10-15T14:10:01.921+00:00"
+      },
+      {
+        "slot": "when",
+        "path": "assets/screenshots/QA-DETAIL-001_when_course-detail.png",
+        "type": "screenshot",
+        "taken_at": "2026-10-15T14:10:02.650+00:00"
+      },
+      {
+        "slot": "when",
+        "path": "assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png",
+        "type": "screenshot",
+        "taken_at": "2026-10-15T14:10:05.860+00:00"
+      },
+      {
+        "slot": "supplemental",
+        "path": "supplemental/QA-DETAIL-001-first-attempt.json",
+        "type": "file",
+        "taken_at": "2026-10-15T14:11:18.275+00:00"
+      }
+    ],
+    "fail_attribution": "diff",
+    "attribution_evidence": "cannot return to the local course tab after PDF open",
+    "recovery_attempts": [
+      {
+        "strategy": "case-retry",
+        "operation": "QA-DETAIL-001: retry detail → official PDF → return workflow with documented attribute order, PDF render wait, and stable tab ids",
+        "result": "success",
+        "detail": "The one-page public PDF rendered, and the browser returned to the title-filtered course list. Earlier stops came from temporary helper argument order, capture timing, and tab-id parsing.",
+        "evidence": "supplemental/QA-DETAIL-001-first-attempt.json and assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png",
+        "timestamp": "2026-10-15T14:11:18+00:00"
+      }
+    ]
+  },
+  "final_outcome": "PASS after case retry; the UI and official PDF path worked, while the helper was corrected to documented stable tab IDs."
+}

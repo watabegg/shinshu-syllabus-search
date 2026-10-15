@@ -1,0 +1,77 @@
+{
+  "recorded_at": "2026-10-15T14:13:35+00:00",
+  "quality_gates": [
+    {
+      "id": "QG-01",
+      "status": "PASS",
+      "scope": "PDF import/normalization, schema, tests, typecheck, build, dry-run and atomicity",
+      "checks": {
+        "typescript_tests": {
+          "status": "PASS",
+          "passed": 6
+        },
+        "python_tests": {
+          "status": "PASS",
+          "passed": 18,
+          "log": "/tmp/syllabus-ingest-test-final.log"
+        },
+        "typecheck": "PASS",
+        "production_build": "PASS",
+        "dry_run": "PASS",
+        "playwright_smoke": {
+          "status": "PASS",
+          "passed": 1
+        },
+        "strict_import_validation": {
+          "status": "PASS",
+          "sampled_pdfs": 21,
+          "pages": 34,
+          "extracted_characters": 86130,
+          "errors": 0,
+          "parse_warnings": 14,
+          "ready_sources": 21,
+          "discovered_sources": 6461,
+          "unknown_modality": 18
+        },
+        "d1_atomicity_failure_injection": {
+          "status": "PASS",
+          "summary": "update plus missing-table failure in one SQL input rolled back to original state",
+          "logs": [
+            "/tmp/syllabus-d1-atomic-setup.log",
+            "/tmp/syllabus-d1-atomic-failure.log",
+            "/tmp/syllabus-d1-atomic-cleanup.log"
+          ]
+        },
+        "dry_run_log": "/tmp/syllabus-final-dry-run.log",
+        "strict_validation_summary": "/tmp/syllabus-strict-validation.json"
+      }
+    },
+    {
+      "id": "QG-02",
+      "status": "PASS",
+      "scope": "Production build served by local Worker at port 5174",
+      "observed": {
+        "html_status": 200,
+        "html_cache": "no-store",
+        "vary": "Accept, X-Inertia",
+        "hashed_js_status": 200,
+        "hashed_js_cache": "public, max-age=31536000, immutable",
+        "hashed_css_status": 200,
+        "hashed_css_cache": "public, max-age=31536000, immutable"
+      },
+      "evidence": "/tmp/syllabus-built-runtime-check.json"
+    }
+  ],
+  "coverage_limitations": {
+    "imported_courses": 21,
+    "discovered_pdf_urls": 6461,
+    "modality_unknown": 18,
+    "production_full_fetch_performed": false,
+    "note": "Browser QA and strict validation cover the locally imported 21-course sample only; 18 of those 21 have unknown modality, while some also contain explicit remote-mode evidence."
+  },
+  "react_doctor": {
+    "score": 71,
+    "warnings": 6,
+    "classification": "non-functional static warnings; no runtime errors reported"
+  }
+}

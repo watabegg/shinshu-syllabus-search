@@ -1,0 +1,412 @@
+{
+  "target": {
+    "repo": "shinshu-syllabus-search",
+    "pr": null,
+    "head_sha": "0a5b8ef3b737e96f06a1b37379e6553ec853e7e8",
+    "environment": {
+      "type": "local",
+      "url": "http://127.0.0.1:5173"
+    }
+  },
+  "surfaces": [
+    {
+      "id": "S1",
+      "name": "公開検索フォーム・条件検証・講義一覧",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S1.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S1.input-or-time-boundary",
+          "kind": "input-or-time-boundary"
+        },
+        {
+          "id": "S1.adjacent-regression",
+          "kind": "adjacent-regression"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-SEARCH-001",
+          "QA-SEARCH-002",
+          "QA-SEARCH-003",
+          "QA-SEARCH-004",
+          "QA-SEARCH-005",
+          "QA-SEARCH-006",
+          "QA-SEARCH-007",
+          "QA-SEARCH-008",
+          "QA-SEARCH-009",
+          "QA-SEARCH-010",
+          "QA-SEARCH-011",
+          "QA-SEARCH-012",
+          "QA-SEARCH-013"
+        ]
+      }
+    },
+    {
+      "id": "S2",
+      "name": "講義詳細・抽出本文・原本PDFへの導線",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S2.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S2.integration-visible",
+          "kind": "integration-visible"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-DETAIL-001"
+        ]
+      }
+    },
+    {
+      "id": "S3",
+      "name": "狭幅検索画面と結果カードの表示",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S3.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S3.adjacent-regression",
+          "kind": "adjacent-regression"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-RESPONSIVE-001"
+        ]
+      }
+    },
+    {
+      "id": "S4",
+      "name": "PDF抽出・正規化・D1スキーマと取込処理",
+      "reach": "non-browser",
+      "required_obligations": [
+        {
+          "id": "S4.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S4.integration-visible",
+          "kind": "integration-visible"
+        }
+      ],
+      "disposition": {
+        "covered_by": "quality_gate",
+        "evidence": "QG-01"
+      }
+    },
+    {
+      "id": "S5",
+      "name": "本番ビルドWorkerと静的アセット配信",
+      "reach": "non-browser",
+      "required_obligations": [
+        {
+          "id": "S5.normal-readback",
+          "kind": "normal-readback"
+        }
+      ],
+      "disposition": {
+        "covered_by": "quality_gate",
+        "evidence": "QG-02"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "QA-SEARCH-001",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "未認証の新しいブラウザーで公開検索ページを開き、既定条件の検索フォームが見える",
+        "when": "条件を追加せず「検索する」を押す",
+        "then": "認証要求なしで20件の一覧と21/6461件の対象範囲が表示される"
+      },
+      "given_seed": {
+        "state_summary": "未認証の新しいブラウザーで公開検索ページを開き、既定条件の検索フォームが見える",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-002",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "キーワード欄が空の検索フォームが表示される",
+        "when": "キーワード欄だけに「コロイド」を入力して検索する",
+        "then": "T1AB3300「コロイド・界面化学」だけが表示される"
+      },
+      "given_seed": {
+        "state_summary": "キーワード欄が空の検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-003",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "科目名欄が空の検索フォームが表示される",
+        "when": "科目名欄だけに「コロイド」を入力して検索する",
+        "then": "T1AB3300「コロイド・界面化学」だけが表示される"
+      },
+      "given_seed": {
+        "state_summary": "科目名欄が空の検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-004",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "担当教員欄が空の検索フォームが表示される",
+        "when": "担当教員欄だけに「大　迫 祐太朗」を入力して検索する",
+        "then": "空白と文字幅が正規化され、ASL00500が表示される"
+      },
+      "given_seed": {
+        "state_summary": "担当教員欄が空の検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-005",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "教室欄が空の検索フォームが表示される",
+        "when": "教室欄だけに「工Ｗ２－１０１」を入力して検索する",
+        "then": "文字幅とハイフンが正規化され、T1AB3300が表示される"
+      },
+      "given_seed": {
+        "state_summary": "教室欄が空の検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-006",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "QA専用年度2025講義と、工学部・後期の検索対象がローカルDBにあり、既定検索画面が開いている",
+        "when": "年度・学部・学期を一つずつ指定して検索し、各検索の間は「条件をクリア」で戻る",
+        "then": "年度2025でQA専用講義、工学部でT1AB3300、後期で科学技術政策特論が個別に表示される"
+      },
+      "given_seed": {
+        "state_summary": "QA専用年度2025講義と、工学部・後期の検索対象がローカルDBにあり、既定検索画面が開いている",
+        "source": "db-insert"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-007",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "月曜日と5限に該当する講義が取り込まれている",
+        "when": "曜日を月曜日にして検索し、条件をクリアした後、時限だけ5限にして検索する",
+        "then": "曜日検索に月曜日の講義が出て、5限検索にはHM218100とHB800100が含まれる"
+      },
+      "given_seed": {
+        "state_summary": "月曜日と5限に該当する講義が取り込まれている",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-008",
+      "surface": "S1",
+      "covers": [
+        "S1.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "QA専用講義の枠が後期・月曜1限と後期・金曜2限として読み戻されている",
+        "when": "後期・月曜・2限を同時に指定して検索する",
+        "then": "別々の開講枠をまたぐ月曜2限は0件で、同じ枠の月曜1限ならQA専用講義が表示される"
+      },
+      "given_seed": {
+        "state_summary": "QA専用講義の枠が後期・月曜1限と後期・金曜2限として読み戻されている",
+        "source": "db-insert"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-009",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "授業形式を選んでいない検索フォームが表示される",
+        "when": "授業形式を「対面」にして検索する",
+        "then": "FSE15500とHB800100が表示され、HB800100には対面とオンライン（同時配信）の両方が表示される"
+      },
+      "given_seed": {
+        "state_summary": "授業形式を選んでいない検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-010",
+      "surface": "S1",
+      "covers": [
+        "S1.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "9条件の入力前に検索フォームが表示される",
+        "when": "科目名・教員・教室・年度・学部・学期・曜日・時限・授業形式を同時指定して検索する",
+        "then": "全条件に合うT1AB3300だけが表示される"
+      },
+      "given_seed": {
+        "state_summary": "9条件の入力前に検索フォームが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-011",
+      "surface": "S1",
+      "covers": [
+        "S1.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "検索フォームと、本文内に検索語が含まれる既存コースがある",
+        "when": "キーワード「AND OR NOT」をそのまま検索する",
+        "then": "FTS/SQLエラーを出さず、語句が一致するHM218100・HB800100・HS900100が表示される。補助的な一意語検索は通常0件になる"
+      },
+      "given_seed": {
+        "state_summary": "検索フォームと、本文内に検索語が含まれる既存コースがある",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-012",
+      "surface": "S1",
+      "covers": [
+        "S1.input-or-time-boundary"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "公開検索ページが開いている",
+        "when": "未知の授業形式と上限超過ページ番号を指定して開く",
+        "then": "利用者向け400エラーが説明され、FTS/SQL内部詳細は表示されない"
+      },
+      "given_seed": {
+        "state_summary": "公開検索ページが開いている",
+        "source": "none-needed"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-013",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "2026年度の1ページ目に20件と次ページ導線が表示される",
+        "when": "次ページへ進む",
+        "then": "2ページ目に残り1件が表示され、年度条件は2026のまま保たれる"
+      },
+      "given_seed": {
+        "state_summary": "2026年度の1ページ目に20件と次ページ導線が表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-DETAIL-001",
+      "surface": "S2",
+      "covers": [
+        "S2.normal-readback",
+        "S2.integration-visible"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "検索フォームが表示され、取込済みのFSE15500がある",
+        "when": "科目名で絞り、詳細を開いて公開PDFを別タブで確認してから戻る",
+        "then": "本文と原本PDF導線が表示され、戻った一覧に科目名条件が残る"
+      },
+      "given_seed": {
+        "state_summary": "検索フォームが表示され、取込済みのFSE15500がある",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-RESPONSIVE-001",
+      "surface": "S3",
+      "covers": [
+        "S3.normal-readback",
+        "S3.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "1440px幅で検索フォームと講義カードが表示される",
+        "when": "ブラウザー幅を390pxにする",
+        "then": "フォームと20件のカードが読め、横方向のはみ出しがない"
+      },
+      "given_seed": {
+        "state_summary": "1440px幅で検索フォームと講義カードが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    }
+  ]
+}

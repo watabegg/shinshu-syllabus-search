@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-10-15 JST",
+  "documents_only": true,
+  "html_sections": 19,
+  "mermaid_diagrams_rendered": 7,
+  "mermaid_errors": 0,
+  "viewport_widths": [
+    390,
+    1440
+  ],
+  "horizontal_page_overflow": false,
+  "local_links_missing": 0,
+  "todo_items_match": 5,
+  "proposed_sql_schema": "SQLite local syntax and pending-row insert passed; not remote D1",
+  "ui_model": "gpt-6.1-sol (user selected)",
+  "writing": "Gemini 3.8 Flash High; lead fact review; Medium wording pass (4 accepted, 1 rejected)",
+  "full_pdf_ingestion": false,
+  "app_build_test_deploy": "not performed; implementation not started"
+}

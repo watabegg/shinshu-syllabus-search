@@ -1,0 +1,412 @@
+{
+  "target": {
+    "repo": "shinshu-syllabus-search",
+    "pr": null,
+    "head_sha": "0a5b8ef3b737e96f06a1b37379e6553ec853e7e8",
+    "environment": {
+      "type": "local",
+      "url": "http://127.0.0.1:5173"
+    }
+  },
+  "surfaces": [
+    {
+      "id": "S1",
+      "name": "公開検索フォーム・条件検証・講義一覧",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S1.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S1.input-or-time-boundary",
+          "kind": "input-or-time-boundary"
+        },
+        {
+          "id": "S1.adjacent-regression",
+          "kind": "adjacent-regression"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-SEARCH-001",
+          "QA-SEARCH-002",
+          "QA-SEARCH-003",
+          "QA-SEARCH-004",
+          "QA-SEARCH-005",
+          "QA-SEARCH-006",
+          "QA-SEARCH-007",
+          "QA-SEARCH-008",
+          "QA-SEARCH-009",
+          "QA-SEARCH-010",
+          "QA-SEARCH-011",
+          "QA-SEARCH-012",
+          "QA-SEARCH-013"
+        ]
+      }
+    },
+    {
+      "id": "S2",
+      "name": "講義詳細・抽出本文・原本PDFへの導線",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S2.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S2.integration-visible",
+          "kind": "integration-visible"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-DETAIL-001"
+        ]
+      }
+    },
+    {
+      "id": "S3",
+      "name": "狭幅検索画面と結果カードの表示",
+      "reach": "browser",
+      "required_obligations": [
+        {
+          "id": "S3.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S3.adjacent-regression",
+          "kind": "adjacent-regression"
+        }
+      ],
+      "disposition": {
+        "case_ids": [
+          "QA-RESPONSIVE-001"
+        ]
+      }
+    },
+    {
+      "id": "S4",
+      "name": "PDF抽出・正規化・D1スキーマと取込処理",
+      "reach": "non-browser",
+      "required_obligations": [
+        {
+          "id": "S4.normal-readback",
+          "kind": "normal-readback"
+        },
+        {
+          "id": "S4.integration-visible",
+          "kind": "integration-visible"
+        }
+      ],
+      "disposition": {
+        "covered_by": "quality_gate",
+        "evidence": "QG-01"
+      }
+    },
+    {
+      "id": "S5",
+      "name": "本番ビルドWorkerと静的アセット配信",
+      "reach": "non-browser",
+      "required_obligations": [
+        {
+          "id": "S5.normal-readback",
+          "kind": "normal-readback"
+        }
+      ],
+      "disposition": {
+        "covered_by": "quality_gate",
+        "evidence": "QG-02"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "QA-SEARCH-001",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "検索フォーム、20件の一覧、対象21/6461が見える",
+        "when": "検索画面は未認証でも公開される",
+        "then": "新しい未認証ブラウザーから公開検索ページを開く"
+      },
+      "given_seed": {
+        "state_summary": "検索フォーム、20件の一覧、対象21/6461が見える",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-002",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "コロイド・界面化学が表示され、登録コードはT1AB3300",
+        "when": "キーワード検索だけを使う",
+        "then": "キーワード欄へ「コロイド」を入力して検索する"
+      },
+      "given_seed": {
+        "state_summary": "コロイド・界面化学が表示され、登録コードはT1AB3300",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-003",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "T1AB3300だけが表示される",
+        "when": "科目名フィルターだけを使う",
+        "then": "科目名欄へ「コロイド」を入力して検索する"
+      },
+      "given_seed": {
+        "state_summary": "T1AB3300だけが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-004",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "NFKCと空白正規化でASL00500が表示される",
+        "when": "空白を含む教員名を照合する",
+        "then": "担当教員欄へ「大　迫 祐太朗」を入力して検索する"
+      },
+      "given_seed": {
+        "state_summary": "NFKCと空白正規化でASL00500が表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-005",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "幅とハイフンを正規化しT1AB3300が表示される",
+        "when": "全角の教室表記を照合する",
+        "then": "教室欄へ「工Ｗ２－１０１」を入力して検索する"
+      },
+      "given_seed": {
+        "state_summary": "幅とハイフンを正規化しT1AB3300が表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-006",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "2025はQA専用講義、工学部はT1AB3300、後期は科学技術政策特論が各々表示される",
+        "when": "年度・学部・学期を個別に絞り込む",
+        "then": "年度2025、工学部、後期をそれぞれ単独で選び直して検索する"
+      },
+      "given_seed": {
+        "state_summary": "2025はQA専用講義、工学部はT1AB3300、後期は科学技術政策特論が各々表示される",
+        "source": "db-insert"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-007",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "月曜日の講義が表示され、5限ではHM218100とHB800100を含む",
+        "when": "曜日と時限の各フィルターを単独で使う",
+        "then": "曜日だけを月曜日にして検索後、条件を戻し時限だけを5限にして検索する"
+      },
+      "given_seed": {
+        "state_summary": "月曜日の講義が表示され、5限ではHM218100とHB800100を含む",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-008",
+      "surface": "S1",
+      "covers": [
+        "S1.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "月曜+2限は0件、実在する月曜+1限はQA専用講義1件",
+        "when": "曜日と時限は同じ開講枠に一致する",
+        "then": "QA専用講義の月曜+2限を検索し、続けて月曜+1限を検索する"
+      },
+      "given_seed": {
+        "state_summary": "月曜+2限は0件、実在する月曜+1限はQA専用講義1件",
+        "source": "db-insert"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-009",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "FSE15500とHB800100が表示され、HB800100には対面と同時配信の両ラベルがある",
+        "when": "授業形式フィルターは判定済み形式を照合する",
+        "then": "授業形式を対面にして検索する"
+      },
+      "given_seed": {
+        "state_summary": "FSE15500とHB800100が表示され、HB800100には対面と同時配信の両ラベルがある",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-010",
+      "surface": "S1",
+      "covers": [
+        "S1.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "一致条件の共通講義T1AB3300だけが表示される",
+        "when": "複数条件は同じ講義にANDで適用される",
+        "then": "科目名・教員・教室・学部の4条件をT1AB3300の値で指定する"
+      },
+      "given_seed": {
+        "state_summary": "一致条件の共通講義T1AB3300だけが表示される",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-011",
+      "surface": "S1",
+      "covers": [
+        "S1.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "通常の0件状態になり、検索構文エラーやSQL詳細を表示しない",
+        "when": "FTS演算子を文字列として検索する",
+        "then": "キーワードに「AND OR NOT」を入力して検索する"
+      },
+      "given_seed": {
+        "state_summary": "通常の0件状態になり、検索構文エラーやSQL詳細を表示しない",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-012",
+      "surface": "S1",
+      "covers": [
+        "S1.input-or-time-boundary"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "400の説明画面を表示し、SQL/FTSエラー詳細は出さない",
+        "when": "不正なフィルター値を利用者向けエラーにする",
+        "then": "URLへ未知のmodality値を指定して開く"
+      },
+      "given_seed": {
+        "state_summary": "400の説明画面を表示し、SQL/FTSエラー詳細は出さない",
+        "source": "none-needed"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-SEARCH-013",
+      "surface": "S1",
+      "covers": [
+        "S1.normal-readback"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "1ページ目は20件、2ページ目は残り1件で年度条件が保たれる",
+        "when": "20件単位のページ送りを保つ",
+        "then": "2026年度の1ページ目から次の20件へ進む"
+      },
+      "given_seed": {
+        "state_summary": "1ページ目は20件、2ページ目は残り1件で年度条件が保たれる",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-DETAIL-001",
+      "surface": "S2",
+      "covers": [
+        "S2.normal-readback",
+        "S2.integration-visible"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "抽出本文と公式PDFリンクを確認でき、戻るとコロイド条件が残る",
+        "when": "取込済み講義の詳細と公式PDFを確認して戻る",
+        "then": "コロイドを絞り詳細を開き、原本PDFを別タブで確認して検索結果へ戻る"
+      },
+      "given_seed": {
+        "state_summary": "抽出本文と公式PDFリンクを確認でき、戻るとコロイド条件が残る",
+        "source": "existing"
+      },
+      "status": "planned"
+    },
+    {
+      "id": "QA-RESPONSIVE-001",
+      "surface": "S3",
+      "covers": [
+        "S3.normal-readback",
+        "S3.adjacent-regression"
+      ],
+      "priority": "P1",
+      "hypothesis": null,
+      "gwt": {
+        "given": "フォームと講義カードが読め、ページ横幅のはみ出しがない",
+        "when": "390px幅で検索結果を読む",
+        "then": "ビューポートを390pxにして公開検索画面を開く"
+      },
+      "given_seed": {
+        "state_summary": "フォームと講義カードが読め、ページ横幅のはみ出しがない",
+        "source": "existing"
+      },
+      "status": "planned"
+    }
+  ]
+}

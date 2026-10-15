@@ -1,0 +1,21 @@
+{
+  "run_id": "20261015T135808Z-re-qa-d63c",
+  "target_repo": "/home/watabegg/shinshu-syllabus-search",
+  "branch": "main",
+  "git_head": "unborn (git rev-parse HEAD failed)",
+  "workspace_state_digest_sha256": "0a5b8ef3b737e96f06a1b37379e6553ec853e7e805101e9650676806c84f2651",
+  "plan_head_sha_prefix": "0a5b8ef3b737e96f06a1b37379e6553ec853e7e8",
+  "environment": {
+    "type": "local",
+    "url": "http://127.0.0.1:5173",
+    "inferred": false
+  },
+  "profile": null,
+  "profile_resolution": "no profile; unknown operational facts were not used to reduce case coverage",
+  "browser_backend_preflight": {
+    "standalone_chrome_devtools_mcp": "not discovered in ALL_TOOLS",
+    "in_app_browser": "mcp__node_repl__js discovered; not selected",
+    "selected": "agent-browser CLI persistent isolated Chromium session syllabus-qa-final",
+    "probe": "opened local validation session; app is public, no auth required; Chromium uses isolated session"
+  }
+}

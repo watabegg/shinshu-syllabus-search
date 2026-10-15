@@ -1,0 +1,550 @@
+{
+  "plan_sha256": "287c66ac8cb4b3d83bd4dcd64727069499fecc6a620f84f1644e7ca6244e4333",
+  "run_id": "20261015T135808Z-re-qa-d63c",
+  "started_at": "2026-10-15T14:05:45.895+00:00",
+  "excluded_at_execution": [],
+  "cases": [
+    {
+      "id": "QA-SEARCH-001",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-001_given_public-search.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:48.172+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-001_when_default-search-submitted.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:48.923+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-001_then_coverage-card.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:49.030+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-002",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-002_given_empty-filter.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:50.533+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-002_when_filter-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:50.666+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-002_then_matching-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:51.466+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-003",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-003_given_empty-filter.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:52.952+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-003_when_filter-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:53.087+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-003_then_matching-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:53.856+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-004",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-004_given_empty-filter.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:55.384+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-004_when_filter-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:55.514+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-004_then_matching-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:56.268+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-005",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-005_given_empty-filter.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:57.765+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-005_when_filter-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:57.907+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-005_then_matching-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:05:58.659+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-006",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-006_given_academic-facets-ready.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:00.101+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-006_when_year-selected.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:00.199+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-006_then_year-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:00.931+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-1.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:02.931+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-006_when_department-selected.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:03.032+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-006_then_department-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:03.763+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-2.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:05.761+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-006_when_term-selected.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:05.848+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-006_then_term-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:06.577+00:00"
+        }
+      ],
+      "seed_attempts": [
+        {
+          "method": "product-ui",
+          "command_or_operation": "Inspected the anonymous search page; it exposes search and navigation only, with no course-authoring UI.",
+          "result": "failed",
+          "detail": "The public product UI does not provide course creation controls.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        },
+        {
+          "method": "api",
+          "command_or_operation": "Inspected server routes: GET /healthz, GET /, GET /courses/:id; no course-creation endpoint.",
+          "result": "failed",
+          "detail": "The application API is read-only for courses.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        },
+        {
+          "method": "seed-script",
+          "command_or_operation": "Inspected package scripts and scripts/ingest; no synthetic QA-course seed command exists. The ingestion CLI is source-document ingestion, not a fixture builder.",
+          "result": "failed",
+          "detail": "No local fixture seed script is available without altering the source corpus.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        },
+        {
+          "method": "db-insert",
+          "command_or_operation": "Transactional local D1 insert into source_documents, courses, course_slots, and course_search; tag raw_metadata_json.qa_seed=true and use example.invalid source; verify through UI/D1 and delete after QA.",
+          "result": "success",
+          "detail": "Created one QA-only course with two distinct slot rows for same-slot filtering.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-007",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-007_given_schedule-facets-ready.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:08.062+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-007_when_weekday-monday-selected.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:08.150+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-007_then_weekday-monday-results.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:08.881+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "assets/screenshots/QA-SEARCH-007_supplemental_clear-reset-schedule.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:10.877+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-007_when_period-5-selected.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:10.967+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-007_then_period-5-results.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:11.677+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-008",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-008_given_qa-row-readback.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:12.559+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-008_when_cross-slot-empty.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:13.272+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-008_then_same-slot-match.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:13.987+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "assets/screenshots/QA-SEARCH-008_supplemental_positive-pair-readback.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:14.074+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "supplemental/cleanup-verification.json",
+          "type": "file",
+          "taken_at": "2026-10-15T14:13:14.101+00:00"
+        }
+      ],
+      "seed_attempts": [
+        {
+          "method": "product-ui",
+          "command_or_operation": "Inspected the anonymous search page; it exposes search and navigation only, with no course-authoring UI.",
+          "result": "failed",
+          "detail": "The public product UI does not provide course creation controls.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        },
+        {
+          "method": "api",
+          "command_or_operation": "Inspected server routes: GET /healthz, GET /, GET /courses/:id; no course-creation endpoint.",
+          "result": "failed",
+          "detail": "The application API is read-only for courses.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        },
+        {
+          "method": "seed-script",
+          "command_or_operation": "Inspected package scripts and scripts/ingest; no synthetic QA-course seed command exists. The ingestion CLI is source-document ingestion, not a fixture builder.",
+          "result": "failed",
+          "detail": "No local fixture seed script is available without altering the source corpus.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        },
+        {
+          "method": "db-insert",
+          "command_or_operation": "Transactional local D1 insert into source_documents, courses, course_slots, and course_search; tag raw_metadata_json.qa_seed=true and use example.invalid source; verify through UI/D1 and delete after QA.",
+          "result": "success",
+          "detail": "Created one QA-only course with two distinct slot rows for same-slot filtering.",
+          "timestamp": "2026-10-15T14:02:51+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-009",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-009_given_modality-facet-ready.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:15.526+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-009_when_in-person-selected.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:15.608+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-009_then_multi-mode-results.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:16.328+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-010",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-010_given_and-filter-ready.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:17.730+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-010_when_all-filters-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:17.896+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-010_then_and-single-result.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:18.644+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-011",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-011_given_fts-literal-ready.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:20.153+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-011_when_fts-operators-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:20.284+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-011_then_fts-literal-three-results.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:21.031+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-filled.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:21.149+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-zero.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:21.879+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "supplemental/literal-search-check.json",
+          "type": "file",
+          "taken_at": "2026-10-15T14:13:14.101+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-012",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-012_given_valid-search-before-error.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:23.363+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-012_when_invalid-modality-error.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:24.724+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-012_then_invalid-page-error.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:06:26.083+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-SEARCH-013",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-SEARCH-013_given_retry2-first-page-20.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:08:13.107+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-SEARCH-013_when_retry2-next-page-control.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:08:13.205+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-SEARCH-013_then_retry2-second-page-one.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:08:13.936+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "supplemental/QA-SEARCH-013-first-attempt.json",
+          "type": "file",
+          "taken_at": "2026-10-15T14:08:13.947+00:00"
+        }
+      ],
+      "recovery_attempts": [
+        {
+          "strategy": "case-retry",
+          "operation": "QA-SEARCH-013: rerun page 2 using rendered-count whitespace tolerance and the displayed selected-year value",
+          "result": "success",
+          "detail": "Browser showed the expected single remaining 2026 course on page 2; the original exact-substring and URL-default assumptions were corrected in the temporary harness.",
+          "evidence": "supplemental/QA-SEARCH-013-first-attempt.json and assets/screenshots/QA-SEARCH-013_then_retry2-second-page-one.png",
+          "timestamp": "2026-10-15T14:08:13+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-DETAIL-001",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:13.614+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-DETAIL-001_when_course-detail.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:14.330+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:17.503+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:18.262+00:00"
+        },
+        {
+          "slot": "supplemental",
+          "path": "supplemental/QA-DETAIL-001-first-attempt.json",
+          "type": "file",
+          "taken_at": "2026-10-15T14:13:14.101+00:00"
+        }
+      ],
+      "recovery_attempts": [
+        {
+          "strategy": "case-retry",
+          "operation": "QA-DETAIL-001: retry after preserving helper-only tab-id failure",
+          "result": "success",
+          "detail": "The corrected stable-id parser returned to the local course tab; the title-filtered list was restored after viewing the public PDF.",
+          "evidence": "supplemental/QA-DETAIL-001-first-attempt.json and assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png",
+          "timestamp": "2026-10-15T14:13:14+00:00"
+        }
+      ]
+    },
+    {
+      "id": "QA-RESPONSIVE-001",
+      "status": "PASS",
+      "evidence": [
+        {
+          "slot": "given",
+          "path": "assets/screenshots/QA-RESPONSIVE-001_given_desktop-search.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:22.822+00:00"
+        },
+        {
+          "slot": "when",
+          "path": "assets/screenshots/QA-RESPONSIVE-001_when_mobile-search.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:22.903+00:00"
+        },
+        {
+          "slot": "then",
+          "path": "assets/screenshots/QA-RESPONSIVE-001_then_mobile-result-cards.png",
+          "type": "screenshot",
+          "taken_at": "2026-10-15T14:11:24.741+00:00"
+        }
+      ]
+    }
+  ]
+}

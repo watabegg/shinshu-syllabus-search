@@ -1,0 +1,59 @@
+{
+  "kind": "prior browser QA checkpoint; not authoritative for this run",
+  "run_id": "20261015T133025Z-qa-df42",
+  "path": "/tmp/syllabus-qa-final-20261015T132000Z",
+  "plan_sha256": "bf5df3bee39d91fca4deffc6d9ec9797ccbd69789c7a06659d08b2b782ea2415",
+  "plan_sha256_file": "bf5df3bee39d91fca4deffc6d9ec9797ccbd69789c7a06659d08b2b782ea2415",
+  "results_sha256": "8d02ebc89b1c4a33ce9e45173d3aec5b5bcb5cae196701aa5c068bfc8beb5927",
+  "checkpoint_status": [
+    [
+      "QA-SEARCH-001",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-002",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-003",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-004",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-005",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-006",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-007",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-008",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-009",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-010",
+      "PASS"
+    ],
+    [
+      "QA-SEARCH-011",
+      "FAIL"
+    ]
+  ],
+  "case_qa_search_011": {
+    "outcome": "FAIL preserved: locked oracle predicted zero for `AND OR NOT`; actual search returned 3 existing course codes with no FTS/SQL error.",
+    "independent_data_check": "all three literal words were present in each matched row body_search; unique suffix query was separately verified to return normal zero.",
+    "plan_issue": "all prior GWT strings had result under given and action under then; this new run uses corrected GWT order and keeps the prior plan/results/screenshots here."
+  }
+}

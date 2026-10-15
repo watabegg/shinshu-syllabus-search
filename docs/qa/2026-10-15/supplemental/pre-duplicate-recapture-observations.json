@@ -1,0 +1,414 @@
+[
+  {
+    "case_id": "QA-SEARCH-001",
+    "action": "anonymous page and cookies",
+    "observed": {
+      "page_title": "信州大学シラバス検索（非公式）",
+      "cookies": "",
+      "cards": 20,
+      "coverage_visible": true
+    },
+    "url": "http://127.0.0.1:5173/",
+    "observed_at": "2026-10-15T14:05:48.101+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-001",
+    "action": "public search readiness",
+    "observed": {
+      "cards": 20,
+      "coverage": "21 / 6,461",
+      "authentication": "not requested"
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:05:49.041+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-002",
+    "action": "single-field search",
+    "observed": {
+      "field": "q",
+      "value": "コロイド",
+      "expected_visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:05:51.477+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-003",
+    "action": "single-field search",
+    "observed": {
+      "field": "title",
+      "value": "コロイド",
+      "expected_visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:05:53.871+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-004",
+    "action": "single-field search",
+    "observed": {
+      "field": "teacher",
+      "value": "大　迫 祐太朗",
+      "expected_visible": "ASL00500",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=%E5%A4%A7%E3%80%80%E8%BF%AB%20%E7%A5%90%E5%A4%AA%E6%9C%97&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:05:56.282+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-005",
+    "action": "single-field search",
+    "observed": {
+      "field": "room",
+      "value": "工Ｗ２－１０１",
+      "expected_visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=%E5%B7%A5%EF%BC%B7%EF%BC%92%EF%BC%8D%EF%BC%91%EF%BC%90%EF%BC%91&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:05:58.673+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "independent academic facet",
+    "observed": {
+      "field": "year",
+      "value": "2025",
+      "visible": "QA 時間割スロット検証",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2025&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:06:00.943+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "clear conditions link after Inertia navigation",
+    "observed": {
+      "url": "http://127.0.0.1:5173/",
+      "values": {
+        "q": "",
+        "title": "",
+        "teacher": "",
+        "room": "",
+        "year": "2026",
+        "department": "",
+        "term": "",
+        "day": "",
+        "period": "",
+        "modality": ""
+      },
+      "default_expected": {
+        "q": "",
+        "title": "",
+        "teacher": "",
+        "room": "",
+        "year": "2026",
+        "department": "",
+        "term": "",
+        "day": "",
+        "period": "",
+        "modality": ""
+      }
+    },
+    "url": "http://127.0.0.1:5173/",
+    "observed_at": "2026-10-15T14:06:02.943+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "independent academic facet",
+    "observed": {
+      "field": "department",
+      "value": "t",
+      "visible": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=t&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:06:03.774+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "clear conditions link after Inertia navigation",
+    "observed": {
+      "url": "http://127.0.0.1:5173/",
+      "values": {
+        "q": "",
+        "title": "",
+        "teacher": "",
+        "room": "",
+        "year": "2026",
+        "department": "",
+        "term": "",
+        "day": "",
+        "period": "",
+        "modality": ""
+      },
+      "default_expected": {
+        "q": "",
+        "title": "",
+        "teacher": "",
+        "room": "",
+        "year": "2026",
+        "department": "",
+        "term": "",
+        "day": "",
+        "period": "",
+        "modality": ""
+      }
+    },
+    "url": "http://127.0.0.1:5173/",
+    "observed_at": "2026-10-15T14:06:05.773+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-006",
+    "action": "independent academic facet",
+    "observed": {
+      "field": "term",
+      "value": "後期",
+      "visible": "科学技術政策特論",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=%E5%BE%8C%E6%9C%9F&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:06:06.590+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-007",
+    "action": "independent schedule facet",
+    "observed": {
+      "field": "day",
+      "value": "1",
+      "expected_visible": [
+        "月曜日",
+        "T1AB3300"
+      ],
+      "card_count": 18
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=1&period=&modality=",
+    "observed_at": "2026-10-15T14:06:08.893+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-007",
+    "action": "clear conditions link after Inertia navigation",
+    "observed": {
+      "url": "http://127.0.0.1:5173/",
+      "values": {
+        "q": "",
+        "title": "",
+        "teacher": "",
+        "room": "",
+        "year": "2026",
+        "department": "",
+        "term": "",
+        "day": "",
+        "period": "",
+        "modality": ""
+      },
+      "default_expected": {
+        "q": "",
+        "title": "",
+        "teacher": "",
+        "room": "",
+        "year": "2026",
+        "department": "",
+        "term": "",
+        "day": "",
+        "period": "",
+        "modality": ""
+      }
+    },
+    "url": "http://127.0.0.1:5173/",
+    "observed_at": "2026-10-15T14:06:10.889+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-007",
+    "action": "independent schedule facet",
+    "observed": {
+      "field": "period",
+      "value": "5",
+      "expected_visible": [
+        "HM218100",
+        "HB800100"
+      ],
+      "card_count": 2
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=5&modality=",
+    "observed_at": "2026-10-15T14:06:11.688+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-008",
+    "action": "same-slot schedule condition",
+    "observed": {
+      "cross_pair": "Monday 1 + Friday 2 are stored; Monday+2 returns 0",
+      "valid_pair": "Monday+1 returns QA row",
+      "course_id": "qa-browser-slot-20261015-reqa"
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=QA%20%E6%99%82%E9%96%93%E5%89%B2&teacher=&room=&year=2025&department=&term=%E5%BE%8C%E6%9C%9F&day=1&period=1&modality=",
+    "observed_at": "2026-10-15T14:06:14.081+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-009",
+    "action": "modality filter",
+    "observed": {
+      "filter": "in_person",
+      "expected_codes": [
+        "FSE15500",
+        "HB800100"
+      ],
+      "mixed_labels_visible": true
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=in_person",
+    "observed_at": "2026-10-15T14:06:16.335+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-010",
+    "action": "combined AND filters",
+    "observed": {
+      "fields": [
+        "title",
+        "teacher",
+        "room",
+        "year",
+        "department",
+        "term",
+        "day",
+        "period",
+        "modality"
+      ],
+      "code": "T1AB3300",
+      "card_count": 1
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=%E3%82%B3%E3%83%AD%E3%82%A4%E3%83%89&teacher=%E9%85%92%E4%BA%95%20%E4%BF%8A%E9%83%8E&room=%E5%B7%A5%EF%BC%B7%EF%BC%92%EF%BC%8D%EF%BC%91%EF%BC%90%EF%BC%91&year=2026&department=t&term=%E5%89%8D%E6%9C%9F&day=1&period=1&modality=unknown",
+    "observed_at": "2026-10-15T14:06:18.652+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-011",
+    "action": "literal FTS terms",
+    "observed": {
+      "query": "AND OR NOT",
+      "codes": [
+        "HM218100",
+        "HB800100",
+        "HS900100"
+      ],
+      "cards": 3,
+      "normal_results": true,
+      "database_error_visible": false
+    },
+    "url": "http://127.0.0.1:5173/?q=AND%20OR%20NOT&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:06:21.040+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-011",
+    "action": "unique literal zero-result check",
+    "observed": {
+      "query": "AND OR NOT ZXQ7910",
+      "cards": 0,
+      "normal_empty_state": true,
+      "database_error_visible": false
+    },
+    "url": "http://127.0.0.1:5173/?q=AND%20OR%20NOT%20ZXQ7910&title=&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:06:21.887+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-012",
+    "action": "friendly invalid-query responses",
+    "observed": {
+      "modality": "400 with public Japanese message",
+      "page": "400 with public Japanese message",
+      "database_details_visible": false
+    },
+    "url": "http://127.0.0.1:5173/?page=1001",
+    "observed_at": "2026-10-15T14:06:26.091+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-013",
+    "action": "assertion",
+    "observed": "expected visible text missing: ['1件表示']; URL=http://127.0.0.1:5173/?page=2",
+    "url": "http://127.0.0.1:5173/?page=2",
+    "observed_at": "2026-10-15T14:06:28.344+00:00"
+  },
+  {
+    "case_id": "QA-SEARCH-013",
+    "action": "pagination retry after whitespace-tolerant harness oracle",
+    "observed": {
+      "page1_count": 20,
+      "page2_count": 1,
+      "page2_url": "http://127.0.0.1:5173/?page=2",
+      "displayed_year": "2026",
+      "visible_counter_matched": true,
+      "previous_assertion": "query omits default year=2026 from URL; UI select remains 2026"
+    },
+    "url": "http://127.0.0.1:5173/?page=2",
+    "observed_at": "2026-10-15T14:08:13.947+00:00"
+  },
+  {
+    "case_id": "QA-DETAIL-001",
+    "action": "execution-error",
+    "observed": "browser command failed: agent-browser --session syllabus-qa-reqa --args --no-sandbox get attr href a.source-link\n\n⚠ --args ignored: daemon already running. Use 'agent-browser close' first to restart with new options.\n✗ Element not found. Verify the selector is correct and the element exists in the DOM.\n",
+    "url": "http://127.0.0.1:5173/courses/course_096e8a5bedef8dce98903577ffde103a?back=%2F%3Fq%3D%26title%3D%25E6%25A7%258B%25E9%2580%25A0%25E5%258C%2596%25E5%25AD%25A6%25E7%2589%25B9%25E8%25AB%2596II%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+    "observed_at": "2026-10-15T14:08:23.626+00:00"
+  },
+  {
+    "case_id": "QA-DETAIL-001",
+    "action": "execution-error",
+    "observed": "screenshot is smaller than validator threshold: 6490 bytes: /tmp/syllabus-qa-final-20261015T135803Z/assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png",
+    "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+    "observed_at": "2026-10-15T14:09:28.059+00:00"
+  },
+  {
+    "case_id": "QA-DETAIL-001",
+    "action": "official PDF opened",
+    "observed": {
+      "source_url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+      "browser_tab_url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+      "tab_listing": "[t1] 信州大学シラバス検索（非公式） - http://127.0.0.1:5173/courses/course_096e8a5bedef8dce98903577ffde103a?back=%2F%3Fq%3D%26title%3D%25E6%25A7%258B%25E9%2580%25A0%25E5%258C%2596%25E5%25AD%25A6%25E7%2589%25B9%25E8%25AB%2596II%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\n  [t2] 信州大学シラバス検索（非公式） - http://127.0.0.1:5173/courses/course_096e8a5bedef8dce98903577ffde103a?back=%2F%3Fq%3D%26title%3D%25E6%25A7%258B%25E9%2580%25A0%25E5%258C%2596%25E5%25AD%25A6%25E7%2589%25B9%25E8%25AB%2596II%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\n→ [t3] lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf - https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf"
+    },
+    "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+    "observed_at": "2026-10-15T14:10:05.868+00:00"
+  },
+  {
+    "case_id": "QA-DETAIL-001",
+    "action": "assertion",
+    "observed": "cannot return to the local course tab after PDF open",
+    "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+    "observed_at": "2026-10-15T14:10:05.878+00:00"
+  },
+  {
+    "case_id": "QA-DETAIL-001",
+    "action": "official PDF opened",
+    "observed": {
+      "source_url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+      "browser_tab_url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+      "tab_listing": "[t1] 信州大学シラバス検索（非公式） - http://127.0.0.1:5173/courses/course_096e8a5bedef8dce98903577ffde103a?back=%2F%3Fq%3D%26title%3D%25E6%25A7%258B%25E9%2580%25A0%25E5%258C%2596%25E5%25AD%25A6%25E7%2589%25B9%25E8%25AB%2596II%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\n  [t2] 信州大学シラバス検索（非公式） - http://127.0.0.1:5173/courses/course_096e8a5bedef8dce98903577ffde103a?back=%2F%3Fq%3D%26title%3D%25E6%25A7%258B%25E9%2580%25A0%25E5%258C%2596%25E5%25AD%25A6%25E7%2589%25B9%25E8%25AB%2596II%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D\n  [t3] lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf - https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf\n→ [t4] lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf - https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf"
+    },
+    "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/FSE15500.pdf",
+    "observed_at": "2026-10-15T14:11:17.510+00:00"
+  },
+  {
+    "case_id": "QA-DETAIL-001",
+    "action": "back with filters",
+    "observed": {
+      "detail_url": "http://127.0.0.1:5173/courses/course_096e8a5bedef8dce98903577ffde103a?back=%2F%3Fq%3D%26title%3D%25E6%25A7%258B%25E9%2580%25A0%25E5%258C%2596%25E5%25AD%25A6%25E7%2589%25B9%25E8%25AB%2596II%26teacher%3D%26room%3D%26year%3D2026%26department%3D%26term%3D%26day%3D%26period%3D%26modality%3D",
+      "returned_url": "http://127.0.0.1:5173/?q=&title=%E6%A7%8B%E9%80%A0%E5%8C%96%E5%AD%A6%E7%89%B9%E8%AB%96II&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+      "title_filter_preserved": true
+    },
+    "url": "http://127.0.0.1:5173/?q=&title=%E6%A7%8B%E9%80%A0%E5%8C%96%E5%AD%A6%E7%89%B9%E8%AB%96II&teacher=&room=&year=2026&department=&term=&day=&period=&modality=",
+    "observed_at": "2026-10-15T14:11:18.274+00:00"
+  },
+  {
+    "case_id": "QA-RESPONSIVE-001",
+    "action": "390px responsive check",
+    "observed": {
+      "document_body_viewport_width": [
+        390,
+        390,
+        390
+      ],
+      "horizontal_overflow": false,
+      "visible_cards": 20
+    },
+    "url": "http://127.0.0.1:5173/",
+    "observed_at": "2026-10-15T14:11:24.758+00:00"
+  }
+]

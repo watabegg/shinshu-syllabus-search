@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QA Report</title>
+  <!-- qa-manifest keys: reportId, repo, pr, branch, commit, environment, targetUrl, executedAt, browserTool, ciStatus, cases[].id, cases[].method, cases[].status, cases[].screenshots[], cases[].evidence[] -->
+  <style>
+    :root {
+      --bg:#fafafa;
+      --panel:#ffffff;
+      --text:#111827;
+      --sub:#475467;
+      --muted:#94a3b8;
+      --line:#e5e7eb;
+      --soft:#f8fafc;
+      --ok:#10b981;
+      --ng:#ef4444;
+      --warn:#f59e0b;
+      --hold:#64748b;
+      --link:#2563eb;
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo",system-ui,sans-serif;
+      font-size:13px;
+      line-height:1.55;
+      font-variant-numeric:tabular-nums;
+    }
+    a { color:var(--link); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:1px 5px; }
+    .shell { max-width:1240px; margin:0 auto; padding:24px; }
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      align-items:flex-start;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:22px;
+    }
+    .eyebrow { color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+    h1 { margin:4px 0 6px; font-size:28px; line-height:1.18; letter-spacing:0; }
+    .lead { margin:0; color:var(--sub); max-width:760px; }
+    .top-meta { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:520px; }
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:4px 9px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--sub);
+      white-space:nowrap;
+      font-weight:600;
+    }
+    .status {
+      border-color:currentColor;
+      font-weight:700;
+    }
+    .PASS { color:var(--ok); background:rgba(16,185,129,.08); }
+    .FAIL { color:var(--ng); background:rgba(239,68,68,.08); }
+    .PARTIAL { color:var(--warn); background:rgba(245,158,11,.12); }
+    .BLOCKED { color:var(--hold); background:rgba(100,116,139,.10); }
+    .nav {
+      position:sticky;
+      top:0;
+      z-index:10;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      padding:12px 0;
+      background:rgba(250,250,250,.92);
+      backdrop-filter:blur(10px);
+    }
+    .nav a {
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+      color:var(--sub);
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin:14px 0;
+    }
+    .metric {
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:14px;
+    }
+    .metric span { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
+    .metric b { display:block; font-size:28px; font-weight:650; line-height:1; }
+    .bar {
+      height:10px;
+      overflow:hidden;
+      display:flex;
+      border-radius:999px;
+      background:var(--line);
+      margin-top:10px;
+    }
+    .bar i { display:block; height:100%; }
+    .bar .ok { background:var(--ok); }
+    .bar .ng { background:var(--ng); }
+    .bar .warn { background:var(--warn); }
+    .bar .hold { background:var(--hold); }
+    section {
+      scroll-margin-top:62px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:20px;
+      margin:14px 0;
+    }
+    .section-head {
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:12px;
+    }
+    h2 { margin:0; font-size:15px; font-weight:700; letter-spacing:0; }
+    .hint { margin:3px 0 0; color:var(--muted); }
+    table { width:100%; border-collapse:collapse; }
+    th, td {
+      border-bottom:1px solid var(--line);
+      padding:9px 8px;
+      text-align:left;
+      vertical-align:top;
+      font-size:12.5px;
+    }
+    th { color:var(--muted); background:transparent; font-weight:700; white-space:nowrap; }
+    tr:last-child td { border-bottom:0; }
+    .filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .filter {
+      cursor:pointer;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--sub);
+      border-radius:999px;
+      padding:5px 9px;
+      font:inherit;
+      font-size:12px;
+      font-weight:700;
+    }
+    .filter.active { color:var(--text); border-color:#cbd5e1; background:var(--soft); }
+    .case {
+      border:1px solid var(--line);
+      border-left-width:3px;
+      border-radius:12px;
+      background:#fff;
+      margin:14px 0;
+      overflow:hidden;
+    }
+    .case[data-status="PASS"] { border-left-color:var(--ok); }
+    .case[data-status="FAIL"] { border-left-color:var(--ng); }
+    .case[data-status="PARTIAL"] { border-left-color:var(--warn); }
+    .case[data-status="BLOCKED"] { border-left-color:var(--hold); }
+    .case > header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      padding:15px 16px;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+    }
+    .case-title { display:flex; gap:10px; align-items:flex-start; }
+    .case-id { color:var(--sub); }
+    .case h3 { margin:0 0 3px; font-size:15px; }
+    .meta-line { color:var(--muted); font-size:12px; }
+    .case-body { padding:16px; }
+    .gwt {
+      display:grid;
+      grid-template-columns:80px 1fr;
+      gap:7px 12px;
+      margin:0 0 14px;
+      padding:12px;
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:10px;
+    }
+    .gwt dt { margin:0; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+    .gwt dd { margin:0; color:var(--text); }
+    .evidence {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+    figure {
+      margin:0;
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+    figure img {
+      display:block;
+      width:100%;
+      aspect-ratio:16/10;
+      object-fit:cover;
+      background:var(--soft);
+    }
+    figcaption { padding:9px 10px; color:var(--sub); font-size:12px; border-top:1px solid var(--line); }
+    pre {
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:var(--soft);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:12px;
+      font-size:12px;
+    }
+    details {
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:10px 12px;
+      background:#fff;
+      margin-top:10px;
+    }
+    details summary { cursor:pointer; color:var(--sub); font-weight:700; }
+    @media (max-width: 920px) {
+      .shell { padding:14px; }
+      .topbar, .case > header, .section-head { display:block; }
+      .top-meta { justify-content:flex-start; margin-top:14px; }
+      .grid, .evidence { grid-template-columns:1fr; }
+      h1 { font-size:23px; }
+    }
+    @media print {
+      body { background:#fff; }
+      .shell { max-width:none; padding:0; }
+      .nav, .filters { display:none; }
+      .topbar, section, .case { break-inside:avoid; }
+      .evidence { grid-template-columns:1fr 1fr; }
+      a { color:inherit; text-decoration:underline; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">QA Report</div>
+        <h1>信州大学シラバス検索 ブラウザーQA</h1>
+        <p class="lead">NO_FAILURE_FOUND / COMPLETE(必須obligation実行率 7/7、未実行0件)</p>
+      </div>
+      <div class="top-meta">
+        <span class="pill status PASS" title="Overall result">PASS</span>
+        <span class="pill">PR <code>-</code></span>
+        <span class="pill">Branch <code>unborn HEAD (workspace digest 0a5b8ef3)</code></span>
+        <span class="pill">Commit <code>0a5b8ef</code></span>
+        <span class="pill">local</span>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <a href="#summary">Summary</a>
+      <a href="#coverage">Coverage</a>
+      <a href="#seed">Seed</a>
+      <a href="#scenarios">Scenarios</a>
+      <a href="#findings">Findings</a>
+      <a href="#notes">Notes</a>
+      <a href="#appendix">Appendix</a>
+    </nav>
+
+    <section id="summary">
+      <div class="section-head">
+        <div>
+          <h2>Summary</h2>
+          <p class="hint">http://127.0.0.1:5173 ・ 2026-10-15T14:18:36.687+00:00 ・ Codex QA ・ agent-browser CLI / isolated Chromium</p>
+        </div>
+        <span class="pill">ローカル品質ゲート PASS: TypeScript 6件・Python 18件・型検査・build・dry-run・Playwright smoke 1件。厳格取込確認は21/6461 PDF、34頁、エラー0、警告14。modality unknown 18/21。詳細 supplemental/quality-gates.json。</span>
+      </div>
+      <div class="grid">
+        <div class="metric"><span>Pass Rate</span><b>100%</b></div>
+        <div class="metric"><span>Pass / Total</span><b>15 / 15</b></div>
+        <div class="metric"><span>Critical</span><b>0</b></div>
+        <div class="metric"><span>Blocked</span><b>0</b></div>
+      </div>
+      <div class="bar" aria-label="result distribution">
+        <i class="ok" style="width:100%"></i>
+        <i class="ng" style="width:0%"></i>
+        <i class="warn" style="width:0%"></i>
+        <i class="hold" style="width:0%"></i>
+      </div>
+      <details>
+        <summary>Run context</summary>
+        <table>
+          <tbody>
+            <tr><th>Repo</th><td>shinshu-syllabus-search</td><th>Commit</th><td><code>0a5b8ef3b737e96f06a1b37379e6553ec853e7e8</code></td></tr>
+            <tr><th>Target URL</th><td><a href="http://127.0.0.1:5173" target="_blank">http://127.0.0.1:5173</a></td><th>Fallback</th><td>-</td></tr>
+            <tr><th>Reviewer</th><td>Codex QA</td><th>Approver</th><td>-</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+
+    <section id="coverage">
+      <div class="section-head">
+        <div>
+          <h2>Coverage</h2>
+          <p class="hint">差分の影響範囲と実行シナリオの対応。</p>
+        </div>
+      </div>
+      <div class="filters" data-filter-target="coverage-table">
+        <button class="filter active" data-status="all">All</button>
+        <button class="filter" data-status="PASS">Pass</button>
+        <button class="filter" data-status="FAIL">Fail</button>
+        <button class="filter" data-status="PARTIAL">Partial</button>
+        <button class="filter" data-status="BLOCKED">Blocked</button>
+      </div>
+      <table id="coverage-table">
+        <thead><tr><th>Surface</th><th>Files</th><th>User Impact</th><th>Risk</th><th>Scenario</th><th>Method</th><th>Type</th><th>Priority</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody><tr data-status="PASS"><td>S1 公開検索フォーム・条件検証・講義一覧</td><td>-</td><td>-</td><td>-</td><td>QA-SEARCH-001, QA-SEARCH-002, QA-SEARCH-003, QA-SEARCH-004, QA-SEARCH-005, QA-SEARCH-006, QA-SEARCH-007, QA-SEARCH-008, QA-SEARCH-009, QA-SEARCH-010, QA-SEARCH-011, QA-SEARCH-012, QA-SEARCH-013</td><td>Browser</td><td>normal-readback, input-or-time-boundary, adjacent-regression</td><td>-</td><td>PASS</td><td>3</td></tr>
+<tr data-status="PASS"><td>S2 講義詳細・抽出本文・原本PDFへの導線</td><td>-</td><td>-</td><td>-</td><td>QA-DETAIL-001</td><td>Browser</td><td>normal-readback, integration-visible</td><td>-</td><td>PASS</td><td>2</td></tr>
+<tr data-status="PASS"><td>S3 狭幅検索画面と結果カードの表示</td><td>-</td><td>-</td><td>-</td><td>QA-RESPONSIVE-001</td><td>Browser</td><td>normal-readback, adjacent-regression</td><td>-</td><td>PASS</td><td>2</td></tr>
+<tr data-status="-"><td>S4 PDF抽出・正規化・D1スキーマと取込処理</td><td>-</td><td>-</td><td>-</td><td>covered_by: quality_gate (QG-01)</td><td>Quality Gate</td><td>normal-readback, integration-visible</td><td>-</td><td>QG</td><td>2</td></tr>
+<tr data-status="-"><td>S5 本番ビルドWorkerと静的アセット配信</td><td>-</td><td>-</td><td>-</td><td>covered_by: quality_gate (QG-02)</td><td>Quality Gate</td><td>normal-readback</td><td>-</td><td>QG</td><td>1</td></tr></tbody>
+      </table>
+    </section>
+
+    <section id="seed">
+      <div class="section-head">
+        <div>
+          <h2>Seed Check</h2>
+          <p class="hint">QA前に確認・作成したデータ。正規フロー、seed、factory、API、DB確認のいずれかを明記。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Scenario</th><th>Needed State</th><th>Source</th><th>IDs</th><th>Verification</th><th>Result</th><th>Cleanup</th></tr></thead>
+        <tbody><tr><td>QA-SEARCH-001</td><td>未認証の新しいブラウザーで公開検索ページを開き、既定条件の検索フォームが見える</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-002</td><td>キーワード欄が空の検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-003</td><td>科目名欄が空の検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-004</td><td>担当教員欄が空の検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-005</td><td>教室欄が空の検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-006</td><td>QA専用年度2025講義と、工学部・後期の検索対象がローカルDBにあり、既定検索画面が開いている</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-007</td><td>月曜日と5限に該当する講義が取り込まれている</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-008</td><td>QA専用講義の枠が後期・月曜1限と後期・金曜2限として読み戻されている</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-009</td><td>授業形式を選んでいない検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-010</td><td>9条件の入力前に検索フォームが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-011</td><td>検索フォームと、本文内に検索語が含まれる既存コースがある</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-012</td><td>公開検索ページが開いている</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-SEARCH-013</td><td>2026年度の1ページ目に20件と次ページ導線が表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-DETAIL-001</td><td>検索フォームが表示され、取込済みのFSE15500がある</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr>
+<tr><td>QA-RESPONSIVE-001</td><td>1440px幅で検索フォームと講義カードが表示される</td><td>results.json evidence 参照</td><td>-</td><td>Given 証跡</td><td>PASS</td><td>-</td></tr></tbody>
+      </table>
+    </section>
+
+    <section id="scenarios">
+      <div class="section-head">
+        <div>
+          <h2>Scenarios</h2>
+          <p class="hint">Given / When / Then とブラウザ、コマンド、CI、inspection 証跡。</p>
+        </div>
+      </div>
+      <article class="case" data-status="PASS" id="QA-SEARCH-001">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-001" class="case-id"><code>QA-SEARCH-001</code></a>
+      <div>
+        <h3>条件を追加せず「検索する」を押す</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>未認証の新しいブラウザーで公開検索ページを開き、既定条件の検索フォームが見える</dd>
+      <dt>When</dt><dd>条件を追加せず「検索する」を押す</dd>
+      <dt>Then</dt><dd>認証要求なしで20件の一覧と21/6461件の対象範囲が表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-001_given_public-search.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-001_given_public-search.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:38.258+00:00 ・ assets/screenshots/QA-SEARCH-001_given_public-search.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-001_when_default-search-submitted.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-001_when_default-search-submitted.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:39.052+00:00 ・ assets/screenshots/QA-SEARCH-001_when_default-search-submitted.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-001_then_coverage-card.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-001_then_coverage-card.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:39.168+00:00 ・ assets/screenshots/QA-SEARCH-001_then_coverage-card.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-002">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-002" class="case-id"><code>QA-SEARCH-002</code></a>
+      <div>
+        <h3>キーワード欄だけに「コロイド」を入力して検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>キーワード欄が空の検索フォームが表示される</dd>
+      <dt>When</dt><dd>キーワード欄だけに「コロイド」を入力して検索する</dd>
+      <dt>Then</dt><dd>T1AB3300「コロイド・界面化学」だけが表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-002_given_empty-filter.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-002_given_empty-filter.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:40.732+00:00 ・ assets/screenshots/QA-SEARCH-002_given_empty-filter.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-002_when_filter-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-002_when_filter-filled.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:40.833+00:00 ・ assets/screenshots/QA-SEARCH-002_when_filter-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-002_then_matching-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-002_then_matching-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:41.560+00:00 ・ assets/screenshots/QA-SEARCH-002_then_matching-result.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-003">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-003" class="case-id"><code>QA-SEARCH-003</code></a>
+      <div>
+        <h3>科目名欄だけに「コロイド」を入力して検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>科目名欄が空の検索フォームが表示される</dd>
+      <dt>When</dt><dd>科目名欄だけに「コロイド」を入力して検索する</dd>
+      <dt>Then</dt><dd>T1AB3300「コロイド・界面化学」だけが表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-003_given_empty-filter.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-003_given_empty-filter.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:43.016+00:00 ・ assets/screenshots/QA-SEARCH-003_given_empty-filter.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-003_when_filter-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-003_when_filter-filled.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:43.119+00:00 ・ assets/screenshots/QA-SEARCH-003_when_filter-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-003_then_matching-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-003_then_matching-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:43.847+00:00 ・ assets/screenshots/QA-SEARCH-003_then_matching-result.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-004">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-004" class="case-id"><code>QA-SEARCH-004</code></a>
+      <div>
+        <h3>担当教員欄だけに「大　迫 祐太朗」を入力して検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>担当教員欄が空の検索フォームが表示される</dd>
+      <dt>When</dt><dd>担当教員欄だけに「大　迫 祐太朗」を入力して検索する</dd>
+      <dt>Then</dt><dd>空白と文字幅が正規化され、ASL00500が表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-004_given_empty-filter.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-004_given_empty-filter.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:45.382+00:00 ・ assets/screenshots/QA-SEARCH-004_given_empty-filter.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-004_when_filter-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-004_when_filter-filled.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:45.497+00:00 ・ assets/screenshots/QA-SEARCH-004_when_filter-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-004_then_matching-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-004_then_matching-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:46.219+00:00 ・ assets/screenshots/QA-SEARCH-004_then_matching-result.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-005">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-005" class="case-id"><code>QA-SEARCH-005</code></a>
+      <div>
+        <h3>教室欄だけに「工Ｗ２－１０１」を入力して検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>教室欄が空の検索フォームが表示される</dd>
+      <dt>When</dt><dd>教室欄だけに「工Ｗ２－１０１」を入力して検索する</dd>
+      <dt>Then</dt><dd>文字幅とハイフンが正規化され、T1AB3300が表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-005_given_empty-filter.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-005_given_empty-filter.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:47.666+00:00 ・ assets/screenshots/QA-SEARCH-005_given_empty-filter.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-005_when_filter-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-005_when_filter-filled.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:47.765+00:00 ・ assets/screenshots/QA-SEARCH-005_when_filter-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-005_then_matching-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-005_then_matching-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:48.496+00:00 ・ assets/screenshots/QA-SEARCH-005_then_matching-result.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-006">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-006" class="case-id"><code>QA-SEARCH-006</code></a>
+      <div>
+        <h3>年度・学部・学期を一つずつ指定して検索し、各検索の間は「条件をクリア」で戻る</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>QA専用年度2025講義と、工学部・後期の検索対象がローカルDBにあり、既定検索画面が開いている</dd>
+      <dt>When</dt><dd>年度・学部・学期を一つずつ指定して検索し、各検索の間は「条件をクリア」で戻る</dd>
+      <dt>Then</dt><dd>年度2025でQA専用講義、工学部でT1AB3300、後期で科学技術政策特論が個別に表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-006_given_academic-facets-ready.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_given_academic-facets-ready.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:50.018+00:00 ・ assets/screenshots/QA-SEARCH-006_given_academic-facets-ready.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_when_year-selected.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_when_year-selected.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:50.115+00:00 ・ assets/screenshots/QA-SEARCH-006_when_year-selected.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_when_department-selected.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_when_department-selected.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:53.063+00:00 ・ assets/screenshots/QA-SEARCH-006_when_department-selected.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_when_term-selected.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_when_term-selected.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:56.012+00:00 ・ assets/screenshots/QA-SEARCH-006_when_term-selected.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_then_year-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_then_year-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:50.827+00:00 ・ assets/screenshots/QA-SEARCH-006_then_year-result.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_then_department-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_then_department-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:53.776+00:00 ・ assets/screenshots/QA-SEARCH-006_then_department-result.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_then_term-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_then_term-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:56.728+00:00 ・ assets/screenshots/QA-SEARCH-006_then_term-result.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-1.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-1.png" alt="Supplemental screenshot"></a><figcaption>Supplemental ・ screenshot ・ 2026-10-15T14:18:52.967+00:00 ・ assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-1.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-2.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-2.png" alt="Supplemental screenshot"></a><figcaption>Supplemental ・ screenshot ・ 2026-10-15T14:18:55.912+00:00 ・ assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-2.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-007">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-007" class="case-id"><code>QA-SEARCH-007</code></a>
+      <div>
+        <h3>曜日を月曜日にして検索し、条件をクリアした後、時限だけ5限にして検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>月曜日と5限に該当する講義が取り込まれている</dd>
+      <dt>When</dt><dd>曜日を月曜日にして検索し、条件をクリアした後、時限だけ5限にして検索する</dd>
+      <dt>Then</dt><dd>曜日検索に月曜日の講義が出て、5限検索にはHM218100とHB800100が含まれる</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-007_given_schedule-facets-ready.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-007_given_schedule-facets-ready.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:18:58.240+00:00 ・ assets/screenshots/QA-SEARCH-007_given_schedule-facets-ready.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-007_when_weekday-monday-selected.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-007_when_weekday-monday-selected.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:18:58.356+00:00 ・ assets/screenshots/QA-SEARCH-007_when_weekday-monday-selected.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-007_when_period-5-selected.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-007_when_period-5-selected.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:01.447+00:00 ・ assets/screenshots/QA-SEARCH-007_when_period-5-selected.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-007_then_weekday-monday-results.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-007_then_weekday-monday-results.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:18:59.111+00:00 ・ assets/screenshots/QA-SEARCH-007_then_weekday-monday-results.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-007_then_period-5-results.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-007_then_period-5-results.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:02.179+00:00 ・ assets/screenshots/QA-SEARCH-007_then_period-5-results.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-007_supplemental_clear-reset-schedule.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-007_supplemental_clear-reset-schedule.png" alt="Supplemental screenshot"></a><figcaption>Supplemental ・ screenshot ・ 2026-10-15T14:19:01.332+00:00 ・ assets/screenshots/QA-SEARCH-007_supplemental_clear-reset-schedule.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-008">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-008" class="case-id"><code>QA-SEARCH-008</code></a>
+      <div>
+        <h3>後期・月曜・2限を同時に指定して検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.adjacent-regression ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>QA専用講義の枠が後期・月曜1限と後期・金曜2限として読み戻されている</dd>
+      <dt>When</dt><dd>後期・月曜・2限を同時に指定して検索する</dd>
+      <dt>Then</dt><dd>別々の開講枠をまたぐ月曜2限は0件で、同じ枠の月曜1限ならQA専用講義が表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-008_given_qa-row-readback.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-008_given_qa-row-readback.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:03.125+00:00 ・ assets/screenshots/QA-SEARCH-008_given_qa-row-readback.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-008_when_cross-slot-empty.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-008_when_cross-slot-empty.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:03.859+00:00 ・ assets/screenshots/QA-SEARCH-008_when_cross-slot-empty.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-008_then_same-slot-match.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-008_then_same-slot-match.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:04.591+00:00 ・ assets/screenshots/QA-SEARCH-008_then_same-slot-match.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-008_supplemental_positive-pair-readback.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-008_supplemental_positive-pair-readback.png" alt="Supplemental screenshot"></a><figcaption>Supplemental ・ screenshot ・ 2026-10-15T14:19:04.692+00:00 ・ assets/screenshots/QA-SEARCH-008_supplemental_positive-pair-readback.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00
+Supplemental ・ file ・ supplemental/seed-read-back.json ・ 2026-10-15T14:20:09+00:00
+Supplemental ・ file ・ supplemental/cleanup-verification.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-009">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-009" class="case-id"><code>QA-SEARCH-009</code></a>
+      <div>
+        <h3>授業形式を「対面」にして検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>授業形式を選んでいない検索フォームが表示される</dd>
+      <dt>When</dt><dd>授業形式を「対面」にして検索する</dd>
+      <dt>Then</dt><dd>FSE15500とHB800100が表示され、HB800100には対面とオンライン（同時配信）の両方が表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-009_given_modality-facet-ready.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-009_given_modality-facet-ready.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:06.199+00:00 ・ assets/screenshots/QA-SEARCH-009_given_modality-facet-ready.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-009_when_in-person-selected.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-009_when_in-person-selected.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:06.296+00:00 ・ assets/screenshots/QA-SEARCH-009_when_in-person-selected.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-009_then_multi-mode-results.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-009_then_multi-mode-results.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:07.011+00:00 ・ assets/screenshots/QA-SEARCH-009_then_multi-mode-results.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-010">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-010" class="case-id"><code>QA-SEARCH-010</code></a>
+      <div>
+        <h3>科目名・教員・教室・年度・学部・学期・曜日・時限・授業形式を同時指定して検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.adjacent-regression ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>9条件の入力前に検索フォームが表示される</dd>
+      <dt>When</dt><dd>科目名・教員・教室・年度・学部・学期・曜日・時限・授業形式を同時指定して検索する</dd>
+      <dt>Then</dt><dd>全条件に合うT1AB3300だけが表示される</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-010_given_and-filter-ready.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-010_given_and-filter-ready.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:08.449+00:00 ・ assets/screenshots/QA-SEARCH-010_given_and-filter-ready.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-010_when_all-filters-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-010_when_all-filters-filled.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:08.596+00:00 ・ assets/screenshots/QA-SEARCH-010_when_all-filters-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-010_then_and-single-result.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-010_then_and-single-result.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:09.340+00:00 ・ assets/screenshots/QA-SEARCH-010_then_and-single-result.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-011">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-011" class="case-id"><code>QA-SEARCH-011</code></a>
+      <div>
+        <h3>キーワード「AND OR NOT」をそのまま検索する</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.adjacent-regression ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>検索フォームと、本文内に検索語が含まれる既存コースがある</dd>
+      <dt>When</dt><dd>キーワード「AND OR NOT」をそのまま検索する</dd>
+      <dt>Then</dt><dd>FTS/SQLエラーを出さず、語句が一致するHM218100・HB800100・HS900100が表示される。補助的な一意語検索は通常0件になる</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-011_given_fts-literal-ready.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-011_given_fts-literal-ready.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:10.861+00:00 ・ assets/screenshots/QA-SEARCH-011_given_fts-literal-ready.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-011_when_fts-operators-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-011_when_fts-operators-filled.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:10.977+00:00 ・ assets/screenshots/QA-SEARCH-011_when_fts-operators-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-011_then_fts-literal-three-results.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-011_then_fts-literal-three-results.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:11.713+00:00 ・ assets/screenshots/QA-SEARCH-011_then_fts-literal-three-results.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-filled.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-filled.png" alt="Supplemental screenshot"></a><figcaption>Supplemental ・ screenshot ・ 2026-10-15T14:19:11.814+00:00 ・ assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-filled.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-zero.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-zero.png" alt="Supplemental screenshot"></a><figcaption>Supplemental ・ screenshot ・ 2026-10-15T14:19:12.527+00:00 ・ assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-zero.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00
+Supplemental ・ file ・ supplemental/literal-search-check.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-012">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-012" class="case-id"><code>QA-SEARCH-012</code></a>
+      <div>
+        <h3>未知の授業形式と上限超過ページ番号を指定して開く</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.input-or-time-boundary ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>公開検索ページが開いている</dd>
+      <dt>When</dt><dd>未知の授業形式と上限超過ページ番号を指定して開く</dd>
+      <dt>Then</dt><dd>利用者向け400エラーが説明され、FTS/SQL内部詳細は表示されない</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-012_given_valid-search-before-error.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-012_given_valid-search-before-error.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:13.995+00:00 ・ assets/screenshots/QA-SEARCH-012_given_valid-search-before-error.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-012_when_invalid-modality-error.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-012_when_invalid-modality-error.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:14.765+00:00 ・ assets/screenshots/QA-SEARCH-012_when_invalid-modality-error.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-012_then_invalid-page-error.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-012_then_invalid-page-error.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:16.230+00:00 ・ assets/screenshots/QA-SEARCH-012_then_invalid-page-error.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-SEARCH-013">
+  <header>
+    <div class="case-title">
+      <a href="#QA-SEARCH-013" class="case-id"><code>QA-SEARCH-013</code></a>
+      <div>
+        <h3>次ページへ進む</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S1.normal-readback ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>2026年度の1ページ目に20件と次ページ導線が表示される</dd>
+      <dt>When</dt><dd>次ページへ進む</dd>
+      <dt>Then</dt><dd>2ページ目に残り1件が表示され、年度条件は2026のまま保たれる</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-SEARCH-013_given_first-page-20.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-013_given_first-page-20.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:17.682+00:00 ・ assets/screenshots/QA-SEARCH-013_given_first-page-20.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-013_when_next-page-control.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-013_when_next-page-control.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:17.785+00:00 ・ assets/screenshots/QA-SEARCH-013_when_next-page-control.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-SEARCH-013_then_second-page-one.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-SEARCH-013_then_second-page-one.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:18.528+00:00 ・ assets/screenshots/QA-SEARCH-013_then_second-page-one.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-DETAIL-001">
+  <header>
+    <div class="case-title">
+      <a href="#QA-DETAIL-001" class="case-id"><code>QA-DETAIL-001</code></a>
+      <div>
+        <h3>科目名で絞り、詳細を開いて公開PDFを別タブで確認してから戻る</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S2.normal-readback, S2.integration-visible ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>検索フォームが表示され、取込済みのFSE15500がある</dd>
+      <dt>When</dt><dd>科目名で絞り、詳細を開いて公開PDFを別タブで確認してから戻る</dd>
+      <dt>Then</dt><dd>本文と原本PDF導線が表示され、戻った一覧に科目名条件が残る</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:19.429+00:00 ・ assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-DETAIL-001_when_course-detail.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-DETAIL-001_when_course-detail.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:20.168+00:00 ・ assets/screenshots/QA-DETAIL-001_when_course-detail.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:23.380+00:00 ・ assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:24.216+00:00 ・ assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+<article class="case" data-status="PASS" id="QA-RESPONSIVE-001">
+  <header>
+    <div class="case-title">
+      <a href="#QA-RESPONSIVE-001" class="case-id"><code>QA-RESPONSIVE-001</code></a>
+      <div>
+        <h3>ブラウザー幅を390pxにする</h3>
+        <div class="meta-line">method Browser ・ P1 ・ covers: S3.normal-readback, S3.adjacent-regression ・ 2026-10-15T14:18:36.687+00:00</div>
+      </div>
+    </div>
+    <span class="pill status PASS">PASS</span>
+  </header>
+  <div class="case-body">
+    <dl class="gwt">
+      <dt>Given</dt><dd>1440px幅で検索フォームと講義カードが表示される</dd>
+      <dt>When</dt><dd>ブラウザー幅を390pxにする</dd>
+      <dt>Then</dt><dd>フォームと20件のカードが読め、横方向のはみ出しがない</dd>
+    </dl>
+<div class="evidence"><figure><a href="assets/screenshots/QA-RESPONSIVE-001_given_desktop-search.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-RESPONSIVE-001_given_desktop-search.png" alt="Given screenshot"></a><figcaption>Given ・ screenshot ・ 2026-10-15T14:19:25.784+00:00 ・ assets/screenshots/QA-RESPONSIVE-001_given_desktop-search.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-RESPONSIVE-001_when_mobile-search.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-RESPONSIVE-001_when_mobile-search.png" alt="When screenshot"></a><figcaption>When ・ screenshot ・ 2026-10-15T14:19:25.865+00:00 ・ assets/screenshots/QA-RESPONSIVE-001_when_mobile-search.png</figcaption></figure>
+<figure><a href="assets/screenshots/QA-RESPONSIVE-001_then_mobile-result-cards.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-RESPONSIVE-001_then_mobile-result-cards.png" alt="Then screenshot"></a><figcaption>Then ・ screenshot ・ 2026-10-15T14:19:27.701+00:00 ・ assets/screenshots/QA-RESPONSIVE-001_then_mobile-result-cards.png</figcaption></figure></div>
+<details><summary>Non-browser evidence</summary><pre>Supplemental ・ file ・ supplemental/duplicate-recapture.json ・ 2026-10-15T14:20:09+00:00</pre></details>
+  </div>
+</article>
+      <template id="scenario-template">
+        <article class="case" data-status="PASS" id="QA-CASE-ID">
+          <header>
+            <div class="case-title">
+              <a href="#QA-CASE-ID" class="case-id"><code>QA-CASE-ID</code></a>
+              <div>
+                <h3>Scenario title</h3>
+                <div class="meta-line">method Browser ・ normal ・ priority high ・ admin@example ・ Chrome ・ 2026-05-22 14:02</div>
+              </div>
+            </div>
+            <span class="pill status PASS">PASS</span>
+          </header>
+          <div class="case-body">
+            <dl class="gwt">
+              <dt>Given</dt><dd>Initial state and prepared data.</dd>
+              <dt>When</dt><dd>User action or external event.</dd>
+              <dt>Then</dt><dd>Expected visible outcome and actual result.</dd>
+            </dl>
+            <div class="evidence">
+              <figure>
+                <a href="assets/screenshots/QA-CASE-ID_given_name.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-CASE-ID_given_name.png" alt="Given screenshot"></a>
+                <figcaption>Given ・ screen ・ captured at ・ file ・ why this proves setup</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/screenshots/QA-CASE-ID_when_name.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-CASE-ID_when_name.png" alt="When screenshot"></a>
+                <figcaption>When ・ screen ・ captured at ・ file ・ action just performed</figcaption>
+              </figure>
+              <figure>
+                <a href="assets/screenshots/QA-CASE-ID_then_name.png" target="_blank"><img loading="lazy" src="assets/screenshots/QA-CASE-ID_then_name.png" alt="Then screenshot"></a>
+                <figcaption>Then ・ screen ・ captured at ・ file ・ expected vs actual</figcaption>
+              </figure>
+            </div>
+            <details>
+              <summary>Non-browser evidence</summary>
+              <pre>For command / CI / inspection cases, put exact command or target and observed output summary here. For NOT RUN / BLOCKED, put reason, risk, and follow-up.</pre>
+            </details>
+          </div>
+        </article>
+      </template>
+    </section>
+
+    <section id="findings">
+      <div class="section-head">
+        <div>
+          <h2>Findings</h2>
+          <p class="hint">リリース判断に影響するIssue、差分起因の疑い、観測結果。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>ID</th><th>Severity</th><th>Scenario</th><th>What Happened</th><th>Expected</th><th>Impact</th><th>Evidence</th><th>Next Action</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="notes">
+      <div class="section-head">
+        <div>
+          <h2>Follow-ups</h2>
+          <p class="hint">未確認、環境制約、追加で見るべき観点。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Item</th><th>Reason</th><th>Risk</th><th>Follow-up</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="appendix">
+      <div class="section-head">
+        <div>
+          <h2>Appendix</h2>
+          <p class="hint">コマンド、CI、seed作成ログ、参照リンク。</p>
+        </div>
+      </div>
+      <h3>Commands</h3>
+      <pre># 検証はすべて trusted runner 経由(OK 行の転記は証明にならない。証明は attestation.json のみ)
+python3 &lt;skill&gt;/assets/run.py lock-plan &lt;session&gt;/plan.json
+python3 &lt;skill&gt;/assets/run.py render &lt;session&gt;
+python3 &lt;skill&gt;/assets/run.py verify &lt;session&gt;</pre>
+      <h3>CI</h3>
+      <pre>ローカル品質ゲート PASS: TypeScript 6件・Python 18件・型検査・build・dry-run・Playwright smoke 1件。厳格取込確認は21/6461 PDF、34頁、エラー0、警告14。modality unknown 18/21。詳細 supplemental/quality-gates.json。</pre>
+      <h3>Seed Logs</h3>
+      <pre>-</pre>
+      <h3>References</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Link</th></tr></thead>
+        <tbody><tr><td>plan</td><td>plan.json</td></tr><tr><td>results</td><td>results.json</td></tr><tr><td>attestation</td><td>attestation.json(runner 生成。無ければ UNATTESTED)</td></tr></tbody>
+      </table>
+    </section>
+
+    <script type="application/json" id="qa-manifest">
+{
+  "reportId": "20261015T135808Z-re-qa-d63c",
+  "repo": "shinshu-syllabus-search",
+  "pr": null,
+  "branch": "unborn HEAD (workspace digest 0a5b8ef3)",
+  "commit": "0a5b8ef3b737e96f06a1b37379e6553ec853e7e8",
+  "environment": "local",
+  "targetUrl": "http://127.0.0.1:5173",
+  "executedAt": "2026-10-15T14:18:36.687+00:00",
+  "browserTool": "agent-browser CLI / isolated Chromium",
+  "ciStatus": "ローカル品質ゲート PASS: TypeScript 6件・Python 18件・型検査・build・dry-run・Playwright smoke 1件。厳格取込確認は21/6461 PDF、34頁、エラー0、警告14。modality unknown 18/21。詳細 supplemental/quality-gates.json。",
+  "verdict": {
+    "outcome": "NO_FAILURE_FOUND",
+    "coverage": "COMPLETE",
+    "legacy": "PASS"
+  },
+  "summaryLine": "NO_FAILURE_FOUND / COMPLETE(必須obligation実行率 7/7、未実行0件)",
+  "cases": [
+    {
+      "id": "QA-SEARCH-001",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-001_given_public-search.png",
+        "assets/screenshots/QA-SEARCH-001_when_default-search-submitted.png",
+        "assets/screenshots/QA-SEARCH-001_then_coverage-card.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-001_given_public-search.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-001_when_default-search-submitted.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-001_then_coverage-card.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-002",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-002_given_empty-filter.png",
+        "assets/screenshots/QA-SEARCH-002_when_filter-filled.png",
+        "assets/screenshots/QA-SEARCH-002_then_matching-result.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-002_given_empty-filter.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-002_when_filter-filled.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-002_then_matching-result.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-003",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-003_given_empty-filter.png",
+        "assets/screenshots/QA-SEARCH-003_when_filter-filled.png",
+        "assets/screenshots/QA-SEARCH-003_then_matching-result.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-003_given_empty-filter.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-003_when_filter-filled.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-003_then_matching-result.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-004",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-004_given_empty-filter.png",
+        "assets/screenshots/QA-SEARCH-004_when_filter-filled.png",
+        "assets/screenshots/QA-SEARCH-004_then_matching-result.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-004_given_empty-filter.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-004_when_filter-filled.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-004_then_matching-result.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-005",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-005_given_empty-filter.png",
+        "assets/screenshots/QA-SEARCH-005_when_filter-filled.png",
+        "assets/screenshots/QA-SEARCH-005_then_matching-result.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-005_given_empty-filter.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-005_when_filter-filled.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-005_then_matching-result.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-006",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-006_given_academic-facets-ready.png",
+        "assets/screenshots/QA-SEARCH-006_when_year-selected.png",
+        "assets/screenshots/QA-SEARCH-006_then_year-result.png",
+        "assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-1.png",
+        "assets/screenshots/QA-SEARCH-006_when_department-selected.png",
+        "assets/screenshots/QA-SEARCH-006_then_department-result.png",
+        "assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-2.png",
+        "assets/screenshots/QA-SEARCH-006_when_term-selected.png",
+        "assets/screenshots/QA-SEARCH-006_then_term-result.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-006_given_academic-facets-ready.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-006_when_year-selected.png",
+          "assets/screenshots/QA-SEARCH-006_when_department-selected.png",
+          "assets/screenshots/QA-SEARCH-006_when_term-selected.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-006_then_year-result.png",
+          "assets/screenshots/QA-SEARCH-006_then_department-result.png",
+          "assets/screenshots/QA-SEARCH-006_then_term-result.png"
+        ],
+        "supplemental": [
+          "assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-1.png",
+          "assets/screenshots/QA-SEARCH-006_supplemental_clear-reset-facet-2.png"
+        ]
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-007",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-007_given_schedule-facets-ready.png",
+        "assets/screenshots/QA-SEARCH-007_when_weekday-monday-selected.png",
+        "assets/screenshots/QA-SEARCH-007_then_weekday-monday-results.png",
+        "assets/screenshots/QA-SEARCH-007_supplemental_clear-reset-schedule.png",
+        "assets/screenshots/QA-SEARCH-007_when_period-5-selected.png",
+        "assets/screenshots/QA-SEARCH-007_then_period-5-results.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-007_given_schedule-facets-ready.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-007_when_weekday-monday-selected.png",
+          "assets/screenshots/QA-SEARCH-007_when_period-5-selected.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-007_then_weekday-monday-results.png",
+          "assets/screenshots/QA-SEARCH-007_then_period-5-results.png"
+        ],
+        "supplemental": [
+          "assets/screenshots/QA-SEARCH-007_supplemental_clear-reset-schedule.png"
+        ]
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-008",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-008_given_qa-row-readback.png",
+        "assets/screenshots/QA-SEARCH-008_when_cross-slot-empty.png",
+        "assets/screenshots/QA-SEARCH-008_then_same-slot-match.png",
+        "assets/screenshots/QA-SEARCH-008_supplemental_positive-pair-readback.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-008_given_qa-row-readback.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-008_when_cross-slot-empty.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-008_then_same-slot-match.png"
+        ],
+        "supplemental": [
+          "assets/screenshots/QA-SEARCH-008_supplemental_positive-pair-readback.png"
+        ]
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json",
+        "supplemental/seed-read-back.json",
+        "supplemental/cleanup-verification.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-009",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-009_given_modality-facet-ready.png",
+        "assets/screenshots/QA-SEARCH-009_when_in-person-selected.png",
+        "assets/screenshots/QA-SEARCH-009_then_multi-mode-results.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-009_given_modality-facet-ready.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-009_when_in-person-selected.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-009_then_multi-mode-results.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-010",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-010_given_and-filter-ready.png",
+        "assets/screenshots/QA-SEARCH-010_when_all-filters-filled.png",
+        "assets/screenshots/QA-SEARCH-010_then_and-single-result.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-010_given_and-filter-ready.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-010_when_all-filters-filled.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-010_then_and-single-result.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-011",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-011_given_fts-literal-ready.png",
+        "assets/screenshots/QA-SEARCH-011_when_fts-operators-filled.png",
+        "assets/screenshots/QA-SEARCH-011_then_fts-literal-three-results.png",
+        "assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-filled.png",
+        "assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-zero.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-011_given_fts-literal-ready.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-011_when_fts-operators-filled.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-011_then_fts-literal-three-results.png"
+        ],
+        "supplemental": [
+          "assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-filled.png",
+          "assets/screenshots/QA-SEARCH-011_supplemental_unique-literal-zero.png"
+        ]
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json",
+        "supplemental/literal-search-check.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-012",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-012_given_valid-search-before-error.png",
+        "assets/screenshots/QA-SEARCH-012_when_invalid-modality-error.png",
+        "assets/screenshots/QA-SEARCH-012_then_invalid-page-error.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-012_given_valid-search-before-error.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-012_when_invalid-modality-error.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-012_then_invalid-page-error.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-SEARCH-013",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-SEARCH-013_given_first-page-20.png",
+        "assets/screenshots/QA-SEARCH-013_when_next-page-control.png",
+        "assets/screenshots/QA-SEARCH-013_then_second-page-one.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-SEARCH-013_given_first-page-20.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-SEARCH-013_when_next-page-control.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-SEARCH-013_then_second-page-one.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-DETAIL-001",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png",
+        "assets/screenshots/QA-DETAIL-001_when_course-detail.png",
+        "assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png",
+        "assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-DETAIL-001_given_filtered-list-fse15500.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-DETAIL-001_when_course-detail.png",
+          "assets/screenshots/QA-DETAIL-001_when_official-pdf-open.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-DETAIL-001_then_filtered-list-restored.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    },
+    {
+      "id": "QA-RESPONSIVE-001",
+      "method": "Browser",
+      "status": "PASS",
+      "screenshots": [
+        "assets/screenshots/QA-RESPONSIVE-001_given_desktop-search.png",
+        "assets/screenshots/QA-RESPONSIVE-001_when_mobile-search.png",
+        "assets/screenshots/QA-RESPONSIVE-001_then_mobile-result-cards.png"
+      ],
+      "screenshotsBySlot": {
+        "given": [
+          "assets/screenshots/QA-RESPONSIVE-001_given_desktop-search.png"
+        ],
+        "when": [
+          "assets/screenshots/QA-RESPONSIVE-001_when_mobile-search.png"
+        ],
+        "then": [
+          "assets/screenshots/QA-RESPONSIVE-001_then_mobile-result-cards.png"
+        ],
+        "supplemental": []
+      },
+      "evidence": [
+        "supplemental/duplicate-recapture.json"
+      ]
+    }
+  ]
+}
+    </script>
+    <script>
+      document.querySelectorAll('.filters').forEach((group) => {
+        const table = document.getElementById(group.dataset.filterTarget);
+        group.addEventListener('click', (event) => {
+          const button = event.target.closest('button[data-status]');
+          if (!button || !table) return;
+          group.querySelectorAll('.filter').forEach((item) => item.classList.remove('active'));
+          button.classList.add('active');
+          const status = button.dataset.status;
+          table.querySelectorAll('tbody tr').forEach((row) => {
+            row.hidden = status !== 'all' && row.dataset.status !== status;
+          });
+        });
+      });
+    </script>
+  </main>
+</body>
+</html>

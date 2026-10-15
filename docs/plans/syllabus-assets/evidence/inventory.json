@@ -1,0 +1,156 @@
+{
+  "observed_at": "2026-10-15 JST",
+  "auth": "none",
+  "departments": [
+    {
+      "department": "人文学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/l/index.html",
+      "status": 200,
+      "links": 304,
+      "unique": 280
+    },
+    {
+      "department": "教育学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/e/index.html",
+      "status": 200,
+      "links": 707,
+      "unique": 689
+    },
+    {
+      "department": "経法学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/j/index.html",
+      "status": 200,
+      "links": 236,
+      "unique": 199
+    },
+    {
+      "department": "理学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/s/index.html",
+      "status": 200,
+      "links": 439,
+      "unique": 374
+    },
+    {
+      "department": "医学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/m/index.html",
+      "status": 200,
+      "links": 948,
+      "unique": 331
+    },
+    {
+      "department": "工学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/t/index.html",
+      "status": 200,
+      "links": 596,
+      "unique": 492
+    },
+    {
+      "department": "農学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/a/index.html",
+      "status": 200,
+      "links": 709,
+      "unique": 608
+    },
+    {
+      "department": "繊維学部",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/f/index.html",
+      "status": 200,
+      "links": 337,
+      "unique": 271
+    },
+    {
+      "department": "共通教育・グローバル",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/g/index.html",
+      "status": 200,
+      "links": 1161,
+      "unique": 1129
+    },
+    {
+      "department": "教育学研究科",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/ek/index.html",
+      "status": 200,
+      "links": 114,
+      "unique": 114
+    },
+    {
+      "department": "総合人文社会科学研究科",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/ua/index.html",
+      "status": 200,
+      "links": 256,
+      "unique": 247
+    },
+    {
+      "department": "医学系研究科（修士課程）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/ma/index.html",
+      "status": 200,
+      "links": 218,
+      "unique": 146
+    },
+    {
+      "department": "総合理工学研究科（理学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/ss/index.html",
+      "status": 200,
+      "links": 190,
+      "unique": 189
+    },
+    {
+      "department": "総合理工学研究科（工学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/ts/index.html",
+      "status": 200,
+      "links": 484,
+      "unique": 480
+    },
+    {
+      "department": "総合理工学研究科（繊維学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/fs/index.html",
+      "status": 200,
+      "links": 137,
+      "unique": 123
+    },
+    {
+      "department": "総合理工学研究科（農学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/as/index.html",
+      "status": 200,
+      "links": 186,
+      "unique": 165
+    },
+    {
+      "department": "総合理工学研究科（生命医工学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/bs/index.html",
+      "status": 200,
+      "links": 136,
+      "unique": 130
+    },
+    {
+      "department": "総合医理工学研究科（医学系専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/hm/index.html",
+      "status": 200,
+      "links": 280,
+      "unique": 257
+    },
+    {
+      "department": "総合医理工学研究科（総合理工学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/hs/index.html",
+      "status": 200,
+      "links": 154,
+      "unique": 152
+    },
+    {
+      "department": "総合医理工学研究科（生命医工学専攻）",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/hb/index.html",
+      "status": 200,
+      "links": 75,
+      "unique": 75
+    },
+    {
+      "department": "大学院共通教育用科目のみ",
+      "url": "https://lms.ealps.shinshu-u.ac.jp/syllabus/com/index.html",
+      "status": 200,
+      "links": 10,
+      "unique": 10
+    }
+  ],
+  "pdf_url_total": 7677,
+  "pdf_url_unique": 6461,
+  "note": "リンク収集数。全PDF本文の検証数ではない。"
+}

@@ -1,0 +1,29 @@
+{
+  "checked_at": "2026-10-15T14:05:45+00:00",
+  "method": "independent read-only scan of imported data/courses.jsonl body_search, without emitting syllabus text",
+  "expected_codes": [
+    "HM218100",
+    "HB800100",
+    "HS900100"
+  ],
+  "token_presence_by_code": {
+    "HB800100": {
+      "AND": true,
+      "OR": true,
+      "NOT": true
+    },
+    "HM218100": {
+      "AND": true,
+      "OR": true,
+      "NOT": true
+    },
+    "HS900100": {
+      "AND": true,
+      "OR": true,
+      "NOT": true
+    }
+  },
+  "all_three_tokens_present_for_each": true,
+  "control_query": "AND OR NOT ZXQ7910",
+  "control_oracle": "ZXQ7910 is a deliberately unique test token; browser result should be normal empty state"
+}

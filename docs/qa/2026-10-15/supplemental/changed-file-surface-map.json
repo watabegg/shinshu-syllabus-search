@@ -1,0 +1,78 @@
+[
+  {
+    "file": "app/pages/Index.tsx",
+    "surface": "S1 公開検索フォーム・条件検証・講義一覧"
+  },
+  {
+    "file": "app/pages/Courses/Show.tsx",
+    "surface": "S2 講義詳細・抽出本文・原本PDFへの導線"
+  },
+  {
+    "file": "app/pages/Error.tsx",
+    "surface": "S1 不正クエリ・エラー画面"
+  },
+  {
+    "file": "app/root-view.tsx",
+    "surface": "S1/S2 共通HTML配信"
+  },
+  {
+    "file": "src/server.tsx",
+    "surface": "S1/S2 公開ルート・入力検証"
+  },
+  {
+    "file": "src/lib/search.ts",
+    "surface": "S1/S2 検索クエリ解析、条件検索、講義詳細読取"
+  },
+  {
+    "file": "src/lib/contracts.ts",
+    "surface": "S1/S2 検索・詳細データ型"
+  },
+  {
+    "file": "src/lib/utils.ts",
+    "surface": "S1 検索表示ユーティリティ"
+  },
+  {
+    "file": "scripts/ingest/common.py",
+    "surface": "S4 PDF抽出・正規化・取込"
+  },
+  {
+    "file": "scripts/ingest/discover.py",
+    "surface": "S4 公開一覧からのPDF発見"
+  },
+  {
+    "file": "scripts/ingest/extract.py",
+    "surface": "S4 PDF本文抽出"
+  },
+  {
+    "file": "scripts/ingest/normalize.py",
+    "surface": "S4 コース・時間割・形式の正規化"
+  },
+  {
+    "file": "scripts/ingest/export.py",
+    "surface": "S4 D1出力・再取込"
+  },
+  {
+    "file": "scripts/ingest/validate.py",
+    "surface": "S4 strict validation"
+  },
+  {
+    "file": "migrations/0001_initial.sql",
+    "surface": "S4 D1初期スキーマ"
+  },
+  {
+    "file": "migrations/0002_search.sql",
+    "surface": "S4 D1検索索引"
+  },
+  {
+    "file": "tests/e2e/search.spec.ts",
+    "surface": "S1/S2 browser E2E"
+  },
+  {
+    "file": "tests/site-search.test.ts",
+    "surface": "S1/S2 search unit tests"
+  },
+  {
+    "file": "tests/ingest/test_ingest.py",
+    "surface": "S4 ingest/normalization tests"
+  }
+]

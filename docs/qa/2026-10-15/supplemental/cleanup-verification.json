@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-10-15T14:20:09+00:00",
+  "environment": "local D1 only",
+  "cleanup_sql": "/tmp/syllabus-browser-qa.cleanup-final.sql",
+  "cleanup_command": "pnpm exec wrangler d1 execute syllabus-db --local --file /tmp/syllabus-browser-qa.cleanup-final.sql --yes --json",
+  "cleanup_command_success": true,
+  "seed_ids_removed": {
+    "course_id": "qa-browser-slot-20261015-reqa",
+    "source_document_id": "qa-source-browser-slot-20261015-reqa"
+  },
+  "counts_before_cleanup": {
+    "source_documents": 6462,
+    "courses": 22,
+    "course_search": 22,
+    "course_slots": 56
+  },
+  "counts_after_cleanup": {
+    "source_documents": 6461,
+    "courses": 21,
+    "course_search": 21,
+    "course_slots": 54,
+    "qa_course": 0,
+    "qa_source": 0,
+    "qa_slots": 0
+  },
+  "restored_to_preseed_baseline": true,
+  "reseeded_for_validator-directed_GWT_recapture": true
+}

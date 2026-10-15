@@ -1,0 +1,39 @@
+{
+  "preserved_at": "2026-10-15T14:07:43+00:00",
+  "note": "Initial helper assertion used the exact substring `1件表示`; the visible UI separates the count and counter with whitespace. This was a harness text-oracle mismatch, not a product behavior failure. Original result and screenshot references are preserved verbatim.",
+  "original_case_result": {
+    "id": "QA-SEARCH-013",
+    "status": "FAIL",
+    "evidence": [
+      {
+        "slot": "given",
+        "path": "assets/screenshots/QA-SEARCH-013_given_first-page-20.png",
+        "type": "screenshot",
+        "taken_at": "2026-10-15T14:06:27.560+00:00"
+      },
+      {
+        "slot": "when",
+        "path": "assets/screenshots/QA-SEARCH-013_when_next-page-control.png",
+        "type": "screenshot",
+        "taken_at": "2026-10-15T14:06:27.660+00:00"
+      }
+    ],
+    "fail_attribution": "diff",
+    "attribution_evidence": "expected visible text missing: ['1件表示']; URL=http://127.0.0.1:5173/?page=2"
+  },
+  "retry_history": [
+    {
+      "attempt": 1,
+      "outcome": "harness assertion stopped before final screenshot",
+      "assertion": "expected year=2026 in URL",
+      "observation": "page-2 URL contains only ?page=2 because 2026 is the current default; browser select still reads 2026",
+      "timestamp": "2026-10-15T14:08:13+00:00"
+    },
+    {
+      "attempt": 2,
+      "outcome": "PASS",
+      "oracle": "page=2, rendered counter contains 1 item with whitespace tolerated, one result card, selected year is 2026",
+      "timestamp": "2026-10-15T14:08:13+00:00"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "method": "product-ui",
+    "command_or_operation": "Inspected the anonymous search page; it exposes search and navigation only, with no course-authoring UI.",
+    "result": "failed",
+    "detail": "The public product UI does not provide course creation controls.",
+    "timestamp": "2026-10-15T14:18:12+00:00"
+  },
+  {
+    "method": "api",
+    "command_or_operation": "Inspected server routes: GET /healthz, GET /, GET /courses/:id; no course-creation endpoint.",
+    "result": "failed",
+    "detail": "The application API is read-only for courses.",
+    "timestamp": "2026-10-15T14:18:12+00:00"
+  },
+  {
+    "method": "seed-script",
+    "command_or_operation": "Inspected package scripts and scripts/ingest; no synthetic QA-course seed command exists. The ingestion CLI is source-document ingestion, not a fixture builder.",
+    "result": "failed",
+    "detail": "No local fixture seed script is available without altering the source corpus.",
+    "timestamp": "2026-10-15T14:18:12+00:00"
+  },
+  {
+    "method": "db-insert",
+    "command_or_operation": "Transactional local D1 insert into source_documents, courses, course_slots, and course_search; tag raw_metadata_json.qa_seed=true and use example.invalid source; verify through UI/D1 and delete after QA.",
+    "result": "success",
+    "detail": "Created one QA-only course with two distinct slot rows for same-slot filtering.",
+    "timestamp": "2026-10-15T14:18:12+00:00"
+  }
+]

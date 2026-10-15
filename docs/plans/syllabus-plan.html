@@ -1,0 +1,1352 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>信大シラバス検索 — 調査・実装計画</title><style>
+:root{
+  --bg:#FAFAF7;--surface:#FFF;--ink:#20242E;--ink2:#5A6372;
+  --accent:#31567F;--accent-soft:#EAF0F6;--border:#E2E3DE;
+  --code-bg:#EFF1F3;--ok:#2E7D4F;--warn:#A8741A;--bad:#B03A2E;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#15181D;--surface:#1C2026;--ink:#E4E6E9;--ink2:#9AA3AF;
+  --accent:#8AAED6;--accent-soft:#243244;--border:#2C313A;
+  --code-bg:#262B33;--ok:#6FBF8F;--warn:#D2A24C;--bad:#E08578;}
+}
+*{box-sizing:border-box}
+body{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic Medium",sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.8;margin:0;font-feature-settings:"palt"}
+main{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:1.5rem;line-height:1.5;margin:.2em 0}
+h2{font-size:1.2rem;margin:2.2em 0 .6em;padding-top:1em;border-top:1px solid var(--border)}
+h3{font-size:1.02rem;margin:1.6em 0 .4em}
+a{color:var(--accent)}
+code{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:.84em;
+  background:var(--code-bg);padding:.1em .35em;border-radius:3px;word-break:break-all}
+pre{background:var(--code-bg);padding:12px 16px;overflow-x:auto;font-size:.84rem;line-height:1.6}
+pre code{background:none;padding:0}
+pre.mermaid{background:var(--surface);border:1px solid var(--border)}
+.tablewrap{overflow-x:auto;margin:.8em 0;border:1px solid var(--border)}
+table{border-collapse:collapse;width:100%;font-size:.87rem}
+th{text-align:left;font-size:.78rem;color:var(--ink2);background:var(--surface);
+  padding:7px 11px;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:top;background:var(--surface)}
+tr:last-child td{border-bottom:none}
+.meta{color:var(--ink2);font-size:.83rem}
+.toc{background:var(--surface);border:1px solid var(--border);padding:10px 20px;font-size:.9rem;margin:16px 0;columns:2}
+.toc a{text-decoration:none}
+.progress{height:8px;background:var(--code-bg);border-radius:4px;overflow:hidden;margin:6px 0}
+.progress>div{height:100%;background:var(--ok);width:0%}
+ul.tasks{padding-left:1.2em}
+li.task{list-style:none;margin-left:-1.2em}
+li.task input{accent-color:var(--accent);margin-right:.4em}
+li.task.done{color:var(--ink2);text-decoration:line-through}
+.note{font-size:.8rem;color:var(--ink2)}
+.gate{background:var(--accent-soft);border-left:3px solid var(--accent);padding:8px 14px;margin:.6em 0;font-size:.9rem}
+@media (max-width:640px){main{padding:24px 14px 60px}.toc{columns:1}}
+
+/* PR俯瞰レポートと共通の情報設計 */
+.layout{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;max-width:1360px;margin:0 auto;padding:28px 24px 80px}
+aside{position:sticky;top:28px;align-self:start;max-height:calc(100vh - 56px);overflow:auto;font-size:13px}
+.brand{margin:4px 0 14px;color:var(--ink2);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.toc{margin:0;padding:0;border:0;background:transparent;columns:1}.toc>strong{display:none}.toc ol{margin:0;padding:0;list-style:none}
+.toc a{display:block;margin:1px 0;padding:5px 10px;border-left:2px solid transparent;border-radius:6px;color:var(--ink2)}
+.toc a:hover,.toc a.active{background:var(--accent-soft);color:var(--accent)}
+.sidemeta{margin-top:18px;padding-top:12px;border-top:1px solid var(--border);color:var(--ink2);font-size:11.5px}
+main{min-width:0;max-width:1040px;margin:0;padding:0}
+header.hero,section{padding:24px 28px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+section{margin-top:20px}header.hero h1{margin:0 0 10px;font-size:1.55rem}
+section>h2{margin:0 0 14px;padding:0 0 10px;border-top:0;border-bottom:1px solid var(--border);font-size:1.08rem}
+.tablewrap{border-radius:10px}.diagram-card{margin:12px 0;padding:16px;overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.screen-redline{display:grid;grid-template-columns:minmax(280px,1.25fr) minmax(240px,.75fr);gap:16px;align-items:start;margin:16px 0}
+.shot{margin:0}.shot-stage{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:10px;background:var(--code-bg)}
+.shot-stage img{display:block;width:100%;height:auto}.shot figcaption{margin-top:6px;color:var(--ink2);font-size:.75rem}
+.redbox{position:absolute;border:3px solid var(--bad);border-radius:8px;background:color-mix(in srgb,var(--bad) 7%,transparent);box-shadow:0 0 0 2px rgba(255,255,255,.82)}
+.pin{position:absolute;display:grid;width:26px;height:26px;place-items:center;border:2px solid #fff;border-radius:50%;background:var(--bad);color:#fff;font-size:.78rem;font-weight:800;box-shadow:0 2px 7px rgba(0,0,0,.28)}
+.annotation-list{margin:0;padding:0;list-style:none;counter-reset:annotation}.annotation-list li{position:relative;margin:0 0 10px;padding:10px 12px 10px 42px;border:1px solid var(--border);border-radius:9px;background:var(--bg)}
+.annotation-list li::before{counter-increment:annotation;content:counter(annotation);position:absolute;left:10px;top:10px;display:grid;width:22px;height:22px;place-items:center;border-radius:50%;background:var(--bad);color:#fff;font-size:.72rem;font-weight:800}
+.annotation-list strong,.annotation-list span{display:block}.annotation-list span{margin-top:3px;color:var(--ink2);font-size:.82rem}
+.step-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}.step-no{display:grid;flex:0 0 30px;width:30px;height:30px;place-items:center;border-radius:8px;background:var(--accent);color:#fff;font-weight:800}
+.step-layer{padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:.7rem;font-weight:700;text-transform:uppercase}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.problem-card{padding:15px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
+.problem-card.asis{border-top:4px solid var(--bad)}.problem-card.tobe{border-top:4px solid var(--ok)}
+.problem-card h3{margin:0 0 8px}.state-label{display:inline-block;margin-bottom:8px;padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.06em}
+.asis .state-label{background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad)}
+.tobe .state-label{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}
+.implementation-step{margin:16px 0;padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--bg)}
+.implementation-step .step-head{padding-bottom:12px;border-bottom:1px solid var(--border)}
+.implementation-step h3{margin:0}.implementation-step h4{margin:16px 0 7px;font-size:.9rem}
+.step-purpose{margin:0 0 12px;color:var(--ink2)}.step-gate{margin-top:14px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);font-size:.86rem}
+@media (max-width:980px){.layout{display:block;padding:16px 12px 60px}aside{position:static;max-height:none;margin-bottom:16px}
+  .toc ol{display:flex;flex-wrap:wrap;gap:4px}.toc a{padding:3px 12px;border:1px solid var(--border);border-radius:999px}
+  .sidemeta{display:none}header.hero,section{padding:16px}.screen-redline,.problem-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff}.layout{display:block;max-width:none;padding:0}aside{display:none!important}
+  header.hero,section{box-shadow:none;break-inside:avoid;border-right:0;border-left:0;border-radius:0}}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.chip{padding:16px;border:1px solid var(--border);border-radius:10px}.n{font-size:26px;font-weight:bold}.l{font-size:12px;color:var(--ink2)}img{max-width:100%}td,th{overflow-wrap:anywhere}section{scroll-margin-top:20px}@media(max-width:640px){.chips{grid-template-columns:1fr 1fr}.implementation-step{padding:10px}.screen-redline{display:block}}</style></head><body><aside style="padding:16px;border:1px solid #94a3b8;margin:16px">2026-10-15 更新：UI承認済み。検索条件追加・正規化・並列実装の設計は<a href="implementation-addendum.md">実装設計の追補</a>を参照。現在の進捗は<a href="syllabus-todo.md">TODO</a>に記録。</aside><div class="layout"><aside><div class="brand">SYLLABUS / IMPLEMENTATION PLAN</div><nav class="toc" id="toc"><ol><li><a href="#purpose">目的と背景</a></li><li><a href="#current">既存実装の理解</a></li><li><a href="#problem-solution">Problem と Solution</a></li><li><a href="#decisions">設計判断と代替案</a></li><li><a href="#screens">画面変更一覧</a></li><li><a href="#api">API仕様の変更</a></li><li><a href="#db">データモデル・DB変更</a></li><li><a href="#states">ステータス・ライフサイクル変更</a></li><li><a href="#files">変更対象ファイル</a></li><li><a href="#steps">実装ステップ</a></li><li><a href="#tests">テスト計画</a></li><li><a href="#crosscutting">セキュリティ・プライバシー・可観測性</a></li><li><a href="#rollout">ロールアウト</a></li><li><a href="#risks">リスクと対策</a></li><li><a href="#unclear">Unclear Points</a></li><li><a href="#todo">TodoList</a></li><li><a href="#dod">Definition of Done</a></li><li><a href="#research">Appendix A. 事前調査結果</a></li><li><a href="#gates">Appendix B. Hard Gate</a></li></ol></nav><div class="sidemeta">調査済み / 実装未着手<br>Google認証は最終要件から除外</div></aside><main><header class="hero"><p class="meta">調査・実装計画 / 2026-10-15 / main・初回コミット前</p><h1>信大シラバス検索</h1><p>認証なし・全学横断検索。React + shadcn + Inertia + Hono + Cloudflare D1。</p><div class="chips"><div class="chip"><div class="n">21</div><div class="l">公開一覧の区分</div></div><div class="chip"><div class="n">6,461</div><div class="l">重複排除したPDF URL</div></div><div class="chip"><div class="n">21 / 21</div><div class="l">サンプル文字抽出成功</div></div><div class="chip"><div class="n">5</div><div class="l">実装ステップ・未着手</div></div></div><p><a href="syllabus-assets/mock/search-mock.html">UIモックを見る（未承認）</a> · <a href="syllabus-todo.md">実装の進捗台帳</a></p><p class="meta">改訂履歴: 初版。最終指示に合わせ認証を除外。同名講義は科目名で統合しない。</p></header><section id="purpose"><h2>目的と背景</h2><p>本計画は、信州大学におけるキャンパス情報システムの停止に伴う暫定措置として、学内構成員（学生および教職員）が2026年度の講義情報を迅速かつ横断的に検索できるようにするための検索基盤に関する調査結果と実装計画をまとめたものである。対象データは、大学により一般公開されている2026年度分のシラバス情報に限定する。</p>
+<p>本計画における対象範囲（In scope）および対象外（Out of scope）の境界は以下の通りである。</p>
+<ul>
+<li><strong>対象範囲（In scope）</strong>:</li>
+<li>大学の公開ポータルHTMLからの講義一覧および階層構造の取り込み</li>
+<li>各シラバスPDFの取得とテキスト情報の抽出</li>
+<li>講義名、担当教員名、登録コード、講義本文を対象とした横断検索機能の提供</li>
+<li>検索結果一覧および講義詳細画面における講義情報・原本出典URLの表示</li>
+<li>Cloudflare Workers（<code>workers.dev</code> ドメイン）へのシステム配備</li>
+<li><strong>対象外（Out of scope）</strong>:</li>
+<li>履修登録、成績照会、出席管理などの学務業務機能</li>
+<li>利用者のログイン認証およびセッション管理</li>
+<li>お気に入り登録や講義のブックマーク保存機能</li>
+<li>生成AIを用いたシラバスの自動要約やベクトル検索（意味検索）</li>
+<li>過年度シラバス情報の推測やデータの補完</li>
+<li>原本PDFの独自再配信（大学公式の公開URLへの外部リンク表示にとどめる）</li>
+<li>外部サーバに対する高頻度な自動巡回クローラの常駐運用</li>
+</ul>
+<p>要件定義において、本システムは学内全員の利用を想定した「認証不要の一般公開検索サイト」として運用することが確定している。検討初期に挙がっていた学内Googleアカウント限定の認証方針は撤回されており、認証テーブルの設計、認証ルートの実装、Google OAuth連携設定、およびCloudflare Accessの設定はすべて不要である。また、独自ドメインの新規購入は行わず、将来的にCloudflareの指定アカウント配下の <code>workers.dev</code> ドメインへデプロイする。</p>
+<p>なお、現行の公開ポータルに掲載されているシラバスは認証なしで取得可能な状態にあるが、これは技術的に取得できるという事実を示すものに過ぎず、本システムでの二次利用や転載の条件を保証するものではない。転載条件に関する具体的な調査は未完了であり、本計画において法的判断は下さない。画面上には取得日時と原本リンクを必ず明示し、利用者に大学公式の原本確認を促す運用とする。</p></section><section id="current"><h2>既存実装の理解</h2><p>本プロジェクトの開発対象リポジトリ（<code>/home/watabegg/shinshu-syllabus-search</code>）の現状を確認したところ、<code>rg --files</code> の出力は空であり、Git管理ディレクトリ（<code>.git</code>）のみが存在する空リポジトリである。<code>package.json</code>、アプリケーションソースコード、自動テスト、CI/CDパイプライン設定、既存画面のコード資産はいずれも存在しない。ベースラインビルドが存在しないのはビルドの失敗ではなく、ビルドすべき対象資材がまだ作成されていない状態を示している。なお、本計画書において提示する各種コマンドは、すべて今後の実装フェーズで追加・実行する想定であり、現時点で実行済みとは扱わない。</p>
+<p>本設計の策定にあたっては、ローカル環境に提供された資料（ユーザー提供の<code>AGENTS.md</code>および各スキル情報）、事前に取得された公開ポータルのHTML、工学部の検索ページHTMLおよび付属JavaScript、全21件のサンプルシラバスPDF抽出統計、ならびに工学部サンプルPDF1件の本文と原本1ページの画像目視確認結果を参照した。外部で稼働している現行の公開サイト自体は改変対象ではない。</p>
+<p>事前調査における外部現行サイトの構造および動作仕様の確認結果は以下の通りである。</p>
+<ol>
+<li><strong>認証経路と調査証跡の保全</strong>:
+   - 事前調査では、Chromeブラウザを用いてGoogleログイン → ACSU（学内認証基盤） → WisePoint → 初回属性同意 → Googleサービス続行という経路を辿り、案内用のGoogle Sitesホームに到達した。Googleアカウント確認画面において指定アカウントの正当性を確認している。
+   - この調査に伴う認証証跡はローカルの <code>/tmp</code> 配下に留めており、セッションCookie、平文パスワード、アカウント情報の画面記録等はリポジトリおよび実装計画書には一切含めない。</li>
+<li><strong>現行公開サイトの提供形態</strong>:
+   - Google Sites上には、シラバスが一般公開であること、および2026年度分のみを対象としている旨が明記されている。
+   - 案内されているリンク先は <code>http://lms.ealps.shinshu-u.ac.jp/syllabus/</code> であり、HTTPS（<code>https://lms.ealps.shinshu-u.ac.jp/syllabus/</code>）でも正常に応答する。配信基盤はGoogle Drive等ではなく、独立したWebサーバである。</li>
+<li><strong>公開ポータルのHTML構造とJavaScriptの制約</strong>:
+   - 公開ポータル <code>https://lms.ealps.shinshu-u.ac.jp/syllabus/</code> は、認証不要（HTTP GET 200）でアクセス可能である。
+   - ポータル内には全21の学部・研究科・教育部局の区分が存在し、各部局のHTML内には学期・曜日・時限の階層構造を表す <code>&lt;details&gt;</code> 要素と、各講義のシラバスPDFへのアンカーリンクが配置されている。
+   - 工学部ページの検索スクリプトを調査したところ、<code>lecture-item.textContent</code> に対して文字列の <code>includes</code> メソッドを実行する実装となっていた。検索対象は画面上に描画されている講義名称および登録コードのテキストのみに限定されており、全学を横断した検索や、PDF本文の内容に基づく検索は行えない。また、検索欄の入力が空になると <code>&lt;details&gt;</code> 要素が初期の折り畳み状態へ戻る挙動となっている。</li>
+<li><strong>画面記録の採取と提示</strong>:
+   - 外部現行サイトの記録として、ポータル全体の構造を示す <code>syllabus-assets/screenshots/portal.png</code>、および工学部の検索欄に「情報」と入力した状態を示す <code>syllabus-assets/screenshots/faculty-search.png</code>（いずれも2026-10-15 JST取得、外部現行サイト、未改変の画面写真）を保存している。
+   - 親文書へ統合する際は、ポータルでの学部選択から部局内の名称・コード検索、PDFへの到達に至る動線をHTML/CSSの赤枠番号注記で補足し、本文の説明と一体化させて提示する。</li>
+</ol><figure class="shot"><div class="shot-stage"><img src="syllabus-assets/screenshots/portal.png" alt="学部・研究科を選択する入口"><span class="redbox" style="left:14.8%;top:48%;width:70.5%;height:47%"></span><span class="pin" style="left:14.8%;top:48%">1</span></div><figcaption>1. 学部・研究科を選択する入口 — 大学公開サイト / 2026-10-15 JST / 外部サイトのためSHAなし / 原画像未改変</figcaption></figure><figure class="shot"><div class="shot-stage"><img src="syllabus-assets/screenshots/faculty-search.png" alt="名称・コードによる学部内検索と時間割階層"><span class="redbox" style="left:30%;top:13.5%;width:40%;height:9%"></span><span class="pin" style="left:30%;top:13.5%">2</span></div><figcaption>2. 名称・コードによる学部内検索と時間割階層 — 大学公開サイト / 2026-10-15 JST / 外部サイトのためSHAなし / 原画像未改変</figcaption></figure></section><section id="problem-solution"><h2>Problem と Solution</h2><p>現行のシラバス閲覧環境における課題と、本システムによる解決方針を以下に整理する。</p>
+<ul>
+<li><strong>学部・部局ごとの分断（Problem）</strong>:
+  現行の公開形態では21の学部・研究科ごとにページが分かれており、共通教育科目や他学部の関連講義を探すには、利用者が各部局のページを個別に開いて往復する必要がある。</li>
+<li><strong>解決方針（Solution）</strong>: 全学の全講義データを単一のデータベースへ統合し、部局の枠組みを越えて一括検索できる全学横断インデックスを提供する。</li>
+<li><strong>検索対象の限定（Problem）</strong>:
+  現行の検索スクリプトは画面上に表示された講義名と登録コードの文字列しか照合できず、担当教員名や、講義概要・達成目標などのシラバス本文を対象とした検索が一切行えない。</li>
+<li><strong>解決方針（Solution）</strong>: 各シラバスPDFからテキスト情報を事前に抽出し、タイトル、担当教員名、登録コード、講義本文を網羅した全文検索インデックスを構築する。</li>
+<li><strong>同名講義の識別困難性（Problem）</strong>:
+  基礎的な科目等では同一の講義名を持つ授業が多数開講されており、担当教員、時間割、所属部局が異なるにもかかわらず、講義名だけでまとめられると受講対象のコマを判別できない。</li>
+<li><strong>解決方針（Solution）</strong>: 同名講義を安易に同一レコードへ集約せず、登録コード、担当教員名、開講スロット（学期・曜日・時限）、掲載区分を検索結果カードおよび詳細画面に明記し、それぞれ独立した講義として識別できるように表示する。</li>
+</ul></section><section id="decisions"><h2>設計判断と代替案</h2><h3>1. システムアーキテクチャの選定</h3>
+<p>本システムでは、単一のCloudflare Workers上にStatic Assets、Hono、<code>@hono/inertia</code>、React、およびshadcn UIを組み合わせた構成を採用する。</p>
+<ul>
+<li><strong>採用構成</strong>:</li>
+<li><strong>フロントエンドとバックエンドの結合</strong>: HonoとReactを <code>@hono/inertia</code> で接続し、単一のWorkerからSPA（Single Page Application）の軽快な操作感とサーバサイドのルーティング・データ供給を両立させる。</li>
+<li><strong>データベース接続</strong>: Cloudflare D1を採用し、SQLの直接バインディングを実行する。初期開発段階ではORM（Object-Relational Mapping）を導入せず、直接SQLを発行して構成の簡潔さと実行効率を担保する。</li>
+<li><strong>PDF抽出パイプライン</strong>: サーバレス環境上でのリアルタイム抽出は行わず、ローカル環境のPythonとPopplerを用いたバッチ抽出スクリプトを手動CLIで運用する。</li>
+<li><strong>不採用とした代替案</strong>:</li>
+<li><strong>Cloudflare R2</strong>: 原本PDFは大学の外部公開URLを直接参照し、抽出テキスト原本はローカルに保持するため初期構成では不要である。</li>
+<li><strong>Cloudflare Queues / Workflows</strong>: 高頻度な自動クロールや非同期分散処理はスコープ外であるため初期構成から除外する。</li>
+<li><strong>React Router / 別個のREST API / Hono RPC</strong>: Inertiaのpropsを通じて型安全にデータを受け渡すため、クライアントサイドルーティングライブラリやRESTエンドポイントの個別定義は不要である。Hono RPCは、将来的にサードパーティ向け外部APIを提供する要件が生じた段階で初めて検討する。</li>
+<li><strong>技術的根拠</strong>:</li>
+<li>設計動機: Zenn記事 <a href="https://zenn.dev/ashunar0/articles/cc351badf8681c">Hono + Inertia.js + ReactでCloudflare Workers上にフルスタックSPAを構築する動機と設計</a> の構成方針を踏襲する。</li>
+<li>公式仕様: Hono公式リポジトリ <a href="https://github.com/honojs/middleware/tree/main/packages/inertia">@hono/middleware/packages/inertia</a> に示されているReact、Vite、Cloudflare Workersの公式統合パターンに準拠する。</li>
+</ul>
+<h3>2. データベース選定と日本語全文検索エンジン</h3>
+<p>全学の対象シラバスは約6,461件（PDF数）であり、データ規模としては数千レコード程度である。この規模であれば、分散RDBMSや外部全文検索サービスを導入せずともCloudflare D1で十分に要件を満たせる見込みがある。</p>
+<ul>
+<li><strong>D1の選定根拠</strong>:</li>
+<li>Cloudflare D1では標準でSQLiteのFTS5拡張およびtrigramトークナイザが利用可能である（参考: <a href="https://developers.cloudflare.com/d1/sql-api/sql-statements/">Cloudflare D1 SQL Statements</a> および <a href="https://developers.cloudflare.com/d1/best-practices/use-indexes/">Cloudflare D1 Best Practices: Use indexes</a>）。</li>
+<li>PostgreSQL等の外部マネージドデータベースは、ネットワークホップの発生や構成の複雑化、コスト増加を招くため初期段階では採用しない。D1の実測で検索性能や表現力に不足が確認された場合に限り再検討を行う。なお、D1にはPDFのバイナリデータは格納せず、抽出・正規化されたテキスト情報のみを保持する。</li>
+<li><strong>日本語テキストの正規化仕様</strong>:</li>
+<li>検索対象となるタイトル（title）、担当教員（teacher）、登録コード（code）、本文（body）の各列について、検索専用のテキストカラムを用意する。</li>
+<li>検索用カラムにはUnicode NFKC正規化、小文字化（lowercase）、および連続空白の単一化を施す。</li>
+<li>画面表示には正規化前の原文データを保持し、データ投入時と検索クエリ発行時で全く同一の正規化ロジックを適用する。</li>
+<li><strong>trigramの制約に伴うクエリ分岐</strong>:</li>
+<li>ローカルのSQLite環境での検証により、trigramインデックスでは2文字以下のトークン（例: 「情報」「数値」）に対してMATCH演算子による検索が行えない（ヒットしない）仕様が確認されている。</li>
+<li>したがって、検索クエリの処理ではトークン長に応じた分岐処理を実装する。<ul>
+<li><strong>3文字以上のトークン</strong>: ダブルクォーテーションで囲んだ安全なFTS5 MATCHクエリ（quoted MATCH）を発行する。</li>
+<li><strong>1〜2文字のトークン</strong>: SQLiteの組み込み関数 <code>instr</code> を用いた部分一致走査へ分岐させる。B-Tree絞り込み後の <code>instr</code> 走査の応答性能については、D1への全量データ投入後に実測して検証する。</li>
+<li><strong>混在時の処理</strong>: 3文字以上の語と1〜2文字の語が同時に指定された場合は、まず3文字以上の語でFTS5により候補レコードを絞り込み、その結果集合に対して短語の <code>instr</code> 条件を適用する。</li>
+</ul>
+</li>
+<li><code>LIKE</code> 演算子は、D1において検索パターンが50バイトを超えた場合にエラーとなる制限が存在するため採用せず、部分一致には <code>instr</code> を用いる。</li>
+<li><strong>入力バリデーションと検索パラメータ</strong>:</li>
+<li>検索キーワードは最大100文字、最大5トークンまでとし、各トークンの長さは最長40文字に制限する。</li>
+<li>複数トークンは空白区切りによるAND検索として扱い、検索文字列が空の場合は全件一覧を返す。</li>
+<li>部局（department）、年度（year）、学期（term）などの絞り込み条件は定義済み列挙型（enum）で検証し、通常インデックス（B-Tree）を適用する。</li>
+<li>ページネーションは整数 <code>page &gt;= 1</code>、1ページあたり固定20件の表示とする。</li>
+<li>FTS5の特殊記号はエスケープした上でSQLバインドパラメータとして安全に引き渡す。</li>
+<li>ランキング順位は、タイトルの一致（完全一致・前方一致） → 登録コードの一致 → 本文スコアの順に評価し、最終的に <code>course.id</code> でソートして表示順の決定性を担保する。ランキングの微調整は実装ステップのfixtureテストで確認し、短語検索性能は全量データ投入後に実測する。全文bigramインデックスの追加は実測で必要と判断された場合のみ行う。</li>
+</ul>
+<h3>3. キャッシュ戦略</h3>
+<p>一般公開サイトの特性を活かしたキャッシュ設計を行うが、開発初期における複雑性の混入を防ぐため段階的なアプローチを採る。</p>
+<ul>
+<li><strong>MVP（初期リリース）の方針</strong>:</li>
+<li>動的HTMLおよびInertia用JSONレスポンスには <code>Cache-Control: no-store</code> を設定し、WorkerのデフォルトエントリポイントにおけるWorkers Cacheも無効化する。</li>
+<li>キャッシュ対象はコンテンツハッシュが付与された静的アセット（JS/CSS）のみとし、まずはD1に対する素のクエリ性能と処理速度を計測する。</li>
+<li><strong>将来的な最適化設計</strong>:</li>
+<li>D1への負荷軽減が必要となった場合は、外側のデフォルトエントリポイントはuncachedのままとし、内部の検索データ専用エントリポイント（search data entrypoint）に対してWorkers Cache（TTL 5分）を導入する。</li>
+<li>キャッシュキーは「正規化クエリ + フィルタ条件 + ページ番号 + データリビジョン番号」で構成し、HTMLレスポンスとInertiaのJSONレスポンス（<code>X-Inertia</code> ヘッダ要求）が同一キーで混ざらないよう分離する。</li>
+<li>将来的に学内認証が再導入された場合でも、外側のエントリポイントで毎リクエスト認証認可を検証できる構造を担保する。</li>
+<li><strong>技術的根拠</strong>:</li>
+<li>旧来のCache APIと新しいWorkers Cacheを同一視しないこと。新Workers Cacheは <code>workers.dev</code> 環境でも利用可能であり、Worker単位でキャッシュが管理され、キャッシュヒット時はハンドラの実行自体を省略して高速に応答する（参考: <a href="https://developers.cloudflare.com/workers/cache/">Cloudflare Workers Cache Documentation</a> および <a href="https://developers.cloudflare.com/workers/cache/examples/">Workers Cache Examples</a>）。内部エントリポイントは外部URLで直接ルーティングされないため安全性が高い。初期段階ではキャッシュの複雑性を持ち込まず、性能測定結果を踏まえて適用を判断する。</li>
+</ul>
+<h3>4. データ同定規則と重複排除ポリシー</h3>
+<ul>
+<li><strong>同名講義の独立性保持</strong>:
+  科目名が同一であっても、安易に1つの講義レコードへ統合してはならない。教員や開講区分、時間割が異なる講義はそれぞれ独立した講義として扱う。</li>
+<li><strong>原本PDFの重複排除</strong>:
+  公開ポータル内の複数箇所からリンクされている同一PDFは、元URL（source canonical URL）をキーとしてダウンロードおよびテキスト抽出の重複を排除する。</li>
+<li><strong>自然キーと主キーの設計</strong>:
+  講義エンティティの自然キーは暫定的に <code>開講年度(year) + 掲載区分(department) + 登録コード(code)</code> の組み合わせとする。データベース上の主キーにはこれとは独立した一意のID文字列（UUID等）を割り当てる。</li>
+<li><strong>開講スロット（時間割）の複数行保持</strong>:
+  1つのシラバスPDF内に複数の開講曜日や時限が記載されている場合、講義レコード自体を別講義へ分割してはならない。講義テーブル（course）に対して開講スロットテーブル（<code>course_slots</code>）を1対多で関連付け、学期（term）、曜日（day）、時限（period）の組み合わせを行単位で保持する。これにより、未定、集中講義、複数時限開講を単一の時限へ潰すことなく正確に記録する。</li>
+<li><strong>データ競合（Conflict）の検知と運用調整</strong>:
+  同一の自然キーでありながら、異なるPDF URL、担当教員、または時間割の食い違いが検出された場合は、自動的な上書き統合を行わず、コンフリクトとして警告を記録して処理を保留する。この競合は運用者がバリアントキー（variant key）を手動で指定して解除する運用とする。ユーザーの判断による運用調整を許容し、もし「同一の登録コードでありながら全く別の講義である」という反例が判明した場合は、自然キーの設計自体を見直す。</li>
+<li><strong>データ整合性の検証</strong>:
+  登録コードの照合はPDF本文とポータルHTMLの記述双方を突き合わせて行い、HTML側の時間割表記とPDF本文の記述に差分がある場合は警告ログを出力する。なお、PDFに複数時限が記載されていることのみを理由として別講義へ分割してはならない。</li>
+</ul></section><section id="screens"><h2>画面変更一覧</h2><p>本システムは信州大学の既存システムや公開ポータルに対する改変は一切行わず、完全に独立したWebアプリケーションとして新規に構築する。</p>
+<ul>
+<li><strong>画面構成とURL設計</strong>:</li>
+<li><strong>ログイン画面（<code>/login</code> 等）</strong>: 認証不要の一般公開方針に伴い、ログイン画面は作成しない。</li>
+<li><strong>トップ検索画面（<code>/</code>）</strong>:<ul>
+<li>検索キーワード入力欄、部局・年度・学期等の絞り込みフィルタ、および検索結果一覧を表示する。</li>
+<li>画面状態として「初期検索状態」「検索結果表示状態」「該当件数0件状態」の3状態をサポートする。</li>
+</ul>
+</li>
+<li><strong>講義詳細画面（<code>/courses/:id</code>）</strong>:<ul>
+<li>科目名、担当教員名、登録コード、掲載区分、開講スロット（学期・曜日・時限）、シラバス本文の原文全文を整理して表示する。</li>
+<li>大学公式の原本PDFを閲覧するための外部リンクを配置し、新規タブかつ安全な属性（<code>target="_blank" rel="noopener noreferrer"</code>）で開くよう実装する。</li>
+</ul>
+</li>
+<li><strong>エラーおよびシステム状態画面</strong>:<ul>
+<li>404（Not Found）および503（Service Unavailable）画面を設ける。</li>
+<li>検索結果が0件である状態と、データ未取得（インポート未完了）やシステム障害によるエラー状態とを明確に区別し、利用者に誤解を与えないメッセージ表示を行う。</li>
+</ul>
+</li>
+<li><strong>UIモックの策定状況</strong>:</li>
+<li>画面仕様の確認用として、モックアップHTML（<code>syllabus-assets/mock/search-mock.html</code>、GPT-6.1 Sol作成）を作成済みであり、現在ユーザーの承認待ち状態にある。モックには実データは含まれておらず、デザイン構成および画面挙動の定義に使用する。</li>
+<li><strong>年度選択と絞り込みの仕様</strong>:</li>
+<li>開講年度の初期選択値は「2026年度」とし、年度絞り込みフィルタの選択肢には実際にシステム内に取り込まれている年度のみを表示する（未収録の過年度は選択肢に含めない）。</li>
+<li><strong>免責事項と注意喚起の表示</strong>:</li>
+<li>全画面の見えやすい位置（ヘッダーまたはフッター）に、本サイトが信州大学の非公式検索システムである旨、データの取得日時、および履修登録や単位認定に関する正式な判断にあたっては必ず原本シラバスおよび大学公式の案内を確認すべき旨の注意書きを明記する。</li>
+</ul></section><section id="api"><h2>API仕様の変更</h2><p>提供するAPIエンドポイントはすべて新規設計であり、既存システムとの後方互換性を考慮する必要はない。すべてのエンドポイントは認証不要で利用可能であり、HTTP GETメソッドのみで構成され副作用を持たない。</p>
+<h3>1. 講義一覧検索: <code>GET /</code></h3>
+<p>講義の検索、絞り込み、およびページ送りを担うエンドポイントである。Inertia.jsによる画面描画とJSONデータ取得の双方で共通のデータ構造を返却する。</p>
+<ul>
+<li><strong>クエリパラメータ</strong>:</li>
+<li><code>q</code>（文字列、任意、初期値: 空文字列）: 全文検索キーワード。画面表示時はHTMLエスケープを徹底する。</li>
+<li><code>year</code>（整数、任意、初期値: <code>2026</code>）: 開講年度。存在しない年度が指定された場合はHTTP 400を返す。</li>
+<li><code>department</code>（文字列、任意）: 学部・研究科の識別子（列挙値）。</li>
+<li><code>term</code>（文字列、任意）: 開講学期（列挙値）。</li>
+<li><code>page</code>（整数、任意、初期値: <code>1</code>）: ページ番号。<code>page &gt; 1000</code> の場合は極端なオフセット指定による高負荷を抑止するため固定上限としてHTTP 400を返す。</li>
+<li><strong>返却プロパティ（Props）</strong>:</li>
+<li><code>items</code>: 講義概要オブジェクトの配列。各要素は <code>{ id, title, code, teacherText, department, slots }</code> で構成される（<code>teacherText</code> は未設定時 <code>null</code>）。</li>
+<li><code>page</code>: 現在のページ番号。</li>
+<li><code>hasNext</code>: 次ページの有無を表す真偽値。総件数（<code>count</code>）の全件走査は初回リクエストの高速化のため行わず、表示件数20件に対して1件余分に取得（20 + 1行取得）することで判定する。</li>
+<li><code>filters</code>: 現在適用されている絞り込み条件（<code>q</code>, <code>year</code>, <code>department</code>, <code>term</code>）。</li>
+<li><code>availableFilters</code>: 絞り込みに利用可能な選択肢一覧（年度、学部、学期）。</li>
+<li><code>importedAt</code>: データが最後に同期された日時。</li>
+<li><code>coverage</code>: システム全体のデータ取り込み状況 <code>{ discovered, ready, failed, conflict }</code>。</li>
+<li><strong>ステータスコードと挙動</strong>:</li>
+<li><code>200 OK</code>: 検索成功。該当結果が0件の場合も空配列を含めて <code>200 OK</code> を返す。</li>
+<li><code>400 Bad Request</code>: 不正なクエリ形式、範囲外のページ番号（<code>page &gt; 1000</code>）、存在しない年度の指定。</li>
+<li><code>429 Too Many Requests</code>: レート制限超過時。</li>
+<li><code>503 Service Unavailable</code>: データベース利用不可時。</li>
+</ul>
+<h3>2. 講義詳細取得: <code>GET /courses/:id</code></h3>
+<p>指定された単一講義の全文、メタデータ、および解析状況を取得するエンドポイントである。</p>
+<ul>
+<li><strong>パスパラメータ</strong>:</li>
+<li><code>id</code>（文字列、必須）: 講義の一意な識別子。</li>
+<li><strong>返却プロパティ（Props）</strong>:</li>
+<li><code>course</code>: 講義の基本情報（タイトル、科目コード、教員名、単位数、開講学期など）。</li>
+<li><code>sections</code>: 抽出された本文の各セクション（構造化データ）。</li>
+<li><code>pages</code>: ページごとの原文テキストおよび検索用正規化テキスト。</li>
+<li><code>sourceUrl</code>: 元のシラバスPDFのURL。外部への不正な誘導やSSRFを防ぐため、許可されたホスト名および <code>/syllabus</code> 配下のパスのみを保持・返却する。</li>
+<li><code>sourceSha256</code>: 取り込み時のPDFファイルのSHA-256ハッシュ値。</li>
+<li><code>fetchedAt</code>: 該当PDFを最後に正常取得した日時。</li>
+<li><code>parseWarnings</code>: テキスト解析時に発生した警告内容の配列。</li>
+<li><strong>ステータスコード</strong>:</li>
+<li><code>200 OK</code>: 取得成功。</li>
+<li><code>404 Not Found</code>: 存在しないID、または未公開状態のIDが指定された場合。</li>
+</ul>
+<h3>3. ヘルスチェック: <code>GET /healthz</code></h3>
+<p>システムの稼働状態を監視するための軽量エンドポイントである。内部状態を詳細に開示せず、サービス提供が可能か否かの最小限の情報のみを返す。</p>
+<ul>
+<li><strong>ステータスコード</strong>:</li>
+<li><code>200 OK</code>: 正常稼働中（WebサーバーおよびD1データベースへの疎通確認が成功）。</li>
+<li><code>503 Service Unavailable</code>: D1接続不能などの致命的障害発生時。</li>
+</ul>
+<h3>4. 共通プロトコル規約</h3>
+<ul>
+<li><strong>コンテンツネゴシエーション</strong>: <code>Accept: text/html</code> および <code>X-Inertia: true</code> ヘッダーを伴う要求はInertia.jsの公式アダプターによって適切に処理される。<code>Accept: application/json</code> の要求に対しても、公開用の同一データ構造を返却する。</li>
+<li><strong>原本URLの制限</strong>: 講義情報に含まれる原本シラバスのリンク（<code>href</code>）は、許可されたホスト名かつ <code>/syllabus</code> から始まるパスのみに制限し、外部サイトへの不正リダイレクトを防止する。</li>
+</ul>
+<hr /></section><section id="db"><h2>データモデル・DB変更</h2><p>Cloudflare D1（SQLite互換）を利用し、スキーママイグレーションファイルは新規作成する <code>migrations/0001_initial.sql</code> および <code>migrations/0002_search.sql</code> の2本で構成する。既存のマイグレーションは存在しない。</p>
+<h3>マイグレーションとテーブル定義</h3>
+<h4>1. <code>0001_initial.sql</code>（基本テーブル群）</h4>
+<pre><code class="language-sql">-- 外部キー制約の有効化
+PRAGMA foreign_keys = ON;
+
+-- データ取り込み実行履歴
+CREATE TABLE imports (
+    id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    status TEXT NOT NULL CHECK (status IN ('running', 'completed', 'partial', 'failed')),
+    discovered_count INTEGER NOT NULL DEFAULT 0,
+    ready_count INTEGER NOT NULL DEFAULT 0,
+    failed_count INTEGER NOT NULL DEFAULT 0,
+    conflict_count INTEGER NOT NULL DEFAULT 0,
+    parser_version TEXT NOT NULL
+);
+
+-- 原本シラバス文書の追跡
+CREATE TABLE source_documents (
+    id TEXT PRIMARY KEY,
+    canonical_url TEXT NOT NULL UNIQUE,
+    sha256 TEXT,
+    fetched_at TEXT,
+    etag TEXT,
+    last_modified TEXT,
+    page_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL CHECK (status IN ('pending', 'ready', 'failed', 'conflict', 'missing')),
+    last_error TEXT,
+    import_id TEXT NOT NULL REFERENCES imports(id),
+    last_attempt_at TEXT NOT NULL,
+    last_attempt_status TEXT NOT NULL CHECK (last_attempt_status IN ('pending', 'ready', 'failed', 'conflict', 'missing'))
+);
+
+-- 講義基本情報
+CREATE TABLE courses (
+    id TEXT PRIMARY KEY,
+    source_id TEXT NOT NULL UNIQUE REFERENCES source_documents(id) ON DELETE RESTRICT,
+    year INTEGER NOT NULL,
+    department TEXT NOT NULL,
+    registration_code TEXT NOT NULL,
+    variant_key TEXT NOT NULL DEFAULT '',
+    title TEXT NOT NULL,
+    teacher_text TEXT,
+    credits TEXT,
+    term_text TEXT,
+    raw_metadata_json TEXT NOT NULL,
+    parse_warnings_json TEXT NOT NULL DEFAULT '[]',
+    content_revision INTEGER NOT NULL DEFAULT 1,
+    search_rowid INTEGER UNIQUE NOT NULL,
+    UNIQUE (year, department, registration_code, variant_key)
+);
+
+CREATE INDEX idx_courses_year_dept ON courses(year, department);
+CREATE INDEX idx_courses_reg_code ON courses(registration_code);
+
+-- 講義時間割枠（同一講義の複数コマ情報）
+CREATE TABLE course_slots (
+    id TEXT PRIMARY KEY,
+    course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE RESTRICT,
+    term_label TEXT NOT NULL,
+    day_label TEXT NOT NULL,
+    period_label TEXT NOT NULL,
+    source_kind TEXT NOT NULL CHECK (source_kind IN ('html', 'pdf')),
+    UNIQUE (course_id, term_label, day_label, period_label, source_kind)
+);
+
+CREATE INDEX idx_course_slots_term_course ON course_slots(term_label, course_id);
+
+-- 講義ページ別テキスト（原文保持とページ分割）
+CREATE TABLE course_pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE RESTRICT,
+    page_number INTEGER NOT NULL,
+    raw_text TEXT NOT NULL,
+    search_text TEXT NOT NULL,
+    UNIQUE (course_id, page_number)
+);
+</code></pre>
+<blockquote>
+<p>[!NOTE]
+<code>course_slots</code> において開講曜日や時限が未定または未分類の場合、SQLiteの <code>NULL</code> ユニーク制約の抜け穴（<code>NULL</code> 同士が重複とみなされない挙動）を防ぐため、<code>NULL</code> ではなく空文字列（<code>''</code>）を格納して一意性を担保する。</p>
+</blockquote>
+<h4>2. <code>0002_search.sql</code>（全文検索インデックス）</h4>
+<p>全文検索機能にはSQLiteのFTS5拡張仮想テーブルを利用し、3文字以上のトークン向けにトークナイザーとして <code>trigram</code> を採用する。なお、1〜2文字の短語検索には <code>instr</code> 関数による部分一致走査へ分岐させる。</p>
+<pre><code class="language-sql">-- FTS5スタンドアロン仮想テーブルの作成
+CREATE VIRTUAL TABLE course_search USING fts5(
+    title,
+    teacher,
+    code,
+    body,
+    tokenize = 'trigram'
+);
+</code></pre>
+<ul>
+<li><strong>FTSとベーステーブルの連携方式</strong>:
+  FTS5テーブルと基本テーブルの紐付けには中間テーブル（<code>course_search_rows</code> 等）を新設せず、<code>courses</code> テーブル上に保持する <code>search_rowid INTEGER UNIQUE NOT NULL</code> を直接利用して <code>course_search</code> の暗黙的な <code>rowid</code> と1対1で対応付ける。</li>
+<li><strong>トリガーの不採用とバッチ更新</strong>:
+  SQLiteの外部コンテンツトリガーは使用せず、講義データを取り込む際に <code>courses</code>, <code>course_pages</code>, <code>course_slots</code>, <code>course_search</code> を同一のD1バッチ処理内で同期的に挿入・更新・削除する。これにより、トリガー起因の予期せぬ制約違反を回避し、D1のトランザクション境界を明示的に制御する。</li>
+<li><strong>検索対象テキスト（<code>body</code>）の構成</strong>:
+  <code>course_search</code> の <code>body</code> カラムには、正規化された全ページの <code>search_text</code> を結合した文字列を格納する。書式や改行を含む生のテキストは <code>course_pages.raw_text</code> に保持する。シラバスPDF内の各見出しセクションは <code>courses.raw_metadata_json</code> 内に任意の派生データとして保存し、初期段階ではPDFセクション構造に対する厳密なスキーマ固定は行わない。</li>
+</ul>
+<h3>エンティティ関係図</h3>
+<pre class="mermaid">erDiagram
+    imports ||--o{ source_documents : &quot;1対多 (import_id)&quot;
+    source_documents ||--o| courses : &quot;1対1 (source_id)&quot;
+    courses ||--o{ course_pages : &quot;1対多 (course_id)&quot;
+    courses ||--o{ course_slots : &quot;1対多 (course_id)&quot;
+    courses ||--|| course_search : &quot;論理rowid対応 (search_rowid)&quot;
+
+    imports {
+        text id PK
+        text started_at
+        text finished_at
+        text status
+        integer discovered_count
+        integer ready_count
+        integer failed_count
+        integer conflict_count
+        text parser_version
+    }
+
+    source_documents {
+        text id PK
+        text canonical_url UK
+        text sha256
+        text fetched_at
+        text etag
+        text last_modified
+        integer page_count
+        text status
+        text last_error
+        text import_id FK
+        text last_attempt_at
+        text last_attempt_status
+    }
+
+    courses {
+        text id PK
+        text source_id FK,UK
+        integer year
+        text department
+        text registration_code
+        text variant_key
+        text title
+        text teacher_text
+        text credits
+        text term_text
+        text raw_metadata_json
+        text parse_warnings_json
+        integer content_revision
+        integer search_rowid UK
+    }
+
+    course_slots {
+        text id PK
+        text course_id FK
+        text term_label
+        text day_label
+        text period_label
+        text source_kind
+    }
+
+    course_pages {
+        integer id PK
+        text course_id FK
+        integer page_number
+        text raw_text
+        text search_text
+    }
+
+    course_search {
+        text title
+        text teacher
+        text code
+        text body
+    }
+</pre>
+<h3>D1制約と更新トランザクション設計</h3>
+<p>Cloudflare D1の制約に対応するため、以下の設計基準を適用する。</p>
+<ol>
+<li><strong>バインド変数とリクエストサイズ制限への対処</strong>:
+   D1には「各SQL文あたり100個のバインド変数上限（bound params per query）」「1行あたり最大2MB」「1クエリSQLサイズ最大100KB」という制限が存在する。講義データ（<code>courses</code>）、ページ（<code>course_pages</code>）、時間割枠（<code>course_slots</code>）、および検索インデックス（<code>course_search</code>）の登録は、各文の上限に配慮しつつ講義単位（1件ごと）にバッチとしてアトミックにコミットする。ページ分割後であっても、FTS検索用インデックス（<code>course_search</code>）に集約結合する本文全体のサイズが1行2MB上限を超過しないか検証を行う。極端に巨大なPDF（暫定で10MiB超のもの）はインポート対象から隔離し、個別エラーとして記録する。</li>
+<li><strong>講義単位のアトミック性と過去データの保持</strong>:
+   データベース全体を一括更新する巨大トランザクションは実行できないため、取り込み処理は講義単位で実施する。更新フェーズ中にクローラーが特定PDFの再取得に失敗した場合でも、既存の正常な講義レコードを削除せず、<code>source_documents.last_attempt_status = 'failed'</code> として前回の正常データを保持（stale状態としてフラグ付け）する。UI上には最後に成功した <code>fetchedAt</code> と最新の試行ステータスを並行して表示する。</li>
+<li><strong>ステージング検証と本番バインディング切り替え</strong>:
+   初回の全量インポートは新規作成したステージング用D1データベースに対して実行し、検証完了後にWorkersのD1バインディングを本番環境へ切り替える。この方式により、取り込み処理の途中段階で不完全なデータが公開されるリスクを回避する。また、旧D1データベースのバインディング定義を保持しておくことで、障害発生時の迅速なロールバックを可能にする。初回取り込みで <code>partial</code>（一部失敗）となった場合は本番バインディングへの差し替えを停止する。</li>
+</ol>
+<hr /></section><section id="states"><h2>ステータス・ライフサイクル変更</h2><h3>ライフサイクル状態遷移図</h3>
+<pre class="mermaid">stateDiagram-v2
+    state source_documents {
+        [*] --&gt; pending: シラバスURL発見 (discover)
+        pending --&gt; ready: PDF取得・解析・保存成功
+        pending --&gt; failed: 取得失敗 (404/Timeout等)
+        pending --&gt; conflict: 同一キー不整合検知
+
+        failed --&gt; pending: 再試行実行 (Retry)
+        conflict --&gt; pending: 手動確認・スキーマ修正後再試行
+
+        ready --&gt; ready: 内容変更なし (304 Not Modified)
+        ready --&gt; ready: 内容更新成功 (SHA変更・再解析)
+        ready --&gt; failed: 再取得失敗 (既存正常データは保持)
+        ready --&gt; missing: 全一覧正常取得時に消失を確認
+
+        missing --&gt; pending: 再出現時
+    }
+
+    state imports {
+        [*] --&gt; running: バッチ処理開始
+        running --&gt; completed: 全件成功 (failed=0, conflict=0)
+        running --&gt; partial: 一部失敗・不整合残存
+        running --&gt; import_failed: 一覧取得失敗・致命的エラー
+    }
+</pre>
+<h3>状態遷移表とエラー制御方針</h3>
+<h4><code>source_documents</code> 状態遷移表</h4>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">現在の状態</th>
+<th style="text-align: left;">イベント / 条件</th>
+<th style="text-align: left;">遷移後の状態</th>
+<th style="text-align: left;">講義データ（<code>courses</code>）の扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>初期状態</strong></td>
+<td style="text-align: left;">インデックスHTML解析で新規URLを発見</td>
+<td style="text-align: left;"><code>pending</code></td>
+<td style="text-align: left;">レコード未作成</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pending</code></td>
+<td style="text-align: left;">PDF取得、テキスト抽出、D1登録がすべて完了</td>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">新規作成、インデックス登録完了</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pending</code></td>
+<td style="text-align: left;">通信切断、解析エラー、タイムアウト発生</td>
+<td style="text-align: left;"><code>failed</code></td>
+<td style="text-align: left;">作成しない（<code>last_error</code> を記録）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pending</code></td>
+<td style="text-align: left;">既存講義と同一キーで異なる属性が衝突</td>
+<td style="text-align: left;"><code>conflict</code></td>
+<td style="text-align: left;">作成しない（不整合として隔離）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>failed</code></td>
+<td style="text-align: left;">クローラーによる再取得処理の開始</td>
+<td style="text-align: left;"><code>pending</code></td>
+<td style="text-align: left;">変更なし（前回の試行をリセット）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">サーバーが <code>304 Not Modified</code> を返却</td>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">変更なし（<code>fetched_at</code> のみ更新）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">SHA-256変更を検知し再解析・更新が成功</td>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">新しい内容で上書き更新</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">再取得時に通信エラーまたはHTTP 5xx発生</td>
+<td style="text-align: left;"><code>failed</code>（試行）</td>
+<td style="text-align: left;"><strong>前回の正常講義データを維持</strong>（削除しない）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ready</code></td>
+<td style="text-align: left;">全インデックス一覧の正常取得時にURLが消失</td>
+<td style="text-align: left;"><code>missing</code></td>
+<td style="text-align: left;"><strong>即座に削除せず保持</strong>（次回確認まで維持）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>missing</code></td>
+<td style="text-align: left;">後続の定期インポートでURLが再発見</td>
+<td style="text-align: left;"><code>pending</code></td>
+<td style="text-align: left;">既存データを保持したまま再検証</td>
+</tr>
+</tbody>
+</table></div>
+<h4>通信エラーと再試行制御方針</h4>
+<ul>
+<li><strong>HTTP 404（Not Found）</strong>: 原本URLの消失と判断し、エラーログに専用分類で記録する。短時間の再試行（リトライフラッド）は行わず、次回インポート周期まで再アクセスを抑止する。</li>
+<li><strong>HTTP 429（Too Many Requests）および 5xx（Server Error）</strong>: 相手先サーバーの過負荷を考慮し、指数バックオフ（Exponential Backoff: 初回1秒、2回目2秒、3回目4秒）を伴う最大3回までの再試行を実施する。3回すべて失敗した場合は <code>failed</code> として記録する。</li>
+<li><strong>タイムアウト</strong>: 30秒を上限とし、タイムアウト発生時は直ちに切断してログを記録し、次回再試行対象とする。</li>
+<li><strong>インポート全体の判定</strong>:</li>
+<li><code>completed</code>: 発見された全URLの処理が完了し、<code>failed_count = 0</code> かつ <code>conflict_count = 0</code> の場合。</li>
+<li><code>partial</code>: 処理は完走したが、一部の文書で <code>failed</code> または <code>conflict</code> が残存している場合。</li>
+<li><code>failed</code>: インデックスHTMLの一覧列挙に失敗するなど、処理自体が中断した場合。</li>
+</ul>
+<hr /></section><section id="files"><h2>変更対象ファイル</h2><p>本システムは空のリポジトリ（<code>/home/watabegg/shinshu-syllabus-search</code>）から新規に構築するため、すべてのファイルが新規作成対象となる。</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイルパス</th>
+<th style="text-align: left;">種別</th>
+<th style="text-align: left;">役割・選定理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>package.json</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">プロジェクト依存関係、実行スクリプトの定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pnpm-lock.yaml</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">依存パッケージのバージョン固定ロックファイル</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tsconfig.json</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">TypeScriptコンパイラ設定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>vite.config.ts</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">Viteビルド設定およびCloudflare/Reactプラグイン設定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>wrangler.jsonc</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">Cloudflare WorkersおよびD1バインディング設定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>components.json</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">shadcn/uiコンポーネント管理設定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>.gitignore</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">Git除外設定（<code>data/</code>, <code>secrets/</code>, <code>.wrangler</code> 等を除外）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>.dev.vars.example</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">ローカル開発用環境変数テンプレート</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/server.tsx</code></td>
+<td style="text-align: left;">バックエンド</td>
+<td style="text-align: left;">Honoアプリケーション本体、Inertiaアダプター、APIルーティング</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/client.tsx</code></td>
+<td style="text-align: left;">フロントエンド</td>
+<td style="text-align: left;">Inertia.jsクライアント側エントリーポイント</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/root-view.tsx</code></td>
+<td style="text-align: left;">共通</td>
+<td style="text-align: left;">サーバーサイドHTMLテンプレート、アセット読み込み</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/style.css</code></td>
+<td style="text-align: left;">共通</td>
+<td style="text-align: left;">Tailwind CSSおよびshadcn/uiの基本スタイル定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/lib/search.ts</code></td>
+<td style="text-align: left;">検索ロジック</td>
+<td style="text-align: left;">D1 FTS5クエリ組み立て、パラメータサニタイズ、検索実行</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/lib/db.ts</code></td>
+<td style="text-align: left;">DB接続</td>
+<td style="text-align: left;">D1クライアントの初期化およびトランザクションヘルパー</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/lib/normalize.ts</code></td>
+<td style="text-align: left;">前処理</td>
+<td style="text-align: left;">全角半角統一、改行正規化、トリム処理</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/lib/schema.ts</code></td>
+<td style="text-align: left;">型定義</td>
+<td style="text-align: left;">D1レコードおよびAPIレスポンスのTypeScript型定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>app/pages/Courses/Index.tsx</code></td>
+<td style="text-align: left;">UI画面</td>
+<td style="text-align: left;">検索・一覧画面（フィルター、検索窓、結果カード一覧）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>app/pages/Courses/Show.tsx</code></td>
+<td style="text-align: left;">UI画面</td>
+<td style="text-align: left;">講義詳細画面（本文、時間割、原本メタデータ表示）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>app/components/ui/*</code></td>
+<td style="text-align: left;">UI部品</td>
+<td style="text-align: left;">shadcn/uiボタン、入力欄、バッジ、ダイアログ等</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>migrations/0001_initial.sql</code></td>
+<td style="text-align: left;">DB定義</td>
+<td style="text-align: left;">基本テーブル群、インデックス定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>migrations/0002_search.sql</code></td>
+<td style="text-align: left;">DB定義</td>
+<td style="text-align: left;">FTS5仮想テーブル（<code>trigram</code>）定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/requirements.txt</code></td>
+<td style="text-align: left;">設定</td>
+<td style="text-align: left;">Python取り込みスクリプト用依存ライブラリ一覧</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/discover.py</code></td>
+<td style="text-align: left;">クローラー</td>
+<td style="text-align: left;">インデックスHTML走査、URL正規化、マニフェスト生成</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/download.py</code></td>
+<td style="text-align: left;">クローラー</td>
+<td style="text-align: left;">シラバスPDFの順次ダウンロード、ハッシュ計算、隔離</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/extract.py</code></td>
+<td style="text-align: left;">解析</td>
+<td style="text-align: left;">Poppler（<code>pdftotext</code>）およびpdfplumberによるテキスト・構造抽出</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/validate.py</code></td>
+<td style="text-align: left;">検証</td>
+<td style="text-align: left;">抽出結果の整合性検証、重複検知、バリデーション</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/export.py</code></td>
+<td style="text-align: left;">データ出力</td>
+<td style="text-align: left;">D1バッチ用SQL・JSONデータ生成スクリプト</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/search.test.ts</code></td>
+<td style="text-align: left;">テスト</td>
+<td style="text-align: left;">検索クエリ構築、サニタイズ、ページネーション検証</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/identity.test.ts</code></td>
+<td style="text-align: left;">テスト</td>
+<td style="text-align: left;">同名異教員、複数スロット、同一キー衝突の識別検証</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/import.test.ts</code></td>
+<td style="text-align: left;">テスト</td>
+<td style="text-align: left;">データ取り込み冪等性、失敗時保持、SSRF防止検証</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/e2e/search.spec.ts</code></td>
+<td style="text-align: left;">テスト</td>
+<td style="text-align: left;">Playwrightによる画面操作、表示確認、レスポンシブ検証</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>docs/operations.md</code></td>
+<td style="text-align: left;">ドキュメント</td>
+<td style="text-align: left;">運用手順書、取り込みバッチ実行手順、障害対応手順</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></section><section id="steps"><h2>実装ステップ</h2><article class="implementation-step"><h3>Step 1: 基盤環境とデプロイパイプラインの構築</h3>
+<p>Hono、Inertia.js、React、Vite、およびCloudflare Workersの実行環境を構築し、D1バインディングと型チェックが正常に機能する最小構成を整える。</p>
+<h4>関連ファイル一覧</h4>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイルパス</th>
+<th style="text-align: left;">内容</th>
+<th style="text-align: left;">選定理由・役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>package.json</code></td>
+<td style="text-align: left;">依存パッケージ定義</td>
+<td style="text-align: left;">最新公式サンプルに基づく固定バージョン指定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pnpm-lock.yaml</code></td>
+<td style="text-align: left;">ロックファイル</td>
+<td style="text-align: left;">実行環境間の依存関係差異を排除</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tsconfig.json</code></td>
+<td style="text-align: left;">TypeScript設定</td>
+<td style="text-align: left;">型安全性の確保とJSX設定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>vite.config.ts</code></td>
+<td style="text-align: left;">ビルド設定</td>
+<td style="text-align: left;">Cloudflare環境向けSSRおよびクライアントビルドの統合</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>wrangler.jsonc</code></td>
+<td style="text-align: left;">Workers設定</td>
+<td style="text-align: left;">アカウントID、Worker名、D1バインディングの定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/server.tsx</code></td>
+<td style="text-align: left;">サーバー基本構成</td>
+<td style="text-align: left;">HonoルーティングとInertiaハンドラーの初期化</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/root-view.tsx</code></td>
+<td style="text-align: left;">ルートビュー</td>
+<td style="text-align: left;">SPA静的フォールバックによる動的パス上書き防止</td>
+</tr>
+</tbody>
+</table></div>
+<h4>実施手順</h4>
+<ol>
+<li><code>pnpm init</code> を実行し、公式の最新推奨構成に基づきHono、Inertia.js、React、Vite、Tailwind CSS、およびCloudflareプラグインを導入して <code>pnpm-lock.yaml</code> を生成する。</li>
+<li><code>wrangler.jsonc</code> を作成し、Worker名として <code>shinshu-syllabus-search</code> を提案設定し、指定アカウントID <code>e4959cb9edbdb2f78ffbf97151fc69e6</code>、<code>workers_dev = true</code>、およびD1バインディング（ローカル・プレビュー用）を設定する。</li>
+<li><code>src/server.tsx</code> および <code>src/root-view.tsx</code> を実装し、動的パスがSPAの静的HTMLフォールバックによって上書きされないようルーティング優先順位を設定する。プレビュー環境では架空データのみを返し、本番データを直接参照させない。</li>
+</ol>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    actor Dev as &quot;個人開発者&quot;
+    participant TS as &quot;TypeScript Compiler&quot;
+    participant Vite as &quot;Vite (Build)&quot;
+    participant Wran as &quot;Wrangler CLI (Local Validation)&quot;
+
+    Dev-&gt;&gt;TS: pnpm typecheck
+    TS--&gt;&gt;Dev: 型エラーなし (Exit 0)
+    Dev-&gt;&gt;Vite: pnpm build
+    Vite--&gt;&gt;Dev: クライアント/SSRアセット生成 (Exit 0)
+    Dev-&gt;&gt;Wran: pnpm exec wrangler deploy --dry-run
+    Wran-&gt;&gt;Wran: build・設定・package検証 (local)
+    Wran--&gt;&gt;Dev: Dry-run完了 (Exit 0)
+</pre>
+<h4>Definition of Doneとゲート</h4>
+<ul>
+<li><strong>Gate 1 (G1)</strong>: <code>pnpm typecheck &amp;&amp; pnpm build</code> が終了コード0で完了し、かつ <code>pnpm exec wrangler deploy --dry-run</code> が終了コード0で完了すること（※本番デプロイは実施しない）。</li>
+</ul>
+<h4>失敗時の切り分け</h4>
+<ul>
+<li>ビルド失敗時: ViteプラグインのSSR出力設定とInertiaのアダプター解決を確認する。</li>
+<li><code>wrangler deploy --dry-run</code> 失敗時: <code>wrangler.jsonc</code> 内の <code>account_id</code> およびD1バインディング名のフォーマットを点検する。</li>
+</ul>
+<hr />
+</article><article class="implementation-step"><h3>Step 2: シラバス一覧マニフェスト生成とPDF収集・抽出</h3>
+<p>公開ウェブサイトからシラバス一覧を安全に収集し、原本PDFを順次取得して構造化テキストを抽出するPythonパイプラインを構築する。</p>
+<h4>関連ファイル一覧</h4>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイルパス</th>
+<th style="text-align: left;">内容</th>
+<th style="text-align: left;">選定理由・役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/requirements.txt</code></td>
+<td style="text-align: left;">Python依存関係</td>
+<td style="text-align: left;"><code>pdfplumber</code>, <code>requests</code> 等のツール定義</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/discover.py</code></td>
+<td style="text-align: left;">一覧解析</td>
+<td style="text-align: left;">details要素からの枠情報抽出とURL正規化</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/download.py</code></td>
+<td style="text-align: left;">PDF収集</td>
+<td style="text-align: left;">順次取得、サイズ検査、エラーPDF隔離</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/extract.py</code></td>
+<td style="text-align: left;">テキスト抽出</td>
+<td style="text-align: left;">Popplerレイアウト抽出とメタデータパース</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/validate.py</code></td>
+<td style="text-align: left;">データ検証</td>
+<td style="text-align: left;">厳密なスキーマ・重複・文字化け検査</td>
+</tr>
+</tbody>
+</table></div>
+<h4>実施手順</h4>
+<ol>
+<li><code>scripts/ingest/discover.py</code> を実装する。21個の学部・研究科別インデックスHTMLを走査し、HTMLの <code>&lt;details&gt;</code> 祖先要素から開講枠（slots）情報を取得する。取得したURLはすべて <code>https</code> で正規化（canonicalize）し、同一オリジンの <code>/syllabus</code> パスに属するもののみを許可するホワイトリスト検証を行う。HTMLコメント内に残存する過去年度（2025年度等）の記述は除外し、重複URLを排除した生マニフェスト <code>data/manifest.json</code> を生成する。</li>
+<li><code>scripts/ingest/download.py</code> を実装する。相手先サーバー保護のため、リクエスト間隔を厳格に「1秒あたり最大1リクエスト（1 req/sec）」とする。タイムアウトは30秒、リトライ回数は最大3回とする。HTTPヘッダーに <code>ETag</code> や <code>Last-Modified</code> が存在する場合は条件付きGETを発行する。受信時は先頭バイトのマジックナンバー、<code>Content-Type: application/pdf</code>、および暫定上限サイズ（10MiB以下）を検査し、破損または不正なPDFは <code>data/quarantine/</code> ディレクトリへ隔離する。</li>
+<li><code>scripts/ingest/extract.py</code> を実装する。Popplerの <code>pdftotext -layout</code> を呼び出してレイアウトを保ったテキストを抽出し、改頁文字 <code>\f</code> でページごとに分割する。ヘッダーのキーワード、および必要に応じて座標抽出（<code>pdfplumber</code>）を併用して科目コード、年度、講義名、教員名を解析する。原文テキストは一切改変せずに保持する。</li>
+<li>観測用として手元に確保された21件のサンプルPDF、および境界条件テスト用（同名別教員、複数開講枠、書式不一致）のフィクスチャデータを準備する（※手元の21件は調査観測用サンプルであり、全件を網羅したものではない）。</li>
+</ol>
+<pre class="mermaid">flowchart TD
+    A[&quot;インデックスHTML走査&quot;] --&gt; B{&quot;URL検証&quot;}
+    B -- &quot;/syllabus許可・https&quot; --&gt; C[&quot;マニフェスト生成 data/manifest.json&quot;]
+    B -- &quot;対象外・過去年度コメント&quot; --&gt; D[&quot;除外&quot;]
+
+    C --&gt; E[&quot;順次ダウンロード 1req/sec&quot;]
+    E --&gt; F{&quot;PDF検証&quot;}
+    F -- &quot;マジックナンバー一致 &amp; 10MiB以下&quot; --&gt; G[&quot;テキスト抽出 pdftotext -layout&quot;]
+    F -- &quot;形式不正・サイズ超過&quot; --&gt; H[&quot;隔離保存 data/quarantine/&quot;]
+
+    G --&gt; I[&quot;改頁コード \f でページ分割&quot;]
+    I --&gt; J[&quot;科目コード・教員名パース&quot;]
+    J --&gt; K[&quot;validate.py 整合性検証&quot;]
+</pre>
+<h4>Definition of Doneとゲート</h4>
+<ul>
+<li><strong>Gate 2 (G2)</strong>: <code>python3 scripts/ingest/validate.py --manifest data/manifest.json --samples data/samples --strict</code> が終了コード0で完了し、件数、重複、警告、および全ソース行が成果物レポートに出力されること。</li>
+</ul>
+<h4>失敗時の切り分け</h4>
+<ul>
+<li>ダウンロード中断時: 直前までの成功履歴を読み込み、未取得URLから順次再開（レジューム）できることを確認する。</li>
+<li>抽出不正時: Popplerのバージョン差異を確認し、座標解析（<code>pdfplumber</code>）側へのフォールバック条件を点検する。</li>
+</ul>
+<hr />
+</article><article class="implementation-step"><h3>Step 3: データベーススキーマ適用、取込パイプライン、検索インデックス構築</h3>
+<p>D1マイグレーションを適用し、抽出済みデータからD1バッチクエリを生成してローカル環境に取り込み、FTS5の検索性能を測定する。</p>
+<h4>関連ファイル一覧</h4>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイルパス</th>
+<th style="text-align: left;">内容</th>
+<th style="text-align: left;">選定理由・役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>migrations/0001_initial.sql</code></td>
+<td style="text-align: left;">スキーマ定義</td>
+<td style="text-align: left;">基本テーブル群の作成</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>migrations/0002_search.sql</code></td>
+<td style="text-align: left;">FTS5定義</td>
+<td style="text-align: left;">trigram仮想テーブルの作成</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>scripts/ingest/export.py</code></td>
+<td style="text-align: left;">SQL生成</td>
+<td style="text-align: left;">D1バッチ実行用クエリの生成</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/lib/db.ts</code></td>
+<td style="text-align: left;">DB接続処理</td>
+<td style="text-align: left;">バッチ分割とエラーハンドリング</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/import.test.ts</code></td>
+<td style="text-align: left;">取り込み検証</td>
+<td style="text-align: left;">冪等性と障害時保持の自動テスト</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/identity.test.ts</code></td>
+<td style="text-align: left;">識別検証</td>
+<td style="text-align: left;">同名講義・複数スロットの分離テスト</td>
+</tr>
+</tbody>
+</table></div>
+<h4>実施手順</h4>
+<ol>
+<li>ローカル開発環境のD1に対して <code>migrations/0001_initial.sql</code> および <code>migrations/0002_search.sql</code> を適用する。</li>
+<li><code>scripts/ingest/export.py</code> を管理CLIとして実装し、抽出結果JSONからのSQLバッチ生成およびCloudflare D1 REST query API（<code>POST /accounts/{account_id}/d1/database/{database_id}/query</code>、ボディ <code>{batch: [{sql, params}]}</code>、既存トークンと明示されたaccount/database IDを使用）経由での直接送信を兼用させる（顧客向けwrite APIは作成しない）。同一PDFを複数回インポートしても同一レコードが得られる冪等性を保証し、APIのレートリミット（HTTP 429）時は <code>Retry-After</code> に従い再試行する。取り込み中に失敗が発生した場合でも既存の有効レコードを削除せず保持するロジックを組み込み、講義単位のアトミック性（途中失敗時のロールバック）はローカルSQLiteおよびリモートステージングでの失敗注入テストによりG3で検証する（現時点では未実施）。</li>
+<li>全件取り込みの所要時間を試算する。全シラバスを約6,461件とした場合、1秒あたり1件のアクセス制限（1 req/sec）により、純粋なダウンロード時間だけで約6,461秒（約1.8時間）を要し、これに加えてPDF解析とリトライ処理の時間が加算される。並列度を無理に引き上げると相手先サーバーに負荷をかけるため、順次実行と安全な再開性を維持する。ただし、今回の計画策定フェーズでは時間短縮のため全件の取り込みは実施せず、調査用の21サンプルに限定して検証を行う。</li>
+<li>D1のステージング環境を想定し、3文字以下の日本語短語、記号、全角半角混在クエリに対する <code>EXPLAIN QUERY PLAN</code> および <code>rows_read</code> の計測手順を計画・整備する（※リモートD1上での本格計測は実装フェーズで行う作業とする）。</li>
+</ol>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant Exporter as &quot;export.py&quot;
+    participant D1 as &quot;Cloudflare D1 (Local)&quot;
+    participant FTS as &quot;course_search (FTS5)&quot;
+
+    Exporter-&gt;&gt;Exporter: SHA-256ハッシュ変更検知
+    alt コンテンツに変更あり
+        Exporter-&gt;&gt;D1: 講義データ挿入/更新 (courses)
+        Exporter-&gt;&gt;D1: ページ別テキスト挿入 (course_pages)
+        Exporter-&gt;&gt;D1: 開講枠情報挿入 (course_slots)
+        Exporter-&gt;&gt;FTS: 全文検索インデックス更新 (body結合テキスト)
+        Note over D1,FTS: 1講義単位で単一D1バッチとしてアトミックにコミット
+        D1--&gt;&gt;Exporter: コミット完了
+    else 変更なし (304 / SHA一致)
+        Exporter-&gt;&gt;D1: source_documents.fetched_at のみ更新
+        D1--&gt;&gt;Exporter: 更新完了
+    end
+</pre>
+<h4>Definition of Doneとゲート</h4>
+<ul>
+<li><strong>Gate 3 (G3)</strong>: <code>pnpm test -- tests/import.test.ts tests/identity.test.ts tests/search.test.ts</code> が終了コード0で完了し、ローカル環境へのマイグレーション適用が正常終了すること。</li>
+</ul>
+<h4>失敗時の切り分け</h4>
+<ul>
+<li>D1バッチ実行エラー時: 各SQL文あたりのバインドパラメータ数が100を超過していないか、SQLクエリ長が100KBを超えていないかを確認する。</li>
+<li>ユニーク制約違反時: <code>course_slots</code> に未定義値（<code>NULL</code>）が渡されていないか、<code>courses.variant_key</code> の生成ルールを点検する。</li>
+</ul>
+<hr />
+</article><article class="implementation-step"><h3>Step 4: 検索・詳細UIの実装とE2Eテスト</h3>
+<p>HonoとInertia.jsを用いて、モックデザイン（<code>syllabus-assets/mock/search-mock.html</code>）に準拠した検索画面および講義詳細画面を構築する。</p>
+<h4>関連ファイル一覧</h4>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイルパス</th>
+<th style="text-align: left;">内容</th>
+<th style="text-align: left;">選定理由・役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>src/server.tsx</code></td>
+<td style="text-align: left;">ルーティング</td>
+<td style="text-align: left;">Inertiaレンダリングハンドラーの実装</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>src/lib/search.ts</code></td>
+<td style="text-align: left;">検索クエリビルダー</td>
+<td style="text-align: left;">FTS5検索SQL組み立てとサニタイズ</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>app/pages/Courses/Index.tsx</code></td>
+<td style="text-align: left;">検索一覧画面</td>
+<td style="text-align: left;">検索窓、フィルター、一覧表示、ページネーション</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>app/pages/Courses/Show.tsx</code></td>
+<td style="text-align: left;">講義詳細画面</td>
+<td style="text-align: left;">原文全文、メタデータ、解析状況の表示</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tests/e2e/search.spec.ts</code></td>
+<td style="text-align: left;">E2Eテスト</td>
+<td style="text-align: left;">Playwrightによる表示・操作検証</td>
+</tr>
+</tbody>
+</table></div>
+<h4>実施手順</h4>
+<ol>
+<li><code>app/pages/Courses/Index.tsx</code> を実装する。検索クエリ入力とブラウザのURLパラメータを完全に連動させ、ブラウザの「戻る」「進む」や再読み込みを行っても検索状態が維持されるようにする。学部や学期などの絞り込み条件（filters）を変更した際は、自動的にページ番号を1にリセットする。ユーザー操作に対する入力負荷を抑えるため、300msのデバウンス処理または明示的な「検索ボタン」押下による遷移（モック基準に準拠）を実装する。また、0件ヒット時の表示、読み込み中表示、および503エラー表示を明確に区別して実装する。</li>
+<li><code>app/pages/Courses/Show.tsx</code> を実装する。講義の原文全文、抽出されたメタデータ、および原本URLを表示する。取り込んだ生テキストを表示する際はHTMLエスケープを徹底し、XSSを防止する。講義名が完全に一致している場合でも、担当教員や開講時限が異なる講義は別々のレコード行として明確に区別して表示する。</li>
+<li>Playwrightを用いたE2Eテストスイート <code>tests/e2e/search.spec.ts</code> を構築し、モバイル端末の画面幅（390px）およびデスクトップ画面幅（1440px）でのレスポンシブ表示崩れがないことを検証する。</li>
+</ol>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    actor User as &quot;利用者&quot;
+    participant Browser as &quot;ブラウザ (React / Inertia)&quot;
+    participant Server as &quot;Hono Worker&quot;
+    participant D1 as &quot;Cloudflare D1&quot;
+
+    User-&gt;&gt;Browser: 検索ワード入力 &amp; 検索ボタン押下
+    Browser-&gt;&gt;Server: GET /?q=物理&amp;year=2026 (X-Inertia: true)
+    Server-&gt;&gt;Server: 入力値エスケープ (リテラルクォート退避・SQLバインド)
+    Server-&gt;&gt;D1: 短語(2文字)のためinstr走査クエリ実行 (20+1行取得)
+    D1--&gt;&gt;Server: 講義レコード返却
+    Server--&gt;&gt;Browser: JSON Props返却 (items, hasNext, filters)
+    Browser-&gt;&gt;Browser: URLを /?q=物理&amp;year=2026 に更新 (履歴保持)
+    Browser--&gt;&gt;User: 検索結果一覧描画 (0〜20件表示、hasNextに応じ次ページ制御)
+
+    User-&gt;&gt;Browser: 特定講義カードをクリック
+    Browser-&gt;&gt;Server: GET /courses/cs101 (X-Inertia: true)
+    Server-&gt;&gt;D1: 講義詳細・全文・ページ情報取得
+    D1--&gt;&gt;Server: 詳細データ返却
+    Server--&gt;&gt;Browser: 詳細画面Props返却
+    Browser--&gt;&gt;User: 詳細画面描画 (HTMLエスケープ済全文表示)
+</pre>
+<h4>Definition of Doneとゲート</h4>
+<ul>
+<li><strong>Gate 4 (G4)</strong>: <code>pnpm exec playwright test tests/e2e/search.spec.ts</code> が終了コード0で完了し、390pxおよび1440pxの両画面幅でレイアウト崩れがなく、原文HTMLエスケープが担保されていること。</li>
+</ul>
+<h4>失敗時の切り分け</h4>
+<ul>
+<li>画面遷移失敗時: Inertiaの公式クライアントが発行するリクエストヘッダー（<code>X-Inertia</code>）とHonoのレスポンス形式を確認する。</li>
+<li>検索結果の不整合時: <code>search.ts</code> におけるFTS5エスケープ処理とバインド変数設定を点検する。</li>
+</ul>
+<hr />
+</article><article class="implementation-step"><h3>Step 5: ステージング検証、本番DB移行、公開準備</h3>
+<p>ステージング環境での全量取り込み検証、性能実測、本番用D1データベースの構築、およびバインディング切り替え手順を策定する。</p>
+<h4>関連ファイル一覧</h4>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイルパス</th>
+<th style="text-align: left;">内容</th>
+<th style="text-align: left;">選定理由・役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>wrangler.jsonc</code></td>
+<td style="text-align: left;">本番設定</td>
+<td style="text-align: left;">本番用D1バインディングおよびデプロイ設定</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>docs/operations.md</code></td>
+<td style="text-align: left;">運用手順書</td>
+<td style="text-align: left;">バッチ実行手順、切り替え手順、障害対応手順</td>
+</tr>
+</tbody>
+</table></div>
+<h4>実施手順</h4>
+<ol>
+<li>ユーザーによる独自ドメインの新規購入は行わないため、Cloudflareのアカウント設定を確認し、未登録の <code>workers.dev</code> サブドメインを割り当てる。アカウント権限および無料/有料プランの制限値を確認する。</li>
+<li>新規のステージング用D1データベースを作成し、マイグレーションを適用した上で取り込み処理を実行する。初回の取り込みにおいて <code>failed_count = 0</code> かつ <code>conflict_count = 0</code> であること、または明示的な除外合意が得られない限り、全件取り込み完了とはみなさない。</li>
+<li>本番用D1データベースを新規作成（<code>wrangler d1 create shinshu-syllabus-db-prod</code>）し、マイグレーション（0001, 0002）を適用する。検証済みのステージングデータをロードし、カバレッジ検証を実施した上で、WorkerのD1バインディング定義を切り替える。</li>
+<li>原本データの再公開条件に関する確認（※転載条件の具体調査は現時点で完了しておらず、法的判断は行わない旨を前提とする）およびGPT-6.1 Solが作成した新UIモックの承認状況を公開前に確定する。</li>
+<li>性能検証を実施する。ステージング環境に対して少数リクエストを逐次実行（合計20件・1秒間隔程度）して計測を行い、サーバー応答時間の提案目標値（未保証）としてコールドスタート時およびウォームスタート時ともにp95で500ms未満を目指す。</li>
+<li>なお、本番環境へのデプロイコマンド（<code>pnpm exec wrangler deploy</code>）は本計画策定時点では未実行であり、後続の実装フェーズにおいて実行する。</li>
+</ol>
+<pre class="mermaid">flowchart TD
+    A[&quot;ステージングD1作成&quot;] --&gt; B[&quot;マイグレーション 0001/0002 適用&quot;]
+    B --&gt; C[&quot;データ取り込み実行&quot;]
+    C --&gt; D{&quot;取り込み結果検証&quot;}
+
+    D -- &quot;failed=0 かつ conflict=0&quot; --&gt; E[&quot;低負荷検索性能実測 (p95&lt;500ms目標)&quot;]
+    D -- &quot;失敗または不整合残存&quot; --&gt; F[&quot;差し替え停止・原因調査&quot;]
+
+    E --&gt; G[&quot;本番用D1作成 &amp; データ移行&quot;]
+    G --&gt; H[&quot;wrangler.jsonc バインディング切り替え&quot;]
+    H --&gt; I[&quot;本番デプロイ wrangler deploy (実装フェーズで実行)&quot;]
+</pre>
+<h4>Definition of Doneとゲート</h4>
+<ul>
+<li><strong>Gate 5 (G5)</strong>: 以下のすべての条件を満たすこと。
+  1. <code>pnpm typecheck &amp;&amp; pnpm build &amp;&amp; pnpm test &amp;&amp; pnpm exec playwright test</code> が終了コード0で完了すること。
+  2. リモートHTTP疎通確認において、<code>/</code>, <code>/courses/:id</code>, <code>/healthz</code> が正常系 <code>200 OK</code> を返し、未知のIDに対して <code>404 Not Found</code>、不正なパラメータに対して <code>400 Bad Request</code>、レートリミット模擬時に <code>429 Too Many Requests</code> を返すこと。
+  3. 初回データ取り込みにおいて <code>failed = 0</code> かつ <code>conflict = 0</code> であることが確認されていること。</li>
+</ul>
+<h4>失敗時の切り分け</h4>
+<ul>
+<li>デプロイ後の503エラー時: <code>wrangler.jsonc</code> のD1データベースIDとCloudflareダッシュボード上の実リソースIDが一致しているか確認する。</li>
+<li>レスポンス遅延時: FTS5クエリがインデックスを使用しているか、D1の読み取り行数（<code>rows_read</code>）を調査する。</li>
+</ul>
+<hr /></article></section><section id="tests"><h2>テスト計画</h2><h3>1. 前提データと観測サンプル</h3>
+<p>初期検証に使用する21件のシラバスPDFサンプルについて、以下の事実が確認されている。</p>
+<ul>
+<li>すべてのページからテキスト抽出が可能であり、ページ数は1〜3ページ、文字数は1,747文字〜10,962文字の範囲に収まっている。</li>
+<li>不正な置換文字（文字化けを示すUnicode <code>U+FFFD</code> 等）は0件であった。</li>
+<li>人手による目視確認は1つのPDFの1ページ分のみ実施されている。</li>
+<li>したがって、すべての抽出項目が完全に正確であることは現時点で保証・検証されておらず、追加の検証が必要である。</li>
+</ul>
+<h3>2. 追加テストフィクスチャの設計</h3>
+<p>21サンプルの範囲外にある境界条件や異常系を検証するため、以下のテストフィクスチャを追加作成する。</p>
+<ul>
+<li><strong>学部バリエーション</strong>: 手元にない各学部・研究科の追加サンプル。</li>
+<li><strong>言語仕様</strong>: 英語で記述されたシラバスPDF。</li>
+<li><strong>文書長</strong>: 4ページ以上の長文PDF、および本文が空のPDF。</li>
+<li><strong>画像化シラバス</strong>: スキャン画像のみで構成され、テキスト情報を持たないPDF。</li>
+<li><strong>破損ファイル</strong>: ファイルヘッダーのみで本体が破損しているPDF。</li>
+<li><strong>通信異常模擬</strong>: サーバーがHTTP 404、HTTP 429、またはHTMLエラー画面をPDFとして偽装して返却するケース。</li>
+</ul>
+<h3>3. アイデンティティ検証（<code>tests/identity.test.ts</code>）</h3>
+<p>同一名称の講義を正確に識別・分離できることを検証する。</p>
+<ul>
+<li><strong>同名異教員・異時限講義の分離</strong>: 同一名称（例: 「情報科学」）であっても、担当教員や開講時限、科目コードが異なる場合は別々の講義レコードとして独立して登録されること。</li>
+<li><strong>同一コード複数スロット</strong>: 同一の科目コードで複数の時間割枠（月曜2限および木曜3限など）を持つ講義が、親講義に紐付く複数の <code>course_slots</code> レコードとして過不足なく登録されること。</li>
+<li><strong>同一キーの不整合検知</strong>: 年度、学部、科目コード、バリアントキーが完全に同一であるにもかかわらず、講義名や教員名が異なる不正データを受信した際、上書きを抑止して <code>conflict</code> 状態として隔離されること。</li>
+</ul>
+<h3>4. 検索機能検証（<code>tests/search.test.ts</code>）</h3>
+<p>FTS5およびSQLiteの検索精度と安定性を検証する。</p>
+<ul>
+<li><strong>短語検索の完全性</strong>: 3文字以下の短い日本語トークン（例: 「法学」「物理」「情報」）で検索した際、取りこぼし（偽陰性）なく正確にヒットすること。</li>
+<li><strong>表記揺れとUnicode正規化</strong>: 全角・半角英数字、濁点・半濁点の結合文字など、NFKC正規化・小文字化・連続空白単一化の仕様範囲内で適切に正規化されてマッチすること（※NFKC対象外の異体字統一は保証しない）。</li>
+<li><strong>複数キーワード検索</strong>: 空白区切りの複数単語によるAND検索が正確に機能すること。</li>
+<li><strong>記号・SQLインジェクション対策</strong>: ダブルクォーテーション、アスタリスク、コロン、ハイフンなどの記号やSQL構文が入力された場合でも、FTS5の構文エラー（Syntax Error）を起こさず安全に無害化（エスケープ）されること。</li>
+<li><strong>ページネーションの安定性</strong>: ソート順の決定性を担保し、ページをめくった際に講義の重複や抜け落ちが発生しないこと。</li>
+<li><strong>境界値処理</strong>: 検索結果が0件の場合の正常応答（200 OKと空配列）、および上限を超えるページ番号（<code>page = 1001</code>）に対する400エラーの返却。</li>
+</ul>
+<h3>5. インポートと障害復旧検証（<code>tests/import.test.ts</code>）</h3>
+<p>データ更新処理における耐障害性と整合性を検証する。</p>
+<ul>
+<li><strong>更新失敗時の旧データ保持</strong>: 既存の正常講義が存在する状態で次回のPDF取得または解析が失敗した場合、既存の講義データが破壊・削除されず、前回の成功状態が保持されること。</li>
+<li><strong>SSRF防御</strong>: 原本シラバスURLとして学外のホスト名や許可されていないパスが指定された場合、ダウンロード処理および画面表示が即座に拒絶されること。</li>
+<li><strong>全量負荷とサイズ測定計画</strong>: 約6,461件の全シラバスをD1に投入した際のデータベース総ファイルサイズ、FTSインデックスによるオーバーヘッド、および代表的な短語クエリ実行時の読み取り行数（<code>rows_read</code>）を計測・記録する試験を実装フェーズで実施する。</li>
+</ul></section><section id="crosscutting"><h2>セキュリティ・プライバシー・可観測性</h2><p>本システムは学内利用者を主対象としつつ認証を設けない一般公開の検索サービスとして運用する。誰でもアクセスできる公開構成をとるため、外部データを取り込むパイプラインと検索画面の双方で安全性を確保する。</p>
+<p>外部の HTML や PDF から抽出した本文、および SVG などの描画要素には、意図しない制御文字やスクリプトが混入する懸念がある。そのため、抽出したテキストは描画前にエスケープ処理を施し、React の <code>dangerouslySetInnerHTML</code> に直接渡す実装は禁止する。サーバーとフロントエンド間のデータ連携には Inertia.js 公式のシリアライザを使用し、安全なデータバインディングを維持する。</p>
+<p>データ収集クローラーは、あらかじめ定めた固定ドメインおよび固定パスのみを巡回対象とする。外部へのリダイレクトが発生した場合にも遷移先のドメインとパスを再検証し、予期しないエンドポイントへの通信を遮断する。また、外部からの意図しないデータ書き込みを防ぐため、取り込み処理を行う Web API は外部公開せず、開発者が実行する管理用 CLI に限定する。</p>
+<p>不特定多数のアクセスによる過負荷を防ぐため、検索エンドポイントにはレート制限を導入する。基準としては IP アドレスあたり毎分 60 リクエスト程度を目安とするが、固定仕様として決め打ちにせず、稼働後の負荷測定に基づいて調整する。特に学内 LAN などの共有 IP アドレスから多数の利用者が同時接続する状況を考慮し、正当な利用を阻害しない閾値と除外基準を設定する。</p>
+<p>プライバシー保護の観点から、シラバス原本全文の保持に伴い本文中に記載された公開連絡先等はそのまま保持されるものの、PDFの作成者情報等の不要なメタデータ（文書プロパティ等）を別途収集することはせず、またログ等に個人連絡先を出力しないよう配慮する。</p>
+<p>ログ管理においては、利用者のプライバシー保護と情報漏洩防止のため、検索クエリ（<code>q</code>）、教員の個別連絡先やメールアドレス、シラバスの原文テキスト、認証情報やトークン（credentials）は一切記録しない。可観測性の確保に必要なメトリクスとして、リクエスト処理時間（<code>duration</code>）、HTTP ステータスコード（<code>status</code>）、Cloudflare D1 の読み取り行数（<code>rows_read</code>）、取り込み件数カウンター（<code>import counters</code>）、外部データ取得時のエラー情報（<code>source errors</code>）のみを出力する。Cloudflare Worker の実行に必要なデプロイトークンは既存の環境変数を通じて設定されており、Git リポジトリ内には保存しない。</p></section><section id="rollout"><h2>ロールアウト</h2><p>安全なサービス公開とトラブル発生時の迅速な切り戻しを実現するため、段階的なデプロイ手順とデータベース管理方針を定める。</p>
+<p>公開に向けた移行手順は、抽出成功を確認したサンプルデータ（21 件、うち目視確認済は1件1ページのみ）を用いた動作確認から開始し、公開前のサンプル人手照合およびステージング環境における全量データ（約 6,400 件）の取り込み検証を経て、一般公開へ進める。原本の PDF ファイルそのものは本サービス内で再配信やホスティングを行わず、信州大学の公式ページへの外部リンクのみを提供する。</p>
+<p>本番データベースへの反映には、新規の Cloudflare D1 インスタンス（fresh D1）を作成してデータを投入・検証した上で、Worker の接続先を切り替える方式（本番スイッチ）を採用する。移行前の旧データベースインスタンスを保持しておくことで、重大な不整合や障害が発生した場合でも即座に以前の状態へ接続を戻せる構成とする。</p>
+<p>公開後のデータ更新については、月次または新学期（春学期・秋学期）の開始時期に手動の更新コマンドを実行する運用を提案する（具体的な更新日程は大学の公開スケジュールを踏まえて確定する）。データ更新の遅延や一部科目の欠落が生じた場合に利用者が混乱しないよう、検索画面上に対象データの網羅率（coverage）と最終取得日時を表示する。</p>
+<p>デプロイ先となる Cloudflare 環境の現状として、<code>workers.dev</code> のサブドメインが未登録であり、API アクセスに対して 404 エラーが返却される状態にある。本番デプロイに先立ち、適切なサブドメインの登録と設定を行う必要がある（権限やエラー状況に応じて再確認する）。なお、本システムでは利用者側からのデータ変更操作（リモートミューテーション）は一切提供しない。</p></section><section id="risks"><h2>リスクと対策</h2><p>本システムのデータ構造および外部依存関係に起因する主なリスクと、それに対する具体的な対策は以下の通りである。</p>
+<ol>
+<li><strong>PDF からのテキスト抽出精度と誤抽出</strong>
+   - <em>課題</em>: <code>pdftotext</code> によるテキスト抽出自体は可能であるものの、表組みの境界判定の失敗、段落の折り返しや改行の乱れ、科目コードや担当教員名などのメタデータの誤抽出が発生する可能性がある。
+   - <em>対策</em>: 抽出処理において信頼度（confidence）が低いと判定されたフィールドは値を無理に確定させず、<code>NULL</code> として扱う。その上で原本テキストと警告表示を併記し、人手で大学の原本情報と照合できるようにする。</li>
+<li><strong>講義総数の不確定性</strong>
+   - <em>課題</em>: 事前調査で判明した 6,461 件という数値はユニークな PDF URL の総数であり、実際の開講講義数と一致するとは限らない。同一科目の複数スロットや休講情報が含まれている可能性がある。
+   - <em>対策</em>: 検索画面上に注記を配置し、最新の時間割や開講状況については大学公式の原本情報を優先して確認するよう誘導する。</li>
+<li><strong>全 PDF における OCR 不要仮説の限界</strong>
+   - <em>課題</em>: サンプル調査として検証した 21 件の PDF では OCR なしでテキスト抽出が可能であったが、全 6,461 件のすべての PDF において OCR 処理が不要であると断定することはできない（スキャン画像による PDF が混在している可能性がある）。
+   - <em>対策</em>: 抽出に失敗した場合は低信頼度フィールドと同様に扱い、原本リンクと警告を併記して人手照合に委ねる。</li>
+<li><strong>大学側公開サーバーへの過負荷</strong>
+   - <em>課題</em>: クローラーによる短時間の集中アクセスが、大学のサーバーに負荷をかける恐れがある。
+   - <em>対策</em>: クローラーの接続頻度を制御し、リクエスト間に最低 1 秒以上の間隔（1 リクエスト/秒以下）を空けて順次取得を行う。</li>
+<li><strong>D1 の短期的費用と制限超過</strong>
+   - <em>課題</em>: 大量の全文検索インデックス作成や全件走査により、D1 の書き込み・読み取りクォータを短期間で消費し、費用や制限に抵触する懸念がある。
+   - <em>対策</em>: 事前調査に基づく料金・クォータ制限（付録 A 参照）に沿って分割取り込みや適切なインデックス設計を行う。</li>
+<li><strong>大学側サイト停止時の影響</strong>
+   - <em>課題</em>: 大学のシラバス公開サーバーがメンテナンスや障害で停止する可能性がある。
+   - <em>対策</em>: 一度取り込んだデータは Cloudflare D1 上に蓄積されているため、元サイトが停止している間も本サービス内での検索・閲覧は継続して稼働する（原本リンクへのアクセスのみが一時的に不能となる）。</li>
+</ol></section><section id="unclear"><h2>Unclear Points</h2><p>プロジェクトの進行を阻害せず、合意形成を図るため、現時点で未確定の事項を要確認事項として以下の形式で整理する。</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">項目（Point）</th>
+<th style="text-align: left;">理由・背景（Why）</th>
+<th style="text-align: left;">影響範囲（Impact）</th>
+<th style="text-align: left;">必要な対応（Need）</th>
+<th style="text-align: left;">代替策・フォールバック（Fallback）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1. 原データの転載条件</strong></td>
+<td style="text-align: left;">大学のシラバス案内における利用条件の確認が未完了であるため。公開されている事実は機械的取得が可能であることを示すのみであり、転載条件を保証するものではない（法的判断は行わない）。</td>
+<td style="text-align: left;">一般公開（Public Release）の可否に影響する。ただしローカル開発や検証作業を止めるものではない。</td>
+<td style="text-align: left;">信州大学のシラバス公開案内における利用条件の確認。</td>
+<td style="text-align: left;">利用条件の確認が取れるまでは外部への一般公開を保留し、ローカル環境での試験にとどめる。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2. 全 6,461 件の PDF 検証とキー衝突率</strong></td>
+<td style="text-align: left;">現時点では 21 件のサンプル検証のみ完了しており、全量ダウンロードとパース検証は未実施なため。</td>
+<td style="text-align: left;">パーサーの実装完了条件およびデータモデルの一意性制約の確定に影響する。</td>
+<td style="text-align: left;">全量データ取り込みスクリプトを実行し、抽出結果および同一キー衝突率のレポートを作成・確認する。</td>
+<td style="text-align: left;">抽出信頼度が低い行やキーの衝突が検知された講義行は隔離して保持する。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3. workers.dev サブドメイン名と利用プラン</strong></td>
+<td style="text-align: left;">Cloudflare アカウントで <code>workers/subdomain</code> が 404（code: 10007、未登録）であることを確認済みであり、具体的なサブドメイン名および無料枠か Paid プランかが未定なため。</td>
+<td style="text-align: left;">本番環境へのデプロイ前に確定が必要となる。</td>
+<td style="text-align: left;">ワーカー名候補（例: <code>shinshu-syllabus-search</code>）の選定、アカウントサブドメインの登録、利用プランの確認。</td>
+<td style="text-align: left;">無料枠の制限値を前提として設計を進め、ドメイン名やプランに関する仮定を設計書に明記する。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4. データ更新の頻度</strong></td>
+<td style="text-align: left;">大学側におけるシラバスの修正・更新タイミングが公開情報から確定できないため。</td>
+<td style="text-align: left;">開発工程には影響しない（ノンブロッキング）。</td>
+<td style="text-align: left;">運用方針としての定期更新日程（学期開始前など）の確定。</td>
+<td style="text-align: left;">初期リリース後は自動巡回を行わず、月次または各学期開始前の手動コマンド実行による更新を提案する。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5. 新 UI モックの承認</strong></td>
+<td style="text-align: left;">作成されたモック（<a href="syllabus-assets/mock/search-mock.html">search-mock.html</a>）が承認待ちの状態であるため。</td>
+<td style="text-align: left;">フロントエンド実装（Step 4）に着手する前に合意が必要となる。</td>
+<td style="text-align: left;">ユーザーによるモック画面の確認と承認。</td>
+<td style="text-align: left;">提示されている 4 状態（初期検索、検索結果、講義詳細、0 件表示）の現行モック案を暫定仕様として設計を進める。</td>
+</tr>
+</tbody>
+</table></div></section><section id="todo"><h2>TodoList</h2><p>以下の実装タスクリストに基づき、各ステップの検証（ハードゲート）を通過させながら段階的に開発を進める。</p>
+<ul>
+<li class="task"><input type="checkbox" disabled>Step 1: <code>package.json</code>, <code>vite.config.ts</code>, <code>wrangler.jsonc</code>, <code>src/server.tsx</code> にHono・Inertia・React基盤を作る（G1）。</li>
+<li class="task"><input type="checkbox" disabled>Step 2: <code>scripts/ingest/</code> に一覧収集・PDF取得・抽出・検証CLIを作る（G2）。</li>
+<li class="task"><input type="checkbox" disabled>Step 3: <code>migrations/</code>, <code>src/lib/</code>, <code>tests/</code> にD1・同一性判定・日本語検索を実装する（G3）。</li>
+<li class="task"><input type="checkbox" disabled>Step 4: <code>app/pages/Courses/</code>, <code>app/components/ui/</code>, <code>tests/e2e/</code> に検索・詳細画面を作る（G4）。</li>
+<li class="task"><input type="checkbox" disabled>Step 5: <code>docs/operations.md</code>, <code>wrangler.jsonc</code> と全量データを検証し、公開・復旧手順を確定する（G5）。</li>
+</ul></section><section id="dod"><h2>Definition of Done</h2><p>本プロジェクトの実装が完了したと判断するための客観的な基準を以下に定める。</p>
+<ol>
+<li><strong>データ収集の網羅性</strong>: 信州大学が公開する全 21 区分において、収集対象となるすべてのシラバス URL が「正常取り込み完了（ready）」「除外理由付きでスキップ」「取り込み失敗」のいずれかとしてレポート上に網羅・分類されていること。</li>
+<li><strong>完了ステータスの基準</strong>: システム全体を「完了（completed）」と呼称する前提として、未解決の失敗（failed）および同一キーの衝突（conflict）が 0 件であるか、明示的な仕様変更・除外スコープの合意が存在すること（現時点では全約 6,400 件の取得処理は未実行である）。</li>
+<li><strong>同名科目の識別</strong>: 一般公開された検索画面において、同一の科目名であっても担当教員や曜日時限・開講期が異なる講義が、別の講義として明確に識別・表示できること。</li>
+<li><strong>日本語検索の機能性</strong>: 日本語 2 文字以上の検索キーワードにおいて、目的の講義が適切に検索・ヒットすること。</li>
+<li><strong>出所情報の保持</strong>: 各講義レコードに対し、開講年度・学部等のメタデータ、取得元の大学公式 URL、原本 PDF のページ情報などの出所（provenance）が記録され、画面上で確認できること。</li>
+<li><strong>セキュリティと機密情報の非公開</strong>: 一般利用者の検索に認証を要求しない構成であり、管理用トークンなどの機密情報がクライアント側に露出せず、Git リポジトリにも保存されていないこと。</li>
+<li><strong>品質ゲートの通過</strong>: 定義されたすべてのハードゲート（G0 〜 G5）を通過していること。</li>
+</ol></section><section id="research"><h2>Appendix A. 事前調査結果</h2><p>2026年10月15日（日本標準時）に実施した、信州大学シラバス公開ページ、サンプル PDF、ローカル検索エンジン、Cloudflare 実行基盤に関する事前調査結果を以下に記録する。</p>
+<h3>1. シラバス公開状況と PDF サンプル調査</h3>
+<ul>
+<li><strong>公開 HTML の導通確認</strong>: 信州大学のシラバス案内サイトから全 21 区分の HTML を取得し、21 件すべてで HTTP ステータス 200 を確認した。</li>
+<li><strong>収集対象件数</strong>: 各区分の一覧から抽出された PDF アンカーの総数は 7,677 件であり、重複を排除したユニークな URL 数は 6,461 件であった。このインベントリ情報は <a href="syllabus-assets/evidence/inventory.json">inventory.json</a> に保存している。</li>
+<li><strong>サンプル PDF の抽出検証</strong>: 各区分から抽出した 21 件のサンプル PDF を対象にダウンロードおよびテキスト抽出の検証を行った。</li>
+<li>21 件すべてのリクエストで HTTP ステータス 200、<code>Content-Type: application/pdf</code> を返却した。</li>
+<li>ファイルサイズは 15,612 バイト 〜 40,931 バイトの範囲であった。</li>
+<li><code>pdftotext</code> コマンドを実行した結果、終了コード 0（正常終了）が得られ、ページ数は 1 〜 3 ページ、抽出文字数は 1,747 文字 〜 10,962 文字であった。</li>
+<li>文字化けやデコードエラーを示す置換文字（<code>U+FFFD</code>）の発生は 0 件であった。検証結果の統計は <a href="syllabus-assets/evidence/pdf-samples.json">pdf-samples.json</a> に記録している。</li>
+<li>工学部のサンプルを用いて原本 1 ページの画像と抽出テキストを目視で照合したところ、講義名、講義コード、開講年度、担当教員、単位数、開講学期、曜日時限、授業概要、評価方法の各項目が抽出されていることを確認した（教科書情報については2ページの抽出テキスト上で確認）。</li>
+<li><em>留意事項</em>: 本検証は 21 件のサンプルに基づくものであり、全文・全フィールドの抽出正確性を保証するものではない。また、全 6,461 件のダウンロードは未実施である。原本 PDF の平均サイズ（約 23,400 バイト × 6,461 件 ≈ 約 144 MiB）は非ランダム抽出の 21 サンプルから算出した粗い外挿値であり、データベースの必要容量を示すものではない。</li>
+<li><strong>Web サーバーの挙動</strong>:</li>
+<li>存在しないサンプル PDF へのアクセスは HTTP 404 を返却した。</li>
+<li><code>robots.txt</code> は HTTP 404 であった（ただし、これはクローリングの利用許諾を意味するものではない）。</li>
+<li>同名科目や複数時間割スロットの構造は、工学部の公開 HTML を実際に読み取って存在を確認した。</li>
+<li>HTTP 取得において Cookie は不要であった。信州大学の公開 URL を引用して検証を行っている。</li>
+</ul>
+<h3>2. 全文検索（FTS5 Trigram）のローカル検証</h3>
+<p>ローカル環境の SQLite 3.46.1 上で FTS5 trigram トークナイザの動作を検証した。
+- 「情報科学入門」というテキストに対し、<code>MATCH '情報'</code> では 0 件ヒット（3 文字未満の文字列は trigram の MATCH ではヒットしない）、<code>MATCH '情報科学'</code> では 1 件ヒットした。
+- 一方、<code>LIKE '%情報%'</code> による部分一致検索では 1 件ヒットした。
+- 数値 2 文字の検索でも同様の挙動を示した。
+- 3 文字の単語である「データ」に対しては、<code>MATCH 'データ'</code> で 1 件ヒットした。
+- <em>留意事項</em>: Cloudflare D1 の実環境上での検索ベンチマークテストは未実施である。</p>
+<h3>3. Cloudflare D1 および Workers の制限と料金体系</h3>
+<p>Cloudflare D1 は FTS5 trigram に対応しており、システム設計に関わる主要な制約と料金体系は以下の通りである。
+- <strong>制約・上限仕様</strong>:
+  - LIKE パターンの上限は 50 バイト。
+  - 1 行あたりのサイズ上限は 2 MB。
+  - バインドパラメータの上限は 100 個。
+  - 1 クエリあたりの SQL サイズ上限は 100 KB。
+  - データベース容量は無料枠で 1 DB あたり 500 MB（アカウント全体で 5 GB）、有料プラン（Paid）で 1 DB あたり 10 GB。
+  - 詳細は <a href="https://developers.cloudflare.com/d1/platform/limits/">Cloudflare D1 Limits</a> を参照。
+- <strong>D1 料金体系</strong>:
+  - 無料枠: 1 日あたり 500 万行の読み取り（5M rows read/day）、1 日あたり 10 万行の書き込み（100k rows write/day）。
+  - 有料枠: 月間 250 億行の読み取り（超過時は 100 万行あたり $0.001）、月間 5,000 万行の書き込み（超過時は 100 万行あたり $1.00）、5 GB のストレージを含む（超過時は 1 GB あたり月額 $0.75）。詳細は <a href="https://developers.cloudflare.com/d1/platform/pricing/">Cloudflare D1 Pricing</a> を参照。
+- <strong>Workers 料金体系</strong>:
+  - 無料枠: 1 日あたり 10 万リクエスト（100k requests/day）。
+  - 有料枠: 月額最低 $5 から（要再確認）。詳細は <a href="https://developers.cloudflare.com/workers/platform/pricing/">Cloudflare Workers Pricing</a> を参照。
+- <em>留意事項</em>: 記載の金額は為替レートおよび税金を除外した概算である。対象アカウントにおける現行プランの契約状況は未確認であり、無料枠の永続的な適用を保証するものではない。全文検索インデックス作成を伴う全量データ取り込み処理では書き込み行数が多くなるため、1 日あたりの無料枠（10 万行）を超過する可能性がある。</p>
+<h3>4. アカウント・リポジトリ調査</h3>
+<ul>
+<li><strong>アカウント権限の確認</strong>: Wrangler 4.110.0 を使用して <code>wrangler whoami</code> を実行し、指定されたユーザートークンを通じて「信大シラバス」アカウントへのアクセスが可能であることを確認した。</li>
+<li><strong>リソース状態（REST API）</strong>:</li>
+<li><code>GET workers/scripts</code>: HTTP 200（空の配列が返却され、スクリプトは未デプロイ）。</li>
+<li><code>GET d1/database</code>: HTTP 200（空の配列が返却され、データベースは未作成）。</li>
+<li><code>GET workers/subdomain</code>: HTTP 404（サブドメイン未設定）。</li>
+<li><strong>権限およびリポジトリ</strong>: API トークンに付与されている権限スコープの全容および Paid プラン契約の有無は未確認である。対象リポジトリ（<code>/home/watabegg/shinshu-syllabus-search</code>）は初期状態の空リポジトリであり、Git コミット（SHA）はまだ存在しない。</li>
+<li><strong>ツール運用方針</strong>: 将来的に新しい Workers Cache 設定を使用する場合は、Wrangler 最新版の仕様に合わせてバージョンを固定（pin）して管理する（今回の調査過程においてグローバル CLI のバージョン更新は行っていない）。</li>
+</ul></section><section id="gates"><h2>Appendix B. Hard Gate</h2><p>手戻りを防ぎ、各工程の品質を担保するため、各ステップの境界に以下のハードゲート（Hard Gate）を設ける。</p>
+<h3>G0: 計画前提条件（Plan Prerequisites）</h3>
+<ul>
+<li><strong>判定項目</strong>:
+  1. 新 UI モック（<a href="syllabus-assets/mock/search-mock.html">search-mock.html</a>）に対するユーザーの承認が得られていること。
+  2. 信州大学シラバスデータの公開・再利用に関する条件が確認されていること。
+  3. Cloudflare のワーカー名および適用プランが確定していること。</li>
+<li><strong>並行作業の扱い</strong>: 本ゲートにおける未確認事項がある場合でも、プロジェクト基盤の構築（Step 1）やテスト用フィクスチャの作成は並行して実施可能であり、全作業を一律に停止する必要はない。</li>
+</ul>
+<h3>G1 〜 G5: 各ステップの判定基準</h3>
+<p>各ステップで指定された検証コマンドを実行し、期待される成果物が得られていることを確認する（現時点では計画段階であるため、提示されているすべてのコマンドは未実行である。D1のbinding名syllabus-dbは実装設定と合わせる予定）。</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">ゲート</th>
+<th style="text-align: left;">対象ステップ</th>
+<th style="text-align: left;">検証コマンド（全コマンド未実行）</th>
+<th style="text-align: left;">判定基準（期待終了コード: 0）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>G1</strong></td>
+<td style="text-align: left;">基盤構築</td>
+<td style="text-align: left;"><code>pnpm typecheck &amp;&amp; pnpm build &amp;&amp; pnpm exec wrangler deploy --dry-run</code></td>
+<td style="text-align: left;">型チェック、ビルド、およびWranglerのローカルdry-run検証が正常終了すること。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>G2</strong></td>
+<td style="text-align: left;">収集・抽出 CLI</td>
+<td style="text-align: left;"><code>python3 scripts/ingest/validate.py --manifest data/manifest.json --samples data/samples --strict</code></td>
+<td style="text-align: left;">サンプルデータの取得・抽出・厳密バリデーションが正常終了すること。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>G3</strong></td>
+<td style="text-align: left;">DB・検索実装</td>
+<td style="text-align: left;"><code>pnpm exec wrangler d1 migrations apply syllabus-db --local &amp;&amp; pnpm test -- tests/import.test.ts tests/identity.test.ts tests/search.test.ts</code></td>
+<td style="text-align: left;">ローカルD1マイグレーション適用後、インポート・同一性判定・日本語検索（trigramおよびinstr分岐）テストが全通過すること。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>G4</strong></td>
+<td style="text-align: left;">フロントエンド実装</td>
+<td style="text-align: left;"><code>pnpm exec playwright test tests/e2e/search.spec.ts</code></td>
+<td style="text-align: left;">検索画面、講義詳細画面、0件表示画面のE2Eテストが全通過すること。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>G5</strong></td>
+<td style="text-align: left;">運用・公開検証</td>
+<td style="text-align: left;"><code>pnpm typecheck &amp;&amp; pnpm build &amp;&amp; pnpm test &amp;&amp; pnpm exec playwright test</code> および remote疎通テスト（200/400/404/503 fixture）</td>
+<td style="text-align: left;">全自動テスト通過およびリモート疎通fixture検証が正常終了し、本番環境への切り替え準備が完了すること。</td>
+</tr>
+</tbody>
+</table></div>
+<h3>ゲート不合格（FAIL）時の対応方針</h3>
+<p>いずれかのステップでゲート判定を通過できなかった（FAIL）場合、後続ステップへの進行を直ちに停止する。発生した課題に応じて TodoList および Unclear Points を更新し、原因を解消した上で再判定を実施する。</p>
+<p><em>留意事項</em>: 今回の計画段階における検証範囲は、ドキュメント内のリンク整合性、構成図、画面表示（表示幅 390px および 1440px でのレンダリング）、スナップショットによる確認にとどまり、製品コードのテスト実行は含まない。</p></section></main></div><script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script>if(window.mermaid)mermaid.initialize({startOnLoad:true,securityLevel:'strict',theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'default'});const links=[...document.querySelectorAll('#toc a')];const observer=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.hash==='#'+e.target.id))}},{rootMargin:'-10% 0px -75% 0px'});document.querySelectorAll('main>section').forEach(s=>observer.observe(s));</script></body></html>

@@ -1,0 +1,33 @@
+{
+  "counts_after_seed": {
+    "source_documents": 6462,
+    "courses": 22,
+    "course_search": 22,
+    "course_slots": 56
+  },
+  "course_readback": {
+    "id": "qa-browser-slot-20261015-reqa",
+    "year": 2025,
+    "department": "qa",
+    "registration_code": "QAREQA2025",
+    "title": "QA 時間割スロット検証",
+    "qa_seed": true
+  },
+  "slot_readback": [
+    {
+      "term": "後期",
+      "day_label": "月曜",
+      "period_label": "1時限",
+      "day": 1,
+      "period": 1
+    },
+    {
+      "term": "後期",
+      "day_label": "金曜",
+      "period_label": "2時限",
+      "day": 5,
+      "period": 2
+    }
+  ],
+  "verified_at": "2026-10-15T14:18:12+00:00"
+}

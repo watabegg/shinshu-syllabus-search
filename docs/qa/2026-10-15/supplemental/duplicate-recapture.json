@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-10-15T14:20:09+00:00",
+  "trigger": "Trusted validator reported byte-identical baseline/clear/detail-return screenshots in the initial evidence set.",
+  "action": "Archived the prior results, reseeded only the local QA course needed by cases 006/008, replayed all 15 browser cases in the same locked run, captured distinct Given/When/Then evidence chronologically, then cleaned the seed again.",
+  "case_ids_replayed": [
+    "QA-SEARCH-001",
+    "QA-SEARCH-002",
+    "QA-SEARCH-003",
+    "QA-SEARCH-004",
+    "QA-SEARCH-005",
+    "QA-SEARCH-006",
+    "QA-SEARCH-007",
+    "QA-SEARCH-008",
+    "QA-SEARCH-009",
+    "QA-SEARCH-010",
+    "QA-SEARCH-011",
+    "QA-SEARCH-012",
+    "QA-SEARCH-013",
+    "QA-DETAIL-001",
+    "QA-RESPONSIVE-001"
+  ],
+  "case_count": 15,
+  "screenshot_count": 58,
+  "duplicate_screenshot_hash_groups_after_recapture": 0,
+  "prior_results": "supplemental/pre-duplicate-recapture-results.json",
+  "validator_attempt": "Trusted verification is rerun after this evidence update."
+}
