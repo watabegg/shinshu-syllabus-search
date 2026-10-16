@@ -57,8 +57,8 @@
 html { min-width: 320px; scroll-behavior: smooth; }
 body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--background); }
 button, input, select { font: inherit; }
-a { color: inherit; text-underline-offset: 4px; }
-a:hover { color: #52525b; }
+a:not([data-slot="button"]) { color: inherit; text-underline-offset: 4px; }
+a:not([data-slot="button"]):hover { color: #52525b; }
 button, a, input, select { -webkit-tap-highlight-color: transparent; }
 a:not([data-slot]):focus-visible { outline: 3px solid #a1a1aa; outline-offset: 3px; }
 
@@ -163,7 +163,12 @@ a:not([data-slot]):focus-visible { outline: 3px solid #a1a1aa; outline-offset: 3
 .result-card-link:hover { color: inherit; }
 .result-card-link:hover [data-slot="card"], .result-card-link:focus-visible [data-slot="card"] { border-color: var(--ring); box-shadow: 0 3px 12px rgb(24 24 27 / 8%); }
 .syllabus-text { white-space: pre-line; overflow-wrap: anywhere; line-height: 1.9; font-size: 14px; }
-.syllabus-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.syllabus-nav { margin: 16px 0 28px; padding: 8px 0; border-block: 1px solid var(--border); }
+.syllabus-nav ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; list-style: none; margin: 0; padding: 0; }
+.syllabus-nav a { display: flex; align-items: baseline; gap: 12px; padding: 10px 8px; border-radius: 4px; text-decoration: none; font-size: 13px; line-height: 1.6; }
+.syllabus-nav a:hover { background: #f4f4f5; text-decoration: underline; }
+.toc-number { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; min-width: 18px; }
+@media (max-width: 680px) { .syllabus-nav ol { grid-template-columns: 1fr; } }
 .syllabus-section { scroll-margin-top: 24px; padding: 22px 0; border-top: 1px solid var(--border); }
 .syllabus-section h3 { margin: 0 0 12px; font-weight: 600; font-size: 16px; }
 .syllabus-section p { margin: 0 0 12px; }

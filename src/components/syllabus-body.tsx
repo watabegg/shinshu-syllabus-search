@@ -10,7 +10,7 @@ export function SyllabusBody(props: Pick<DetailProps, 'sections' | 'pages'>) {
               {props.sections.length > 0 ? (
                 <>
                   <nav className="syllabus-nav" aria-label="シラバスの目次">
-                    {props.sections.map((section) => <Button key={section.id} variant="outline" size="sm" asChild><a href={`#${section.id}`}>{section.title}</a></Button>)}
+                    <ol>{props.sections.map((section, index) => <li key={section.id}><a href={`#${section.id}`}><span className="toc-number" aria-hidden="true">{index + 1}</span><span>{section.title}</span></a></li>)}</ol>
                   </nav>
                   {props.sections.map((section) => (
                     <section id={section.id} key={section.id} className="syllabus-section" aria-labelledby={`${section.id}-title`}>

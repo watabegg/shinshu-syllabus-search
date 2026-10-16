@@ -138,6 +138,23 @@ test('whole result cards navigate and syllabus content is structured', async ({ 
   expect(await page.locator('main').evaluate((element) => element.getBoundingClientRect().width)).toBe(searchWidth);
   await expect(page.getByRole('heading', { name: '授業の概要', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: '成績評価の方法', exact: true })).toBeVisible();
+  for (const text of ['資料の照合情報', 'PDF識別用ハッシュ', '抽出時の注意', '原文の記載：']) {
+    await expect(page.getByText(text, { exact: false })).toHaveCount(0);
+  }
+  await expect(page.locator('.source-caveat')).toHaveCount(0);
+  const pdfButton = page.getByRole('link', { name: '大学の原本PDFを開く' });
+  const textColor = await pdfButton.evaluate(element => getComputedStyle(element).color);
+  expect(textColor).toBe('rgb(250, 250, 250)');
+  await pdfButton.hover();
+  expect(await pdfButton.evaluate(element => getComputedStyle(element).color)).toBe(textColor);
+  const toc = page.getByRole('navigation', { name: 'シラバスの目次' });
+  await expect(toc.getByRole('list')).toBeVisible();
+  const planLink = toc.getByRole('link', { name: '授業計画', exact: true });
+  const target = await planLink.getAttribute('href');
+  await planLink.click();
+  expect(new URL(page.url()).hash).toBe(target);
+  await expect(page.locator(target!)).toBeInViewport();
+
   const plan = page.getByRole('region', { name: '授業計画', exact: true });
   await expect(plan.getByRole('table')).toBeVisible();
   await expect(plan.getByRole('cell', { name: '第1回', exact: true })).toBeVisible();
