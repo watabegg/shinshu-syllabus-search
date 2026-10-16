@@ -74,10 +74,14 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
   const defaultYear = String(available.years.at(-1) ?? 2026);
   const yearValue = params.get('year') ?? defaultYear;
   const department = params.get('department') ?? '';
-  const term = params.get('term') ?? '';
-  const day = params.get('day') ?? '';
-  const period = params.get('period') ?? '';
-  const modality = params.get('modality') ?? '';
+  const multiple = (name: string) => [...new Set([...params.getAll(name), ...params.getAll(`${name}[]`)].flatMap(value => value.split(',')).filter(Boolean))];
+  const rawTerms = multiple('term');
+  const availableTerms = new Set(available.terms);
+  const term = [...new Set(rawTerms.map(value => availableTerms.has(value) ? /^(前期|後期|通年)/u.exec(value)?.[1] ?? value : value))];
+  const intensive = multiple('intensive');
+  const day = multiple('day');
+  const period = multiple('period');
+  const modality = multiple('modality');
   const rawPage = params.get('page') ?? '1';
 
   if (yearValue && (!/^[0-9]{4}$/u.test(yearValue) || !available.years.includes(Number(yearValue)))) {
@@ -86,17 +90,20 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
   if (department && !available.departments.some((option) => option.id === department)) {
     throw new SearchInputError('学部・研究科の選択が正しくありません。');
   }
-  if (term && !available.terms.includes(term)) {
+  if (term.some(value => !['前期', '後期', '通年'].includes(value))) {
     throw new SearchInputError('学期の選択が正しくありません。');
   }
-  if (day && !/^[1-7]$/u.test(day)) {
+  if (day.some(value => !/^[1-7]$/u.test(value))) {
     throw new SearchInputError('曜日の選択が正しくありません。');
   }
-  if (period && !/^(?:[1-9]|10)$/u.test(period)) {
+  if (period.some(value => !/^(?:[1-9]|10)$/u.test(value))) {
     throw new SearchInputError('時限の選択が正しくありません。');
   }
-  if (modality && !MODALITIES.includes(modality as Modality)) {
+  if (modality.some(value => !MODALITIES.includes(value as Modality))) {
     throw new SearchInputError('授業形式の選択が正しくありません。');
+  }
+  if (intensive.some(value => !['yes', 'no'].includes(value))) {
+    throw new SearchInputError('集中授業の選択が正しくありません。');
   }
   if (!/^[1-9][0-9]{0,3}$/u.test(rawPage) || Number(rawPage) > MAX_PAGE) {
     throw new SearchInputError('ページ番号の指定が正しくありません。');
@@ -110,9 +117,10 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
     year: yearValue,
     department,
     term,
+    intensive,
     day,
     period,
-    modality: modality === 'unknown' ? 'in_person' : modality,
+    modality: [...new Set(modality.map(value => value === 'unknown' ? 'in_person' : value))],
     page: Number(rawPage),
   };
 }
@@ -213,29 +221,32 @@ function buildSearchWhere(filters: SearchFilters): { sql: string; values: QueryV
     clauses.push('c.department = ?');
     values.push(filters.department);
   }
-  if (filters.term || filters.day || filters.period) {
+  if (filters.term.length || filters.day.length || filters.period.length) {
     const slotClauses = ['s.course_id = c.id'];
-    if (filters.term) {
-      slotClauses.push('s.term_label = ?');
-      values.push(filters.term);
+    if (filters.term.length) {
+      slotClauses.push(`(${filters.term.map(() => 's.term_label LIKE ?').join(' OR ')})`);
+      values.push(...filters.term.map(term => `${term}%`));
     }
-    if (filters.day) {
-      slotClauses.push('s.day = ?');
-      values.push(Number(filters.day));
-    }
-    if (filters.period) {
-      slotClauses.push('s.period = ?');
-      values.push(Number(filters.period));
+    for (const field of ['day', 'period'] as const) {
+      if (filters[field].length) {
+        slotClauses.push(`s.${field} IN (${filters[field].map(() => '?').join(',')})`);
+        values.push(...filters[field].map(Number));
+      }
     }
     clauses.push(`EXISTS (SELECT 1 FROM course_slots s WHERE ${slotClauses.join(' AND ')})`);
   }
-  if (filters.modality) {
-    if (filters.modality === 'in_person') {
-      clauses.push("(EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id AND cm.modality IN ('in_person', 'unknown')) OR NOT EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id))");
-    } else {
-      clauses.push('EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id AND cm.modality = ?)');
-      values.push(filters.modality);
-    }
+  if (filters.intensive.length === 1) {
+    // HTML/PDF copies can disagree in detail. Any explicit intensive label wins
+    // for the course; the generic PDF label "集中・不定期" alone is not evidence.
+    const intensive = "EXISTS (SELECT 1 FROM course_slots si WHERE si.course_id = c.id AND (instr(si.term_label, '集中') > 0 OR instr(si.day_label, '集中') > 0 OR si.period_label = '集中'))";
+    clauses.push(filters.intensive[0] === 'yes' ? intensive : `NOT ${intensive}`);
+  }
+  if (filters.modality.length) {
+    const modalities = filters.modality.includes('in_person') ? [...filters.modality, 'unknown'] : filters.modality;
+    const match = `EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id AND cm.modality IN (${modalities.map(() => '?').join(',')}))`;
+    clauses.push(filters.modality.includes('in_person')
+      ? `(${match} OR NOT EXISTS (SELECT 1 FROM course_modalities cm WHERE cm.course_id = c.id))` : match);
+    values.push(...modalities);
   }
 
   return { sql: clauses.length ? `WHERE ${clauses.join(' AND ')}` : '', values };

@@ -26,69 +26,81 @@ test('public search renders its data state and keeps query conditions in the URL
   }
 });
 
-test('shadcn selects submit their values, support keyboard selection, and reset with navigation', async ({ page }) => {
+test('multiple filters persist in URL, reload, detail navigation, and reset', async ({ page }) => {
   const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('form', { name: '講義を検索' }).getByRole('combobox')).toHaveCount(6);
-  for (const trigger of await page.getByRole('combobox').all()) {
-    expect(await trigger.evaluate((element) => element.tagName)).toBe('BUTTON');
-  }
-  // Radix keeps visually clipped native selects for browser form integration.
+  await expect(page.getByRole('form', { name: '講義を検索' }).getByRole('combobox')).toHaveCount(2);
   await expect(page.locator('select:not([aria-hidden="true"])')).toHaveCount(0);
-  const choose = async (label: string, option: string) => {
-    await page.getByRole('combobox', { name: label, exact: true }).click();
-    await page.getByRole('option', { name: option, exact: true }).click();
-    await expect(page.getByRole('combobox', { name: label, exact: true })).toContainText(option);
+  await page.getByRole('combobox', { name: '学部・研究科' }).click();
+  await page.getByRole('option', { name: '工学部', exact: true }).click();
+  const choose = async (label: string, options: string[]) => {
+    await page.getByRole('button', { name: `${label}を選択`, exact: true }).click();
+    for (const name of options) await page.getByRole('checkbox', { name, exact: true }).check();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('button', { name: '完了', exact: true }).click();
   };
-  await choose('学部・研究科', '工学部');
-  await choose('学期', '前期');
-  await choose('曜日', '月曜日');
-  await choose('時限', '1限');
-  await choose('授業形式', '対面');
+  await choose('学期', ['前期', '後期', '集中以外']);
+  await choose('曜日', ['月', '水']);
+  await choose('時限', ['1限', '2限']);
+  await choose('授業形式', ['対面', 'オンデマンド']);
   await page.getByRole('button', { name: '検索する', exact: true }).click();
   await expect(page).toHaveURL(/department=t/);
   const params = new URL(page.url()).searchParams;
-  expect(params.get('term')).toBe('前期');
-  expect(params.get('day')).toBe('1');
-  expect(params.get('period')).toBe('1');
-  expect(params.get('modality')).toBe('in_person');
-  expect([...params.values()]).not.toContain('__all__');
+  expect(params.get('term')).toBe('前期,後期');
+  expect(params.get('intensive')).toBe('no');
+  expect(params.get('day')).toBe('1,3');
+  expect(params.get('period')).toBe('1,2');
+  expect(params.get('modality')).toBe('in_person,on_demand');
+  await expect(page.locator('.result-card-link').first()).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('combobox', { name: '曜日', exact: true })).toContainText('月曜日');
-  await expect(page.getByRole('combobox', { name: '学部・研究科' })).toContainText('工学部');
-  const courseLink = page.locator('.result-card-link').first();
-  if (await courseLink.count()) {
-    await courseLink.click();
-    await expect(page.getByRole('link', { name: '大学の原本PDFを開く' })).toBeVisible();
-    await page.getByRole('button', { name: '資料の照合情報' }).click();
-    await expect(page.getByText('PDF識別用ハッシュ')).toBeVisible();
-    await page.getByRole('link', { name: '← 検索結果に戻る' }).click();
-    await expect(page.getByRole('combobox', { name: '曜日', exact: true })).toContainText('月曜日');
-  }
+  await expect(page.getByRole('button', { name: '曜日を選択' })).toContainText('月・水');
+  await page.locator('.result-card-link').first().click();
+  await expect(page.getByRole('link', { name: '大学の原本PDFを開く' })).toBeVisible();
+  await page.getByRole('link', { name: '← 検索結果に戻る' }).click();
+  await expect(page.getByRole('button', { name: '時限を選択' })).toContainText('1限・2限');
+  await expect(page.getByRole('button', { name: '学期を選択' })).toContainText('前期・後期・集中以外');
+  await page.getByRole('button', { name: '次のページ', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'ページを選択' })).toHaveText(/^2\//);
+  expect(new URL(page.url()).searchParams.get('day')).toBe('1,3');
   await page.getByRole('link', { name: '条件をクリア' }).click();
   await expect(page).toHaveURL(/\/$/);
-  for (const label of ['学部・研究科', '学期', '曜日', '時限', '授業形式']) {
-    await expect(page.getByRole('combobox', { name: label, exact: true })).toContainText('すべて');
+  for (const label of ['学期', '曜日', '時限', '授業形式']) {
+    await expect(page.getByRole('button', { name: `${label}を選択`, exact: true })).toContainText('すべて');
   }
-  const day = page.getByRole('combobox', { name: '曜日', exact: true });
+  expect(errors).toEqual([]);
+});
+
+test('multiple dropdowns support keyboard, group clearing, mobile and legacy URLs', async ({ page }, testInfo) => {
+  await page.goto('/?term=前期(隔週A)&day=1&period=1&modality=unknown');
+  await expect(page.getByRole('button', { name: '学期を選択' })).toContainText('前期');
+  await expect(page.getByRole('button', { name: '授業形式を選択' })).toContainText('対面');
+  const day = page.getByRole('button', { name: '曜日を選択' });
   await day.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('listbox')).toBeVisible();
-  await page.keyboard.press('Home');
-  await expect(page.getByRole('option', { name: 'すべて', exact: true })).toBeFocused();
-  await page.keyboard.press('ArrowDown');
-  await expect(page.getByRole('option', { name: '月曜日', exact: true })).toBeFocused();
-  await page.keyboard.press('Enter');
-  await expect(day).toContainText('月曜日');
-  await day.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  const wed = page.getByRole('checkbox', { name: '水', exact: true });
+  await wed.focus();
+  await page.keyboard.press('Space');
+  await expect(wed).toBeChecked();
   await page.keyboard.press('Escape');
   await expect(day).toBeFocused();
-  await choose('曜日', 'すべて');
-  await page.getByRole('button', { name: '検索する', exact: true }).click();
-  await expect(day).toContainText('すべて');
-  expect(new URL(page.url()).searchParams.get('day') ?? '').toBe('');
-  expect(errors).toEqual([]);
+  await expect(day).toContainText('月・水');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: '学期を選択' }).click();
+  await page.getByRole('checkbox', { name: '集中', exact: true }).check();
+  await page.getByRole('checkbox', { name: '集中以外', exact: true }).check();
+  await expect(page.getByRole('checkbox', { name: '集中', exact: true })).toBeChecked();
+  const box = await page.getByRole('dialog').boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+  await page.screenshot({ path: testInfo.outputPath('multi-select-mobile.png') });
+  await page.getByRole('button', { name: 'クリア', exact: true }).click();
+  await expect(page.getByRole('checkbox', { checked: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '完了', exact: true }).click();
+  await expect(day).toContainText('月・水');
+  await expect(page.getByRole('button', { name: '学期を選択' })).toContainText('すべて');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
 test('shadcn dropdown stays visible and usable on mobile', async ({ page }, testInfo) => {

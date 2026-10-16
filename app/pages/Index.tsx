@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SearchMultiSelect } from '@/components/search-multi-select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Form, Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
@@ -107,14 +108,18 @@ function SearchForm({ props }: { props: SearchProps }) {
           options={availableFilters.years.map((year) => ({ value: String(year), label: `${year}年度` }))} />
         <SearchSelect name="department" label="学部・研究科" initialValue={filters.department}
           options={availableFilters.departments.map(({ id, name }) => ({ value: id, label: name }))} />
-        <SearchSelect name="term" label="学期" initialValue={filters.term}
-          options={availableFilters.terms.map((term) => ({ value: term, label: term }))} />
-        <SearchSelect name="day" label="曜日" initialValue={filters.day}
-          options={['月', '火', '水', '木', '金', '土', '日'].map((day, index) => ({ value: String(index + 1), label: `${day}曜日` }))} />
-        <SearchSelect name="period" label="時限" initialValue={filters.period}
-          options={Array.from({ length: 10 }, (_, index) => ({ value: String(index + 1), label: `${index + 1}限` }))} />
-        <SearchSelect name="modality" label="授業形式" initialValue={filters.modality}
-          options={Object.entries(modalityLabels).filter(([value]) => value !== 'unknown').map(([value, label]) => ({ value, label }))} />
+      </div>
+      <div className="multi-filter-grid">
+        <SearchMultiSelect label="学期" groups={[
+          { name: 'term', label: '開講学期', initialValue: filters.term, options: ['前期', '後期', '通年'].map(value => ({ value, label: value })) },
+          { name: 'intensive', label: '集中授業', initialValue: filters.intensive, options: [{ value: 'yes', label: '集中' }, { value: 'no', label: '集中以外' }] },
+        ]} />
+        <SearchMultiSelect label="曜日" groups={[{ name: 'day', label: '曜日', initialValue: filters.day,
+          options: ['月', '火', '水', '木', '金', '土', '日'].map((label, index) => ({ value: String(index + 1), label })) }]} />
+        <SearchMultiSelect label="時限" groups={[{ name: 'period', label: '時限', initialValue: filters.period,
+          options: Array.from({ length: 10 }, (_, index) => ({ value: String(index + 1), label: `${index + 1}限` })) }]} />
+        <SearchMultiSelect label="授業形式" groups={[{ name: 'modality', label: '授業形式', initialValue: filters.modality,
+          options: Object.entries(modalityLabels).filter(([value]) => value !== 'unknown').map(([value, label]) => ({ value, label })) }]} />
       </div>
       <div className="form-actions">
         <Button type="submit">検索する</Button>

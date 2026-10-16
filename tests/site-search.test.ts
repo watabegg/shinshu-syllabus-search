@@ -218,5 +218,38 @@ it('defaults unspecified modalities to in-person in both search and details with
   expect((await searchCourses(d1, filters('modality=in_person&title=online'))).items).toHaveLength(0);
   expect((await readCourseDetail(d1, 'mixed-default'))?.course.modalities).toEqual(['in_person', 'live_online']);
   expect((await readCourseDetail(d1, 'online-only'))?.course.modalities).toEqual(['on_demand']);
-  expect(filters('modality=unknown').modality).toBe('in_person');
+  expect(filters('modality=unknown').modality).toEqual(['in_person']);
+});
+
+it('accepts repeated, comma-separated, and bracket array parameters and rejects invalid members', () => {
+  expect(filters('day=1,3&day=3&day[]=5').day).toEqual(['1', '3', '5']);
+  expect(filters('term=前期,後期&period=1,2&modality=unknown,on_demand').modality).toEqual(['in_person', 'on_demand']);
+  expect(() => filters('day=1,8')).toThrow('曜日');
+  expect(() => filters('period=1,11')).toThrow('時限');
+  expect(() => filters('term=前期,偽造')).toThrow('学期');
+  expect(() => filters('intensive=maybe')).toThrow('集中授業');
+});
+
+it('ORs values within each filter, ANDs fields, and keeps day and period on the same slot', async () => {
+  addCourse({ id: 'remote', title: 'Remote', modalities: ['on_demand'], slots: [{term:'後期',day:3,period:3,dayLabel:'水',periodLabel:'3'}] });
+  const found = await searchCourses(d1, filters('term=前期,後期&day=1,3&period=1,3&modality=in_person,on_demand'));
+  expect(found.items.map(item => item.id).sort()).toEqual(['course-info', 'remote']);
+  expect((await searchCourses(d1, filters('day=1,3&period=2'))).items).toEqual([]);
+});
+
+it('groups half-term and alternate-week labels while keeping intensive independent and preserving raw labels', async () => {
+  const slot = (term: string, dayLabel = '月') => ({term,day:1,period:1,dayLabel,periodLabel:'1'});
+  addCourse({id:'alternate',title:'Alternate',slots:[slot('前期(隔週A)')]});
+  addCourse({id:'half',title:'Half',slots:[slot('後期(前半)')]});
+  addCourse({id:'intensive',title:'Intensive',slots:[slot('通年(集中)'),slot('通年')]});
+  addCourse({id:'intensive-day',title:'Intensive day',slots:[slot('前期','集中')]});
+  addCourse({id:'ambiguous',title:'Ambiguous',slots:[{...slot('前期(随時)'),day:null,period:null,dayLabel:'',periodLabel:'集中・不定期'}]});
+  const first = await searchCourses(d1, filters('term=前期&intensive=no'));
+  expect(first.items.map(item=>item.id).sort()).toEqual(['alternate','ambiguous','course-info']);
+  expect(first.items.find(item=>item.id==='alternate')?.slots[0].term_label).toBe('前期(隔週A)');
+  expect((await searchCourses(d1, filters('term=後期'))).items.map(item=>item.id)).toContain('half');
+  expect((await searchCourses(d1, filters('term=前期&intensive=yes'))).items.map(item=>item.id)).toEqual(['intensive-day']);
+  expect((await searchCourses(d1, filters('term=通年&intensive=no'))).total).toBe(0);
+  expect((await searchCourses(d1, filters('term=通年&intensive=yes'))).items.map(item=>item.id)).toEqual(['intensive']);
+  expect((await searchCourses(d1, filters('intensive=yes,no'))).total).toBe((await searchCourses(d1, filters(''))).total);
 });
