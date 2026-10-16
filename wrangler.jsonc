@@ -3,6 +3,7 @@
   "name": "shinshu-syllabus-search",
   "main": "./src/server.tsx",
   "workers_dev": true,
+  "placement": { "mode": "smart" },
   "compatibility_date": "2026-10-15",
   "compatibility_flags": ["nodejs_compat"],
   "account_id": "e4959cb9edbdb2f78ffbf97151fc69e6",

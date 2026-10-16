@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { normalizeName, parseSearchFilters, readCourseDetail, searchCourses, type AvailableFilters } from '../src/lib/search';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { normalizeName, parseSearchFilters, readCourseDetail, searchCourses, readSearchMetadata, METADATA_TTL_MS, type AvailableFilters } from '../src/lib/search';
 
 const available: AvailableFilters = {
   years: [2026],
@@ -14,6 +14,7 @@ let d1: D1Database;
 
 function makeD1(database: DatabaseSync): D1Database {
   return {
+    async batch(statements: { all: () => Promise<unknown> }[]) { return Promise.all(statements.map(statement => statement.all())); },
     prepare(sql: string) {
       return {
         bind(...values: (string | number | null)[]) {
@@ -108,6 +109,7 @@ beforeEach(() => {
   sqlite.exec('PRAGMA foreign_keys = ON');
   sqlite.exec(readFileSync(new URL('../migrations/0001_initial.sql', import.meta.url), 'utf8'));
   sqlite.exec(readFileSync(new URL('../migrations/0002_search.sql', import.meta.url), 'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0003_search_indexes.sql', import.meta.url), 'utf8'));
   sqlite.prepare("INSERT INTO imports (id, started_at, finished_at, status, discovered_count, ready_count, failed_count, conflict_count, parser_version) VALUES ('import-1', '2026-10-15T02:00:00Z', '2026-10-15T03:00:00Z', 'completed', 25, 25, 0, 0, 'test')").run();
   d1 = makeD1(sqlite);
   addCourse({
@@ -133,7 +135,7 @@ beforeEach(() => {
   }
 });
 
-afterEach(() => sqlite.close());
+afterEach(() => { sqlite.close(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('public syllabus search', () => {
   it('uses quoted FTS terms as literal AND search and keeps short tokens searchable', async () => {
@@ -262,4 +264,35 @@ it('ORs multiple departments, preserves single-value links, and rejects invalid 
   expect((await searchCourses(d1, filters('department=dept-b'))).items.map(item => item.id)).toEqual(['dept-other']);
   expect((await searchCourses(d1, filters('department=dept-a,dept-b&title=Other'))).total).toBe(1);
   expect(() => filters('department=dept-a,forged')).toThrow('学部・研究科');
+});
+
+it('caches public metadata per database for five minutes and refreshes after expiry', async () => {
+  vi.useFakeTimers();
+  const batch = vi.spyOn(d1, 'batch');
+  const first = await readSearchMetadata(d1);
+  addCourse({ id: 'new-dept', title: 'New', department: 'dept-new' });
+  expect((await readSearchMetadata(d1)).availableFilters).toEqual(first.availableFilters);
+  expect(batch).toHaveBeenCalledTimes(1);
+  vi.advanceTimersByTime(METADATA_TTL_MS + 1);
+  expect((await readSearchMetadata(d1)).availableFilters.departments.map(item => item.id)).toContain('dept-new');
+  expect(batch).toHaveBeenCalledTimes(2);
+  await readSearchMetadata(makeD1(sqlite));
+  expect(batch).toHaveBeenCalledTimes(2);
+});
+
+it('does not cache a failed metadata lookup and batches a normal search into two database calls', async () => {
+  const batch = vi.spyOn(d1, 'batch');
+  batch.mockRejectedValueOnce(new Error('temporary unavailable'));
+  await expect(readSearchMetadata(d1)).rejects.toThrow('temporary unavailable');
+  expect((await readSearchMetadata(d1)).availableFilters.years).toEqual([2026]);
+  batch.mockClear();
+  await searchCourses(d1, filters('q=情報'));
+  expect(batch).toHaveBeenCalledTimes(2);
+});
+
+it('uses the ordered browsing index instead of a temporary sort', () => {
+  const rows = sqlite.prepare('EXPLAIN QUERY PLAN SELECT id, title FROM courses WHERE year=2026 ORDER BY title_search COLLATE BINARY, id COLLATE BINARY LIMIT 21').all();
+  const plan = JSON.stringify(rows);
+  expect(plan).toContain('courses_year_title_id');
+  expect(plan).not.toContain('TEMP B-TREE');
 });

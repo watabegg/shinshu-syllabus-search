@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { inertia } from '@hono/inertia';
 import { rootView } from '../app/root-view';
-import { SearchInputError, parseSearchFilters, readAvailableFilters, readCourseDetail, readSearchPage } from './lib/search';
+import { SearchInputError, parseSearchFilters, readSearchMetadata, readCourseDetail, readSearchPage } from './lib/search';
 import type { ErrorPageProps } from '../app/pages/Error';
 import type {} from '../app/pages.gen';
 
@@ -10,7 +10,9 @@ type Bindings = { Bindings: Env };
 const app = new Hono<Bindings>();
 
 app.use('*', async (c, next) => {
+  const started = performance.now();
   await next();
+  c.header('Server-Timing', `app;dur=${(performance.now() - started).toFixed(1)}`);
   c.header('Cache-Control', 'no-store');
   const vary = (c.res.headers.get('Vary') ?? '').split(',').map((value) => value.trim()).filter(Boolean);
   if (!vary.some((value) => value.toLowerCase() === 'x-inertia')) vary.push('X-Inertia');
@@ -30,9 +32,9 @@ app.get('/healthz', async (c) => {
 
 app.get('/', async (c) => {
   try {
-    const availableFilters = await readAvailableFilters(c.env.DB);
-    const filters = parseSearchFilters(new URL(c.req.url).searchParams, availableFilters);
-    const props = await readSearchPage(c.env.DB, filters, availableFilters);
+    const metadata = await readSearchMetadata(c.env.DB);
+    const filters = parseSearchFilters(new URL(c.req.url).searchParams, metadata.availableFilters);
+    const props = await readSearchPage(c.env.DB, filters, metadata);
     return c.render('Index', props);
   } catch (error) {
     if (error instanceof SearchInputError) {

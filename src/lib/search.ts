@@ -136,40 +136,35 @@ async function first<T>(db: D1Database, sql: string, ...values: QueryValue[]): P
   return db.prepare(sql).bind(...values).first<T>();
 }
 
-export async function readAvailableFilters(db: D1Database): Promise<AvailableFilters> {
-  const [years, departments, terms] = await Promise.all([
-    all<{ year: number }>(db, 'SELECT DISTINCT year FROM courses ORDER BY year'),
-    all<DepartmentOption>(db, 'SELECT department AS id, MIN(department_name) AS name FROM courses GROUP BY department ORDER BY name COLLATE NOCASE, id'),
-    all<{ term_label: string }>(db, "SELECT DISTINCT term_label FROM course_slots WHERE term_label <> '' ORDER BY term_label COLLATE NOCASE"),
-  ]);
-  return {
-    years: years.length > 0 ? years.map(({ year }) => year) : [2026],
-    departments,
-    terms: terms.map(({ term_label }) => term_label),
-  };
-}
+type ImportRow = { discovered_count: number; ready_count: number; failed_count: number; conflict_count: number; finished_at: string | null };
+export type SearchMetadata = { availableFilters: AvailableFilters; coverage: Coverage; importedAt: string | null };
+export const METADATA_TTL_MS = 5 * 60 * 1000;
+// Cache completed public data only; never share request-bound promises between requests.
+const metadataCache = new WeakMap<D1Database, { expires: number; value: SearchMetadata }>();
 
-export async function readCoverage(db: D1Database): Promise<{ coverage: Coverage; importedAt: string | null }> {
-  const latest = await first<{
-    discovered_count: number;
-    ready_count: number;
-    failed_count: number;
-    conflict_count: number;
-    finished_at: string | null;
-  }>(
-    db,
-    "SELECT discovered_count, ready_count, failed_count, conflict_count, finished_at FROM imports WHERE status IN ('completed', 'partial') ORDER BY COALESCE(finished_at, started_at) DESC, id DESC LIMIT 1",
-  );
-  if (!latest) return { coverage: { discovered: 0, ready: 0, failed: 0, conflict: 0 }, importedAt: null };
-  return {
-    coverage: {
-      discovered: latest.discovered_count,
-      ready: latest.ready_count,
-      failed: latest.failed_count,
-      conflict: latest.conflict_count,
+export async function readSearchMetadata(db: D1Database): Promise<SearchMetadata> {
+  const cached = metadataCache.get(db);
+  if (cached && cached.expires > Date.now()) return cached.value;
+  const result = await db.batch([
+    db.prepare('SELECT DISTINCT year FROM courses ORDER BY year').bind(),
+    db.prepare('SELECT department AS id, MIN(department_name) AS name FROM courses GROUP BY department ORDER BY name COLLATE NOCASE, id').bind(),
+    db.prepare("SELECT DISTINCT term_label FROM course_slots WHERE term_label <> '' ORDER BY term_label COLLATE NOCASE").bind(),
+    db.prepare("SELECT discovered_count, ready_count, failed_count, conflict_count, finished_at FROM imports WHERE status IN ('completed', 'partial') ORDER BY COALESCE(finished_at, started_at) DESC, id DESC LIMIT 1").bind(),
+  ]);
+  if (result.some(item => !item.success)) throw new Error('D1 metadata query failed');
+  const years = result[0].results as { year: number }[];
+  const latest = (result[3].results as ImportRow[])[0];
+  const value: SearchMetadata = {
+    availableFilters: {
+      years: years.length ? years.map(row => row.year) : [2026],
+      departments: result[1].results as DepartmentOption[],
+      terms: (result[2].results as { term_label: string }[]).map(row => row.term_label),
     },
-    importedAt: latest.finished_at,
+    coverage: latest ? { discovered: latest.discovered_count, ready: latest.ready_count, failed: latest.failed_count, conflict: latest.conflict_count } : { discovered: 0, ready: 0, failed: 0, conflict: 0 },
+    importedAt: latest?.finished_at ?? null,
   };
+  metadataCache.set(db, { expires: Date.now() + METADATA_TTL_MS, value });
+  return value;
 }
 
 type SearchRow = Omit<CourseSummary, 'slots' | 'modalities'>;
@@ -256,18 +251,13 @@ function buildSearchWhere(filters: SearchFilters): { sql: string; values: QueryV
 async function readSummaryRelations(db: D1Database, ids: string[]): Promise<Map<string, Pick<CourseSummary, 'slots' | 'modalities'>>> {
   if (ids.length === 0) return new Map();
   const markers = ids.map(() => '?').join(', ');
-  const [slotRows, modalityRows] = await Promise.all([
-    all<Slot & { course_id: string }>(
-      db,
-      `SELECT course_id, term_label, day_label, period_label, day, period, MIN(source_kind) AS source_kind FROM course_slots WHERE course_id IN (${markers}) GROUP BY course_id, term_label, day_label, period_label, day, period ORDER BY term_label COLLATE NOCASE, day, period, day_label, period_label`,
-      ...ids,
-    ),
-    all<{ course_id: string; modality: Modality }>(
-      db,
-      `SELECT course_id, modality FROM course_modalities WHERE course_id IN (${markers}) ORDER BY modality`,
-      ...ids,
-    ),
+  const batches = await db.batch([
+    db.prepare(`SELECT course_id, term_label, day_label, period_label, day, period, MIN(source_kind) AS source_kind FROM course_slots WHERE course_id IN (${markers}) GROUP BY course_id, term_label, day_label, period_label, day, period ORDER BY term_label COLLATE NOCASE, day, period, day_label, period_label`).bind(...ids),
+    db.prepare(`SELECT course_id, modality FROM course_modalities WHERE course_id IN (${markers}) ORDER BY modality`).bind(...ids),
   ]);
+  if (batches.some(result => !result.success)) throw new Error('D1 relation query failed');
+  const slotRows = batches[0].results as (Slot & { course_id: string })[];
+  const modalityRows = batches[1].results as { course_id: string; modality: Modality }[];
   const result = new Map<string, Pick<CourseSummary, 'slots' | 'modalities'>>();
   for (const id of ids) result.set(id, { slots: [], modalities: [] });
   for (const row of slotRows) {
@@ -288,17 +278,20 @@ async function readSummaryRelations(db: D1Database, ids: string[]): Promise<Map<
 
 export async function searchCourses(db: D1Database, filters: SearchFilters): Promise<Pick<SearchProps, 'items' | 'hasNext' | 'total' | 'totalPages'> & { page: number }> {
   const where = buildSearchWhere(filters);
-  const count = await first<{ total: number }>(db, `SELECT COUNT(*) AS total FROM courses c ${where.sql}`, ...where.values);
-  const total = count?.total ?? 0;
+  const listSql = `SELECT c.id, c.title, c.registration_code, c.year, c.department, c.department_name, c.teacher_text, c.room_text, c.credits FROM courses c ${where.sql} ORDER BY c.title_search COLLATE BINARY, c.id COLLATE BINARY LIMIT ? OFFSET ?`;
+  const listValues = (page: number) => [...where.values, PAGE_SIZE + 1, (page - 1) * PAGE_SIZE];
+  const batches = await db.batch([
+    db.prepare(`SELECT COUNT(*) AS total FROM courses c ${where.sql}`).bind(...where.values),
+    db.prepare(listSql).bind(...listValues(filters.page)),
+  ]);
+  if (batches.some(result => !result.success)) throw new Error('D1 search query failed');
+  const total = (batches[0].results as { total: number }[])[0]?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const page = Math.min(filters.page, Math.max(1, totalPages));
-  const rows = await all<SearchRow>(
-    db,
-    `SELECT c.id, c.title, c.registration_code, c.year, c.department, c.department_name, c.teacher_text, c.room_text, c.credits FROM courses c ${where.sql} ORDER BY c.title_search COLLATE BINARY, c.id COLLATE BINARY LIMIT ? OFFSET ?`,
-    ...where.values,
-    PAGE_SIZE + 1,
-    (page - 1) * PAGE_SIZE,
-  );
+  // A second list lookup is needed only for an out-of-range page, not normal navigation.
+  const rows = total > 0 && page !== filters.page
+    ? await all<SearchRow>(db, listSql, ...listValues(page))
+    : batches[1].results as SearchRow[];
   const hasNext = rows.length > PAGE_SIZE;
   const pageRows = rows.slice(0, PAGE_SIZE);
   const relations = await readSummaryRelations(db, pageRows.map(({ id }) => id));
@@ -350,19 +343,13 @@ function allowedSourcePdf(value: string): string {
 }
 
 export async function readCourseDetail(db: D1Database, id: string): Promise<DetailProps | null> {
-  const row = await first<DetailRow>(
-    db,
-    'SELECT c.id, c.title, c.registration_code, c.year, c.department, c.department_name, c.teacher_text, c.room_text, c.credits, c.parse_warnings_json, c.modality_evidence_json, sd.url AS source_url, sd.sha256 AS source_sha256, sd.fetched_at FROM courses c JOIN source_documents sd ON sd.id = c.source_id WHERE c.id = ? LIMIT 1',
-    id,
-  );
+  const [row, relations, pageRows] = await Promise.all([
+    first<DetailRow>(db,
+      'SELECT c.id, c.title, c.registration_code, c.year, c.department, c.department_name, c.teacher_text, c.room_text, c.credits, c.parse_warnings_json, c.modality_evidence_json, sd.url AS source_url, sd.sha256 AS source_sha256, sd.fetched_at FROM courses c JOIN source_documents sd ON sd.id = c.source_id WHERE c.id = ? LIMIT 1', id),
+    readSummaryRelations(db, [id]),
+    all<{ page_number: number; raw_text: string }>(db, 'SELECT page_number, raw_text FROM course_pages WHERE course_id = ? ORDER BY page_number', id),
+  ]);
   if (!row) return null;
-
-  const relations = await readSummaryRelations(db, [id]);
-  const pageRows = await all<{ page_number: number; raw_text: string }>(
-    db,
-    'SELECT page_number, raw_text FROM course_pages WHERE course_id = ? ORDER BY page_number',
-    id,
-  );
   const warnings = parseJsonArray(row.parse_warnings_json, (item): item is string => typeof item === 'string');
   const modalityEvidence = parseJsonArray(row.modality_evidence_json, isModalityEvidence);
   return {
@@ -391,12 +378,11 @@ export async function readCourseDetail(db: D1Database, id: string): Promise<Deta
 export async function readSearchPage(
   db: D1Database,
   filters: SearchFilters,
-  knownFilters?: AvailableFilters,
+  knownMetadata?: SearchMetadata,
 ): Promise<SearchProps> {
-  const [availableFilters, search, importSummary] = await Promise.all([
-    knownFilters ? Promise.resolve(knownFilters) : readAvailableFilters(db),
+  const [metadata, search] = await Promise.all([
+    knownMetadata ? Promise.resolve(knownMetadata) : readSearchMetadata(db),
     searchCourses(db, filters),
-    readCoverage(db),
   ]);
-  return { ...search, filters: { ...filters, page: search.page }, availableFilters, ...importSummary };
+  return { ...search, filters: { ...filters, page: search.page }, ...metadata };
 }
