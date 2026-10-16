@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 const pages = import.meta.glob<{ default: ResolvedComponent }>('../app/pages/**/*.tsx');
 
 createInertiaApp({
-  title: (title) => (title ? `${title} | シラバス検索` : '信州大学シラバス検索'),
+  title: (title) => (title ? `${title} | シラバスアルプス` : 'シラバスアルプス'),
   resolve: async (name) => {
     const load = pages[`../app/pages/${name}.tsx`];
     if (!load) throw new Error(`Inertia page not found: ${name}`);

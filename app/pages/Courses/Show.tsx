@@ -39,7 +39,7 @@ export default function Show(props: DetailProps) {
       <a className="skip-link" href="#main-content">本文へ移動</a>
       <div className="site-shell">
         <header className="site-header">
-          <Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバス検索</span><Badge variant="outline">非公式</Badge></Link>
+          <Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバスアルプス</span><Badge variant="outline">非公式</Badge></Link>
           <p>{course.year}年度 公開シラバス</p>
         </header>
         <main id="main-content" className="page-main detail-main">
@@ -81,7 +81,7 @@ export default function Show(props: DetailProps) {
             </div>
           </CardContent></Card>
         </main>
-        <footer className="site-footer"><span>信州大学シラバス検索 · 非公式</span><span>大学の公式サービスではありません。</span></footer>
+        <footer className="site-footer"><span>シラバスアルプス · 非公式</span><span>大学の公式サービスではありません。</span></footer>
       </div>
     </>
   );

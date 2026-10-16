@@ -9,7 +9,7 @@ function Document({ page }: { page: PageObject }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#fafafa" />
-        <title>信州大学シラバス検索（非公式）</title>
+        <title>シラバスアルプス（非公式）</title>
         <ViteClient />
         <Link href="/src/style.css" rel="stylesheet" />
         <Script src="/src/client.tsx" />

@@ -11,7 +11,7 @@ export default function ErrorPage({ status, message }: ErrorPageProps) {
     <>
       <Head title={heading} />
       <div className="site-shell">
-        <header className="site-header"><Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバス検索</span><Badge variant="outline">非公式</Badge></Link></header>
+        <header className="site-header"><Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバスアルプス</span><Badge variant="outline">非公式</Badge></Link></header>
         <main className="page-main error-main">
           <Card className="w-full" role="alert"><CardHeader>
             <CardTitle><h1 className="text-2xl">{heading}</h1></CardTitle>
@@ -19,7 +19,7 @@ export default function ErrorPage({ status, message }: ErrorPageProps) {
             <Button asChild><Link href="/">検索ページに戻る</Link></Button></CardFooter>
           </Card>
         </main>
-        <footer className="site-footer"><span>信州大学シラバス検索 · 非公式</span></footer>
+        <footer className="site-footer"><span>シラバスアルプス · 非公式</span></footer>
       </div>
     </>
   );
