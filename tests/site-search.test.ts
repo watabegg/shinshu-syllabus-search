@@ -296,3 +296,14 @@ it('uses the ordered browsing index instead of a temporary sort', () => {
   expect(plan).toContain('courses_year_title_id');
   expect(plan).not.toContain('TEMP B-TREE');
 });
+
+it('reuses a cached count across pages without executing COUNT and keeps page clamping', async () => {
+  const original = await searchCourses(d1, filters(''));
+  const prepare = vi.spyOn(d1, 'prepare');
+  const result = await searchCourses(d1, filters('page=999'), original.total);
+  expect(result.total).toBe(original.total);
+  expect(result.page).toBe(Math.max(1, original.totalPages));
+  expect(prepare.mock.calls.some(([sql]) => sql.includes('COUNT(*)'))).toBe(false);
+  const uncached = await searchCourses(d1, filters('page=999'));
+  expect(result).toEqual(uncached);
+});

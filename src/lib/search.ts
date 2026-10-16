@@ -276,22 +276,22 @@ async function readSummaryRelations(db: D1Database, ids: string[]): Promise<Map<
   return result;
 }
 
-export async function searchCourses(db: D1Database, filters: SearchFilters): Promise<Pick<SearchProps, 'items' | 'hasNext' | 'total' | 'totalPages'> & { page: number }> {
+export async function searchCourses(db: D1Database, filters: SearchFilters, knownTotal?: number): Promise<Pick<SearchProps, 'items' | 'hasNext' | 'total' | 'totalPages'> & { page: number }> {
   const where = buildSearchWhere(filters);
   const listSql = `SELECT c.id, c.title, c.registration_code, c.year, c.department, c.department_name, c.teacher_text, c.room_text, c.credits FROM courses c ${where.sql} ORDER BY c.title_search COLLATE BINARY, c.id COLLATE BINARY LIMIT ? OFFSET ?`;
   const listValues = (page: number) => [...where.values, PAGE_SIZE + 1, (page - 1) * PAGE_SIZE];
   const batches = await db.batch([
-    db.prepare(`SELECT COUNT(*) AS total FROM courses c ${where.sql}`).bind(...where.values),
+    ...(knownTotal === undefined ? [db.prepare(`SELECT COUNT(*) AS total FROM courses c ${where.sql}`).bind(...where.values)] : []),
     db.prepare(listSql).bind(...listValues(filters.page)),
   ]);
   if (batches.some(result => !result.success)) throw new Error('D1 search query failed');
-  const total = (batches[0].results as { total: number }[])[0]?.total ?? 0;
+  const total = knownTotal ?? (batches[0].results as { total: number }[])[0]?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const page = Math.min(filters.page, Math.max(1, totalPages));
   // A second list lookup is needed only for an out-of-range page, not normal navigation.
   const rows = total > 0 && page !== filters.page
     ? await all<SearchRow>(db, listSql, ...listValues(page))
-    : batches[1].results as SearchRow[];
+    : batches[knownTotal === undefined ? 1 : 0].results as SearchRow[];
   const hasNext = rows.length > PAGE_SIZE;
   const pageRows = rows.slice(0, PAGE_SIZE);
   const relations = await readSummaryRelations(db, pageRows.map(({ id }) => id));
