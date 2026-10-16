@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "shinshu-syllabus-search",
   "main": "./src/server.tsx",
+  "workers_dev": true,
   "compatibility_date": "2026-10-15",
   "compatibility_flags": ["nodejs_compat"],
   "account_id": "e4959cb9edbdb2f78ffbf97151fc69e6",
@@ -10,7 +11,8 @@
     {
       "binding": "DB",
       "database_name": "syllabus-db",
-      "database_id": "00000000-0000-0000-0000-000000000001",
+      "database_id": "42b4d0ca-6ae6-4353-95e1-444e1e8ca796",
+      "preview_database_id": "00000000-0000-0000-0000-000000000001",
       "migrations_dir": "migrations"
     }
   ],
