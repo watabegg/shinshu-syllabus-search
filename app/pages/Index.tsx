@@ -9,20 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { modalityLabels } from '@/lib/contracts';
-import type { CourseSummary, SearchProps } from '@/lib/contracts';
-
-function slotLabel(slot: CourseSummary['slots'][number]): string {
-  return [slot.term_label, slot.day_label, slot.period_label].filter(Boolean).join(' · ');
-}
-
-function Modalities({ items }: { items: CourseSummary['modalities'] }) {
-  if (items.length === 0) return null;
-  return (
-    <span className="tag-list" aria-label="授業形式">
-      {items.map((item) => <Badge variant="outline" key={item}>{modalityLabels[item]}</Badge>)}
-    </span>
-  );
-}
+import { CourseResults } from '@/components/course-results';
+import type { SearchProps } from '@/lib/contracts';
 
 function pageHref(currentUrl: string, page: number): string {
   const url = new URL(currentUrl, window.location.origin);
@@ -53,12 +41,6 @@ function ResultPagination({ currentUrl, page, totalPages }: { currentUrl: string
       </Button>
     </nav>
   );
-}
-
-function detailHref(currentUrl: string, id: string): string {
-  const url = new URL(currentUrl, window.location.origin);
-  const back = `${url.pathname}${url.search}`;
-  return `/courses/${encodeURIComponent(id)}?back=${encodeURIComponent(back)}`;
 }
 
 function SearchSelect({ name, label, initialValue, options, allowAll = true }: {
@@ -106,8 +88,8 @@ function SearchForm({ props }: { props: SearchProps }) {
         </div>
         <SearchSelect name="year" label="年度" initialValue={filters.year} allowAll={false}
           options={availableFilters.years.map((year) => ({ value: String(year), label: `${year}年度` }))} />
-        <SearchSelect name="department" label="学部・研究科" initialValue={filters.department}
-          options={availableFilters.departments.map(({ id, name }) => ({ value: id, label: name }))} />
+        <SearchMultiSelect label="学部・研究科" groups={[{ name: 'department', label: '学部・研究科', initialValue: filters.department,
+          options: availableFilters.departments.map(({ id, name }) => ({ value: id, label: name })) }]} />
       </div>
       <div className="multi-filter-grid">
         <SearchMultiSelect label="学期" groups={[
@@ -129,37 +111,8 @@ function SearchForm({ props }: { props: SearchProps }) {
   );
 }
 
-function ResultCard({ course, currentUrl }: { course: CourseSummary; currentUrl: string }) {
-  const slots = course.slots.map(slotLabel).filter(Boolean);
-  return (
-    <Link href={detailHref(currentUrl, course.id)} aria-labelledby={`title-${course.id}`} className="result-card-link">
-    <Card className="h-full gap-3 py-5" role="article">
-      <CardHeader>
-      <div className="result-card-heading">
-        <CardTitle><h2 id={`title-${course.id}`} className="text-base leading-relaxed">{course.title || '科目名未登録'}</h2></CardTitle>
-        <Modalities items={course.modalities} />
-      </div>
-      </CardHeader>
-      <CardContent>
-      <dl className="result-meta">
-        <div><dt>担当教員</dt><dd>{course.teacher_text || '記載なし'}</dd></div>
-        <div><dt>登録コード</dt><dd>{course.registration_code}</dd></div>
-        <div><dt>年度</dt><dd>{course.year}年度</dd></div>
-        <div><dt>部局</dt><dd>{course.department_name}</dd></div>
-        <div><dt>単位</dt><dd>{course.credits || '記載なし'}</dd></div>
-        <div><dt>教室</dt><dd>{course.room_text || '記載なし'}</dd></div>
-        <div className="result-meta-wide"><dt>開講日時</dt><dd>{slots.length > 0 ? slots.join(' / ') : '記載なし'}</dd></div>
-      </dl>
-      </CardContent>
-    </Card>
-    </Link>
-  );
-}
-
 export default function Index(props: SearchProps) {
   const currentUrl = typeof window === 'undefined' ? '/' : `${window.location.pathname}${window.location.search}`;
-  const databaseEmpty = props.coverage.ready === 0;
-  const shownCount = props.items.length;
   return (
     <>
       <Head title="シラバスを検索" />
@@ -168,8 +121,8 @@ export default function Index(props: SearchProps) {
         <header className="site-header">
           <Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバスアルプス</span><Badge variant="outline">非公式</Badge></Link>
         </header>
-        <main id="main-content" className="page-main">
-          <Card className="gap-5" aria-labelledby="search-heading">
+        <main id="main-content" className="page-main search-main">
+          <Card className="gap-5 search-panel" aria-labelledby="search-heading">
             <CardHeader className="gap-2">
               <div><CardTitle><h1 id="search-heading">検索条件</h1></CardTitle></div>
               <CardDescription>条件を複数指定すると、すべてに一致する講義を表示します。</CardDescription>
@@ -178,29 +131,7 @@ export default function Index(props: SearchProps) {
           </Card>
 
           <div className="results-layout">
-            <section className="results-section" aria-labelledby="results-heading">
-              <div className="results-heading">
-                <h2 id="results-heading">検索結果 <span className="result-count">{props.total.toLocaleString('ja-JP')}件</span></h2>
-                {props.totalPages > 1 && <ResultPagination currentUrl={currentUrl} page={props.filters.page} totalPages={props.totalPages} />}
-              </div>
-              {databaseEmpty ? (
-                <div className="empty-state" role="status">
-                  <span className="empty-icon" aria-hidden="true">⌕</span>
-                  <h3>検索データを準備しています</h3>
-                  <p>現在、公開シラバスのデータはまだ登録されていません。</p>
-                </div>
-              ) : shownCount === 0 ? (
-                <div className="empty-state" role="status">
-                  <span className="empty-icon" aria-hidden="true">⌕</span>
-                  <h3>条件に合う講義が見つかりませんでした</h3>
-                  <p>キーワードを短くするか、検索条件を広げてもう一度お試しください。</p>
-                </div>
-              ) : (
-                <div className="result-list">
-                  {props.items.map((course) => <ResultCard key={course.id} course={course} currentUrl={currentUrl} />)}
-                </div>
-              )}
-            </section>
+            <CourseResults key={currentUrl} props={props} currentUrl={currentUrl} pagination={props.totalPages > 1 ? <ResultPagination currentUrl={currentUrl} page={props.filters.page} totalPages={props.totalPages} /> : null} />
 
           </div>
         </main>

@@ -5,7 +5,7 @@ import { normalizeName, parseSearchFilters, readCourseDetail, searchCourses, typ
 
 const available: AvailableFilters = {
   years: [2026],
-  departments: [{ id: 'dept-a', name: '総合学部' }],
+  departments: [{ id: 'dept-a', name: '総合学部' }, { id: 'dept-b', name: '別学部' }],
   terms: ['前期', '後期'],
 };
 
@@ -252,4 +252,14 @@ it('groups half-term and alternate-week labels while keeping intensive independe
   expect((await searchCourses(d1, filters('term=通年&intensive=no'))).total).toBe(0);
   expect((await searchCourses(d1, filters('term=通年&intensive=yes'))).items.map(item=>item.id)).toEqual(['intensive']);
   expect((await searchCourses(d1, filters('intensive=yes,no'))).total).toBe((await searchCourses(d1, filters(''))).total);
+});
+
+it('ORs multiple departments, preserves single-value links, and rejects invalid members', async () => {
+  addCourse({ id: 'dept-other', title: 'Other', department: 'dept-b', departmentName: '別学部' });
+  expect(filters('department=dept-a').department).toEqual(['dept-a']);
+  expect(filters('department=dept-a,dept-b&department=dept-a').department).toEqual(['dept-a', 'dept-b']);
+  expect((await searchCourses(d1, filters('department=dept-a,dept-b'))).total).toBe(25);
+  expect((await searchCourses(d1, filters('department=dept-b'))).items.map(item => item.id)).toEqual(['dept-other']);
+  expect((await searchCourses(d1, filters('department=dept-a,dept-b&title=Other'))).total).toBe(1);
+  expect(() => filters('department=dept-a,forged')).toThrow('学部・研究科');
 });

@@ -73,8 +73,8 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
 
   const defaultYear = String(available.years.at(-1) ?? 2026);
   const yearValue = params.get('year') ?? defaultYear;
-  const department = params.get('department') ?? '';
   const multiple = (name: string) => [...new Set([...params.getAll(name), ...params.getAll(`${name}[]`)].flatMap(value => value.split(',')).filter(Boolean))];
+  const department = multiple('department');
   const rawTerms = multiple('term');
   const availableTerms = new Set(available.terms);
   const term = [...new Set(rawTerms.map(value => availableTerms.has(value) ? /^(前期|後期|通年)/u.exec(value)?.[1] ?? value : value))];
@@ -87,7 +87,8 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
   if (yearValue && (!/^[0-9]{4}$/u.test(yearValue) || !available.years.includes(Number(yearValue)))) {
     throw new SearchInputError('年度の選択が正しくありません。');
   }
-  if (department && !available.departments.some((option) => option.id === department)) {
+  const departmentIds = new Set(available.departments.map(option => option.id));
+  if (department.some(value => !departmentIds.has(value))) {
     throw new SearchInputError('学部・研究科の選択が正しくありません。');
   }
   if (term.some(value => !['前期', '後期', '通年'].includes(value))) {
@@ -217,9 +218,9 @@ function buildSearchWhere(filters: SearchFilters): { sql: string; values: QueryV
     clauses.push('c.year = ?');
     values.push(Number(filters.year));
   }
-  if (filters.department) {
-    clauses.push('c.department = ?');
-    values.push(filters.department);
+  if (filters.department.length) {
+    clauses.push(`c.department IN (${filters.department.map(() => '?').join(',')})`);
+    values.push(...filters.department);
   }
   if (filters.term.length || filters.day.length || filters.period.length) {
     const slotClauses = ['s.course_id = c.id'];

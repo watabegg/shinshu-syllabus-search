@@ -30,16 +30,15 @@ test('multiple filters persist in URL, reload, detail navigation, and reset', as
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('form', { name: '講義を検索' }).getByRole('combobox')).toHaveCount(2);
+  await expect(page.getByRole('form', { name: '講義を検索' }).getByRole('combobox')).toHaveCount(1);
   await expect(page.locator('select:not([aria-hidden="true"])')).toHaveCount(0);
-  await page.getByRole('combobox', { name: '学部・研究科' }).click();
-  await page.getByRole('option', { name: '工学部', exact: true }).click();
   const choose = async (label: string, options: string[]) => {
     await page.getByRole('button', { name: `${label}を選択`, exact: true }).click();
     for (const name of options) await page.getByRole('checkbox', { name, exact: true }).check();
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.getByRole('button', { name: '完了', exact: true }).click();
   };
+  await choose('学部・研究科', ['工学部', '人文学部']);
   await choose('学期', ['前期', '後期', '集中以外']);
   await choose('曜日', ['月', '水']);
   await choose('時限', ['1限', '2限']);
@@ -47,15 +46,16 @@ test('multiple filters persist in URL, reload, detail navigation, and reset', as
   await page.getByRole('button', { name: '検索する', exact: true }).click();
   await expect(page).toHaveURL(/department=t/);
   const params = new URL(page.url()).searchParams;
+  expect(params.get('department')).toBe('t,l');
   expect(params.get('term')).toBe('前期,後期');
   expect(params.get('intensive')).toBe('no');
   expect(params.get('day')).toBe('1,3');
   expect(params.get('period')).toBe('1,2');
   expect(params.get('modality')).toBe('in_person,on_demand');
-  await expect(page.locator('.result-card-link').first()).toBeVisible();
+  await expect(page.locator('.course-title-link').first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole('button', { name: '曜日を選択' })).toContainText('月・水');
-  await page.locator('.result-card-link').first().click();
+  await page.locator('.course-title-link').first().click();
   await expect(page.getByRole('link', { name: '大学の原本PDFを開く' })).toBeVisible();
   await page.getByRole('link', { name: '← 検索結果に戻る' }).click();
   await expect(page.getByRole('button', { name: '時限を選択' })).toContainText('1限・2限');
@@ -65,7 +65,7 @@ test('multiple filters persist in URL, reload, detail navigation, and reset', as
   expect(new URL(page.url()).searchParams.get('day')).toBe('1,3');
   await page.getByRole('link', { name: '条件をクリア' }).click();
   await expect(page).toHaveURL(/\/$/);
-  for (const label of ['学期', '曜日', '時限', '授業形式']) {
+  for (const label of ['学部・研究科', '学期', '曜日', '時限', '授業形式']) {
     await expect(page.getByRole('button', { name: `${label}を選択`, exact: true })).toContainText('すべて');
   }
   expect(errors).toEqual([]);
@@ -106,9 +106,9 @@ test('multiple dropdowns support keyboard, group clearing, mobile and legacy URL
 test('shadcn dropdown stays visible and usable on mobile', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  const trigger = page.getByRole('combobox', { name: '学部・研究科' });
+  const trigger = page.getByRole('button', { name: '学部・研究科を選択' });
   await trigger.click();
-  const menu = page.getByRole('listbox');
+  const menu = page.getByRole('dialog');
   await expect(menu).toBeVisible();
   const box = await menu.boundingBox();
   expect(box).not.toBeNull();
@@ -116,7 +116,8 @@ test('shadcn dropdown stays visible and usable on mobile', async ({ page }, test
   expect(box!.x + box!.width).toBeLessThanOrEqual(390);
   expect(await menu.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgb(255, 255, 255)');
   await page.screenshot({ path: testInfo.outputPath('mobile-shadcn-select.png') });
-  await page.getByRole('option', { name: '工学部', exact: true }).click();
+  await page.getByRole('checkbox', { name: '工学部', exact: true }).check();
+  await page.getByRole('button', { name: '完了', exact: true }).click();
   await expect(trigger).toContainText('工学部');
   await page.getByRole('button', { name: '検索する', exact: true }).click();
   await expect(page).toHaveURL(/department=t/);
@@ -124,16 +125,15 @@ test('shadcn dropdown stays visible and usable on mobile', async ({ page }, test
 });
 
 
-test('whole result cards navigate and syllabus content is structured', async ({ page }) => {
+test('table course links navigate and syllabus content is structured', async ({ page }) => {
   await page.goto('/?title=コロイド');
   await expect(page.getByText('記載から判定できず', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('complementary', { name: 'データの対象と取得状況' })).toHaveCount(0);
   await expect(page.getByText('出典について', { exact: true })).toHaveCount(0);
-  const card = page.locator('.result-card-link').filter({ hasText: 'T1AB3300' }).first();
+  const card = page.getByRole('row').filter({ hasText: 'T1AB3300' }).locator('.course-title-link').first();
   await expect(card).toHaveAttribute('href', /courses/);
   const searchWidth = await page.locator('main').evaluate((element) => element.getBoundingClientRect().width);
-  // Click metadata rather than the heading: the entire card must be the link.
-  await card.getByText('T1AB3300', { exact: true }).click();
+  await card.click();
   await expect(page.locator('main')).toHaveClass(/detail-main/);
   expect(await page.locator('main').evaluate((element) => element.getBoundingClientRect().width)).toBe(searchWidth);
   await expect(page.getByRole('heading', { name: '授業の概要', exact: true })).toBeVisible();
@@ -163,7 +163,7 @@ test('whole result cards navigate and syllabus content is structured', async ({ 
   await expect(page.getByRole('heading', { name: '原文 · 1ページ' })).toBeVisible();
   await page.getByRole('link', { name: '← 検索結果に戻る' }).click();
   await expect(page.getByRole('textbox', { name: '科目名', exact: true })).toHaveValue('コロイド');
-  await page.locator('.result-card-link').first().focus();
+  await page.locator('.course-title-link').first().focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: '授業の概要', exact: true })).toBeVisible();
 });
@@ -193,7 +193,7 @@ test('pagination selects pages, preserves filters, and disables boundary arrows'
   await page.keyboard.press('Enter');
   await expect(selector).toHaveText('323/323');
   await expect(page.getByRole('button', { name: '次のページ', exact: true })).toBeDisabled();
-  await expect(page.locator('.result-card-link')).toHaveCount(20);
+  await expect(page.locator('.course-title-link')).toHaveCount(20);
   await page.setViewportSize({ width: 390, height: 844 });
   await selector.scrollIntoViewIfNeeded();
   await page.screenshot({ path: testInfo.outputPath('pagination-mobile.png') });
@@ -201,4 +201,60 @@ test('pagination selects pages, preserves filters, and disables boundary arrows'
   await page.goto('/?title=ドイツ言語文化発展演習&year=2026');
   await page.getByRole('link', { name: 'ドイツ言語文化発展演習VII', exact: true }).click();
   await expect(page.getByRole('heading', { name: '授業の概要', exact: true })).toBeVisible();
+});
+
+test('compact favorites and saved conditions survive reload without saving result snapshots', async ({ page }, testInfo) => {
+  await page.goto('/?title=コロイド&day=1&department=t,l&page=2');
+  await expect(page.getByRole('table', { name: '検索結果', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'お気に入りに追加', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'お気に入りから解除', exact: true })).toHaveCount(0);
+  await page.getByRole('checkbox', { name: '表示中の講義をすべて選択' }).check();
+  await page.getByRole('button', { name: 'お気に入りに追加', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('お気に入りに追加');
+  await expect(page.getByRole('button', { name: '選択解除', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '検索条件', exact: true }).click();
+  await page.getByRole('button', { name: '現在の条件を保存' }).click();
+  await expect(page.getByRole('dialog')).toContainText('コロイド');
+  await expect(page.getByRole('dialog')).toContainText('工学部');
+  await expect(page.getByRole('dialog')).toContainText('人文学部');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('syllabus-alps:library:v1')!));
+  expect(stored).not.toHaveProperty('results');
+  expect(stored.condition).not.toHaveProperty('items');
+  expect(new URL(stored.condition.url, 'https://local.invalid').searchParams.has('page')).toBe(false);
+  await page.keyboard.press('Escape');
+  await page.getByRole('link', { name: '条件をクリア', exact: true }).click();
+  await page.reload();
+  await page.getByRole('button', { name: '検索条件', exact: true }).click();
+  await page.getByRole('link', { name: 'この条件で検索', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: '科目名', exact: true })).toHaveValue('コロイド');
+  await expect(page.getByRole('button', { name: '曜日を選択' })).toContainText('月');
+  await expect(page.getByRole('button', { name: '学部・研究科を選択' })).toContainText('工学部');
+  await expect(page.getByRole('button', { name: '学部・研究科を選択' })).toContainText('人文学部');
+  await page.getByRole('link', { name: /^お気に入り \(/ }).click();
+  await expect(page.getByRole('table', { name: 'お気に入り', exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('compact-favorites.png') });
+  await page.getByRole('checkbox', { name: '表示中の講義をすべて選択' }).check();
+  await page.getByRole('button', { name: 'お気に入りから解除', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'お気に入りはまだありません' })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'お気に入りはまだありません' })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: '検索条件', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'この条件で検索', exact: true })).toBeVisible();
+  const box = await page.getByRole('dialog').boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+  await page.getByRole('button', { name: '削除', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'この条件で検索' })).toHaveCount(0);
+  await page.reload();
+  await page.getByRole('button', { name: '検索条件', exact: true }).click();
+  await expect(page.getByRole('button', { name: '現在の条件を保存' })).toBeVisible();
+});
+
+test('failed browser storage writes do not report success or add favorites', async ({ page }) => {
+  await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException('Full', 'QuotaExceededError'); }; });
+  await page.goto('/?title=コロイド');
+  await page.locator('.course-table').getByRole('button', { name: /をお気に入りに追加$/ }).first().click();
+  await expect(page.getByRole('status')).toContainText('保存できませんでした');
+  await expect(page.getByRole('link', { name: 'お気に入り (0)', exact: true })).toBeVisible();
 });

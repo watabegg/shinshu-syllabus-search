@@ -16,7 +16,7 @@ export function SearchMultiSelect({ label, groups }: { label: string; groups: Fi
     {groups.map(group => <input key={group.name} type="hidden" name={group.name} value={selected[group.name].join(',')} />)}
     <Popover>
       <PopoverTrigger asChild><Button id={id} type="button" variant="outline" className="multi-trigger" aria-label={`${label}を選択`} title={labels.join('・') || 'すべて'}><span>{summary}</span><ChevronDown className="size-4 shrink-0 text-muted-foreground" /></Button></PopoverTrigger>
-      <PopoverContent aria-label={`${label}の選択肢`}>
+      <PopoverContent className="multi-select-menu" aria-label={`${label}の選択肢`}>
         <div className="multi-heading"><strong>{label}</strong><Button type="button" variant="ghost" size="xs" onClick={() => setSelected(Object.fromEntries(groups.map(group => [group.name, []])))}>クリア</Button></div>
         {groups.map(group => <fieldset key={group.name} className="multi-group">
           {groups.length > 1 && <legend>{group.label}</legend>}

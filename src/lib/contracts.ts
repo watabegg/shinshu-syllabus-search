@@ -11,7 +11,7 @@ export interface IngestCourse {
  modalities: Modality[]; modality_evidence: { modality: Modality; text: string; source: string }[];
  slots: Slot[]; pages: { page_number: number; raw_text: string }[]; content_revision: string;
 }
-export interface SearchFilters { q: string; title: string; teacher: string; room: string; year: string; department: string; term: string[]; intensive: string[]; day: string[]; period: string[]; modality: string[]; page: number }
+export interface SearchFilters { q: string; title: string; teacher: string; room: string; year: string; department: string[]; term: string[]; intensive: string[]; day: string[]; period: string[]; modality: string[]; page: number }
 export interface CourseSummary { id: string; title: string; registration_code: string; year: number; department: string; department_name: string; teacher_text: string; room_text: string; credits: string; slots: Slot[]; modalities: Modality[] }
 export interface Coverage { discovered: number; ready: number; failed: number; conflict: number }
 export interface SearchProps { items: CourseSummary[]; filters: SearchFilters; hasNext: boolean; total: number; totalPages: number; availableFilters: { years: number[]; departments: {id:string; name:string}[]; terms: string[] }; importedAt: string | null; coverage: Coverage }
