@@ -18,7 +18,7 @@ export function dailyReadLimitNotice(now = new Date()): { message: string; retry
   reset.setUTCHours(24, 0, 0, 0);
   const date = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'long', day: 'numeric' }).format(reset);
   return {
-    message: `本日のデータ利用上限に達したため、現在このページを表示できません。${date}の午前9時（日本時間）以降に、もう一度お試しください。`,
+    message: `このサイトはデータベースの無料枠で運営しています。今日の無料枠を使い切ったため、一時的にデータを読み込めなくなっています。${date}の午前9時（日本時間）以降に、もう一度お試しください。`,
     retryAfter: reset.toUTCString(),
   };
 }

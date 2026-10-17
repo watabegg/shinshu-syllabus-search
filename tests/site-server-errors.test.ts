@@ -18,7 +18,7 @@ it.each(['/', '/courses/example'])('returns the reset date for quota errors on %
     const response = await app.request(path, { headers: { 'X-Inertia': 'true' } }, env);
     expect(response.status).toBe(503);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
-    const page = await response.json();
+    const page = await response.json() as { component: string; props: { message: string } };
     expect(page.component).toBe('Error');
     if (isQuota) {
       expect(page.props.message).toContain('10月18日の午前9時（日本時間）');
