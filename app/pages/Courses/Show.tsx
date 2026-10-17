@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { PageHead } from '../../page-head';
+import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
@@ -35,7 +36,7 @@ export default function Show(props: DetailProps) {
   const backHref = typeof window === 'undefined' ? '/' : safeBackHref();
   return (
     <>
-      <Head title={course.title || '講義詳細'} />
+      <PageHead />
       <a className="skip-link" href="#main-content">本文へ移動</a>
       <div className="site-shell">
         <header className="site-header">

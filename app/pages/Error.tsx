@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { PageHead } from '../page-head';
+import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -9,7 +10,7 @@ export default function ErrorPage({ status, message }: ErrorPageProps) {
   const heading = status === 404 ? 'ページが見つかりません' : status === 503 ? 'サービスを一時的に利用できません' : '入力内容を確認してください';
   return (
     <>
-      <Head title={heading} />
+      <PageHead />
       <div className="site-shell">
         <header className="site-header"><Link href="/" className="brand-link"><span className="brand-mark" aria-hidden="true">信</span><span>シラバスアルプス</span><Badge variant="outline">非公式</Badge></Link></header>
         <main className="page-main error-main">

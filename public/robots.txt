@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /healthz
+Disallow: /__data-cache/
+Sitemap: https://shinshu-syllabus-search.shinshu-syllabus.workers.dev/sitemap.xml

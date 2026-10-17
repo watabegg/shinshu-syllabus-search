@@ -4,6 +4,7 @@ import { rootView } from '../app/root-view';
 import { SearchInputError, parseSearchFilters, readSearchMetadata, readCourseDetail, searchCourses } from './lib/search';
 import { DataCache, SEARCH_TTL, DETAIL_TTL, searchCacheKey } from './lib/data-cache';
 import { dailyReadLimitNotice, isDailyReadLimit } from './lib/d1-errors';
+import { sitemapXml } from './lib/seo';
 import type { ErrorPageProps } from '../app/pages/Error';
 import type {} from '../app/pages.gen';
 
@@ -25,6 +26,19 @@ app.use('*', async (c, next) => {
 });
 
 app.use('*', inertia({ rootView }));
+
+app.get('/sitemap.xml', async (c) => {
+  try {
+    const xml = await c.get('dataCache').read('sitemap:v1', DETAIL_TTL, async () => {
+      const rows = await c.env.DB.prepare('SELECT id FROM courses ORDER BY id').all<{ id: string }>();
+      if (!rows.success) throw new Error('Sitemap query failed');
+      return sitemapXml(rows.results.map(row => row.id));
+    });
+    return c.body(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8' });
+  } catch {
+    return c.text('Sitemap temporarily unavailable', 503);
+  }
+});
 
 app.get('/healthz', async (c) => {
   try {

@@ -1,7 +1,8 @@
+import { PageHead } from '../page-head';
 import { useState } from 'react';
 import { SearchMultiSelect } from '@/components/search-multi-select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Form, Head, Link, router } from '@inertiajs/react';
+import { Form, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -115,7 +116,7 @@ export default function Index(props: SearchProps) {
   const currentUrl = typeof window === 'undefined' ? '/' : `${window.location.pathname}${window.location.search}`;
   return (
     <>
-      <Head title="シラバスを検索" />
+      <PageHead />
       <a className="skip-link" href="#main-content">本文へ移動</a>
       <div className="site-shell">
         <header className="site-header">
