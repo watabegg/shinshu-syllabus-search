@@ -128,7 +128,7 @@ export function parseSearchFilters(params: URLSearchParams, available: Available
 
 async function all<T>(db: D1Database, sql: string, ...values: QueryValue[]): Promise<T[]> {
   const result = await db.prepare(sql).bind(...values).all<T>();
-  if (!result.success) throw new Error('D1 query failed');
+  if (!result.success) throw new Error('D1 query failed', { cause: result.error });
   return result.results ?? [];
 }
 
@@ -151,7 +151,7 @@ export async function readSearchMetadata(db: D1Database): Promise<SearchMetadata
     db.prepare("SELECT DISTINCT term_label FROM course_slots WHERE term_label <> '' ORDER BY term_label COLLATE NOCASE").bind(),
     db.prepare("SELECT discovered_count, ready_count, failed_count, conflict_count, finished_at FROM imports WHERE status IN ('completed', 'partial') ORDER BY COALESCE(finished_at, started_at) DESC, id DESC LIMIT 1").bind(),
   ]);
-  if (result.some(item => !item.success)) throw new Error('D1 metadata query failed');
+  if (result.some(item => !item.success)) throw new Error('D1 metadata query failed', { cause: result.find(item => !item.success)?.error });
   const years = result[0].results as { year: number }[];
   const latest = (result[3].results as ImportRow[])[0];
   const value: SearchMetadata = {
@@ -255,7 +255,7 @@ async function readSummaryRelations(db: D1Database, ids: string[]): Promise<Map<
     db.prepare(`SELECT course_id, term_label, day_label, period_label, day, period, MIN(source_kind) AS source_kind FROM course_slots WHERE course_id IN (${markers}) GROUP BY course_id, term_label, day_label, period_label, day, period ORDER BY term_label COLLATE NOCASE, day, period, day_label, period_label`).bind(...ids),
     db.prepare(`SELECT course_id, modality FROM course_modalities WHERE course_id IN (${markers}) ORDER BY modality`).bind(...ids),
   ]);
-  if (batches.some(result => !result.success)) throw new Error('D1 relation query failed');
+  if (batches.some(result => !result.success)) throw new Error('D1 relation query failed', { cause: batches.find(result => !result.success)?.error });
   const slotRows = batches[0].results as (Slot & { course_id: string })[];
   const modalityRows = batches[1].results as { course_id: string; modality: Modality }[];
   const result = new Map<string, Pick<CourseSummary, 'slots' | 'modalities'>>();
@@ -284,7 +284,7 @@ export async function searchCourses(db: D1Database, filters: SearchFilters, know
     ...(knownTotal === undefined ? [db.prepare(`SELECT COUNT(*) AS total FROM courses c ${where.sql}`).bind(...where.values)] : []),
     db.prepare(listSql).bind(...listValues(filters.page)),
   ]);
-  if (batches.some(result => !result.success)) throw new Error('D1 search query failed');
+  if (batches.some(result => !result.success)) throw new Error('D1 search query failed', { cause: batches.find(result => !result.success)?.error });
   const total = knownTotal ?? (batches[0].results as { total: number }[])[0]?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const page = Math.min(filters.page, Math.max(1, totalPages));

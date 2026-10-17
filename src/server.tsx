@@ -3,6 +3,7 @@ import { inertia } from '@hono/inertia';
 import { rootView } from '../app/root-view';
 import { SearchInputError, parseSearchFilters, readSearchMetadata, readCourseDetail, searchCourses } from './lib/search';
 import { DataCache, SEARCH_TTL, DETAIL_TTL, searchCacheKey } from './lib/data-cache';
+import { dailyReadLimitNotice, isDailyReadLimit } from './lib/d1-errors';
 import type { ErrorPageProps } from '../app/pages/Error';
 import type {} from '../app/pages.gen';
 
@@ -53,6 +54,12 @@ app.get('/', async (c) => {
       c.status(400);
       return c.render('Error', { status: 400, message: error.message } satisfies ErrorPageProps);
     }
+    if (isDailyReadLimit(error)) {
+      const notice = dailyReadLimitNotice();
+      c.header('Retry-After', notice.retryAfter);
+      c.status(503);
+      return c.render('Error', { status: 503, message: notice.message } satisfies ErrorPageProps);
+    }
     c.status(503);
     return c.render('Error', {
       status: 503,
@@ -70,7 +77,13 @@ app.get('/courses/:id', async (c) => {
       return c.render('Error', { status: 404, message: '指定された講義は登録されていないか、公開されていません。' } satisfies ErrorPageProps);
     }
     return c.render('Courses/Show', detail);
-  } catch {
+  } catch (error) {
+    if (isDailyReadLimit(error)) {
+      const notice = dailyReadLimitNotice();
+      c.header('Retry-After', notice.retryAfter);
+      c.status(503);
+      return c.render('Error', { status: 503, message: notice.message } satisfies ErrorPageProps);
+    }
     c.status(503);
     return c.render('Error', {
       status: 503,
